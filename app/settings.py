@@ -212,7 +212,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TWELVE_DATA_API_KEY = os.environ.get('TWELVE_DATA_API_KEY')
 STATIC_URL = 'static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # if not os.path.exists(os.path.join(BASE_DIR, "static")):
 #     os.mkdir(os.path.join(BASE_DIR, "static"))    
 # STATIC_ROOT = os.path.join(BASE_DIR, "static")
