@@ -52,9 +52,8 @@ INSTALLED_APPS = [
     'securities.apps.SecuritiesConfig',
 ]
 
-# ('* 4-11 * * 1-5', 'securities.cronjob.store'),
 CRONJOBS = [
-    # ('* * * * *', 'securities.cronjob.store'),
+    ('* 4-11 * * 1-5', 'securities.cronjob.store'),
     ('* * * * *', 'securities.cronjob.cronny'),
     ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
@@ -217,8 +216,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 #     os.mkdir(os.path.join(BASE_DIR, "static"))    
 # STATIC_ROOT = os.path.join(BASE_DIR, "static")
 if DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static')
     ]
 else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
