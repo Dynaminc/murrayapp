@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from django.core.management.utils import get_random_secret_key
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -23,12 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+# SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = bool(os.environ.get('DEBUG', False))
 
-ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
+# ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # Application definition
 
@@ -58,14 +61,29 @@ CRONJOBS = [
 
 ASGI_APPLICATION = 'app.asgi.application'
 
+
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
+            "hosts":[{
+                "address": os.environ.get('REDIS_URL'),  # "REDIS_TLS_URL"
+                "ssl_cert_reqs": None,
+            }]
+        }
     }
 }
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     }
+# }
 
 REST_FRAMEWORK = {
 
@@ -115,26 +133,26 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE'),
-#         'HOST': os.environ.get('DB_HOST'),
-#         'PORT': os.environ.get('DB_PORT'),
-#         'NAME': os.environ.get('DB_NAME'),
-#         'USER': os.environ.get('DB_USER'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD'),
-#         'OPTIONS': {
-#             'sql_mode': 'traditional',
-#         }
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'OPTIONS': {
+            'sql_mode': 'traditional',
+        }
+    }
+}
 
 CACHES = {
     "default": {
@@ -193,3 +211,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TWELVE_DATA_API_KEY = os.environ.get('TWELVE_DATA_API_KEY')
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+if not os.path.exists(os.path.join(BASE_DIR, "static")):
+    os.mkdir(os.path.join(BASE_DIR, "static"))    
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
