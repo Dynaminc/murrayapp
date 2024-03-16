@@ -1,0 +1,250 @@
+[
+  {
+    "model": "securities.company",
+    "pk": 1,
+    "fields": {
+      "name": "American Express Co",
+      "symbol": "AXP"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 2,
+    "fields": {
+      "name": "Amgen Inc",
+      "symbol": "AMGN"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 3,
+    "fields": {
+      "name": "Apple Inc",
+      "symbol": "AAPL"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 4,
+    "fields": {
+      "name": "Boeing Co",
+      "symbol": "BA"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 5,
+    "fields": {
+      "name": "Caterpillar Inc",
+      "symbol": "CAT"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 6,
+    "fields": {
+      "name": "Cisco Systems Inc",
+      "symbol": "CSCO"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 7,
+    "fields": {
+      "name": "Chevron Corp",
+      "symbol": "CVX"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 8,
+    "fields": {
+      "name": "Goldman Sachs Group Inc",
+      "symbol": "GS"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 9,
+    "fields": {
+      "name": "Home Depot Inc",
+      "symbol": "HD"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 10,
+    "fields": {
+      "name": "Honeywell International Inc",
+      "symbol": "HON"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 11,
+    "fields": {
+      "name": "International Business Machines Corp",
+      "symbol": "IBM"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 12,
+    "fields": {
+      "name": "Intel Corp",
+      "symbol": "INTC"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 13,
+    "fields": {
+      "name": "Johnson & Johnson",
+      "symbol": "JNJ"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 14,
+    "fields": {
+      "name": "Coca-Cola Co",
+      "symbol": "KO"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 15,
+    "fields": {
+      "name": "JPMorgan Chase & Co",
+      "symbol": "JPM"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 16,
+    "fields": {
+      "name": "McDonald's Corp",
+      "symbol": "MCD"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 17,
+    "fields": {
+      "name": "3M Co",
+      "symbol": "MMM"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 18,
+    "fields": {
+      "name": "Merck & Co Inc",
+      "symbol": "MRK"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 19,
+    "fields": {
+      "name": "Microsoft Corp",
+      "symbol": "MSFT"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 20,
+    "fields": {
+      "name": "Nike Inc",
+      "symbol": "NKE"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 21,
+    "fields": {
+      "name": "Procter & Gamble Co",
+      "symbol": "PG"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 22,
+    "fields": {
+      "name": "Travelers Companies Inc",
+      "symbol": "TRV"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 23,
+    "fields": {
+      "name": "UnitedHealth Group Inc",
+      "symbol": "UNH"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 24,
+    "fields": {
+      "name": "Salesforce Inc",
+      "symbol": "CRM"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 25,
+    "fields": {
+      "name": "Verizon Communications Inc",
+      "symbol": "VZ"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 26,
+    "fields": {
+      "name": "Visa Inc",
+      "symbol": "V"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 27,
+    "fields": {
+      "name": "Walgreens Boots Alliance Inc",
+      "symbol": "WBA"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 28,
+    "fields": {
+      "name": "Walmart Inc",
+      "symbol": "WMT"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 29,
+    "fields": {
+      "name": "Walt Disney Co",
+      "symbol": "DIS"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 30,
+    "fields": {
+      "name": "Dow Inc",
+      "symbol": "DOW"
+    }
+  },
+  {
+    "model": "securities.company",
+    "pk": 31,
+    "fields": {
+      "name": "Dow Jones Industrial Average",
+      "symbol": "DJI"
+    }
+  }
+]

@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    
+    <div class='h-screen grid-rows-12 font-sans overflow-y-auto p-4 pb-24'>
+        <!-- Navbar -->
+        <div class="p-4 flex justify-between mb-1">
+            <div class="flex justify-between items-center gap-4">
+                <div class="min-h-12 min-w-12 bg-slate-500">
+
+                </div>
+                <div>
+                    <div class="text-xl">Pacific</div>
+                    <div class="text-xl">Liberty</div>
+                </div>
+
+            </div>
+            <div class="flex justify-between items-center">
+                <div>Market Status</div>
+                <div class="h-4 w-4 rounded-lg"></div>
+            </div>
+
+        </div>
+        <div class="pt-4 font-bold text-2xl">Contractor - Top 5 Strikes</div>
+        <div class="pt-4 font-bold text-2xl">Short Positions</div>
+        <div id="shorttab">
+        </div>
+        <div class="pt-4 font-bold text-2xl">Long Positions</div>
+
+        <div id="longtab">
+        </div>
+    </div>
+    
+</body>
+
+<script>
+    const load_data = ()=>{
+        fetch("/api/test")
+            .then(response => response.json())
+            .then(data => {
+                // let stockData = JSON.parse(data)
+                make_table('shorttab',data['top_5'])
+                make_table('longtab',data['low_5'])
+                
+            });
+    }
+
+
+    const make_table = (table_id, data) =>{
+        table_data = `<table class='min-w-max table text-xs bg-white text-sm table-auto shadow-lg mt-8'><thead>
+            <tr class='text-xs font-bold'>
+                        <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Time</th>
+                        <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Code</th>
+                        <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>`
+        data.map(item=>{
+            table_data += `
+                <tr>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.date}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.symbol}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.score}</td>
+                </tr>
+            `
+        }) 
+                    
+        table_data += `</tbody></table>`
+        document.getElementById(table_id).innerHTML = table_data
+    }
+
+    setInterval(myFunction, 60000)
+</script>
+</html>
