@@ -35,6 +35,27 @@ DEBUG = bool(os.environ.get('DEBUG', False))
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # Application definition
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -48,6 +69,7 @@ INSTALLED_APPS = [
     'channels',
     'django_crontab',
     'rest_framework',
+    'corsheaders',
 
     # Internal Apps
     'securities.apps.SecuritiesConfig',
@@ -225,7 +247,7 @@ STATIC_URL = 'static/'
 if DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static')
+        os.path.join(BASE_DIR, 'staticfiles')
     ]
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
