@@ -504,22 +504,15 @@ def store():
             
             
         # import pprint
-        print('res here ')
-        print(res.keys())
-        print('res here', res["status_code"])
-        print('res worked ')
         if res["status_code"] == 200:
             stocks = res["stocks"]
             current_datetime = stocks[Company.DOW_JONES]["values"][0][
                 "datetime"
             ]
-            print('current', current_datetime)
-            print(cache)
-            print(cache.get("last_datetime"))
             if current_datetime == cache.get("last_datetime"):
                 print('this is the issue ignore')
                 return False
-            print(current_datetime, cache.get("last_datetime"))
+            # print(current_datetime, cache.get("last_datetime"))
             cache.set("last_datetime", current_datetime, timeout=None)
             con.rpush("last_200", str(current_datetime))
             con.ltrim("last_200", -200, -1)
@@ -756,5 +749,3 @@ def remove_data():
     else:
         print("Nothing to delete!")
 
-
-store()
