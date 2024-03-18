@@ -30,7 +30,7 @@ def test_end(request):
         latest_data = Combination.objects.latest('date_time')
         if latest_data:
             latest_time = str(latest_data.date_time).split('.')[0].split(':')[:-1]
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':str(datetime.now().split('.')[0])} for item in Combination.objects.all() if str(item.date_time).split('.')[0].split(':')[:-1] ==  latest_time]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':str(datetime.now()).split('.')[0]} for item in Combination.objects.all() if str(item.date_time).split('.')[0].split(':')[:-1] ==  latest_time]
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:]})
         else:
