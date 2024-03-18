@@ -616,7 +616,7 @@ def store():
     except Exception as e:
         print("Exception for stock update after crone execution. Message:", e)
 
-
+store()
 def get_data():
     """Gets third-party API data"""
     try:

@@ -13,7 +13,6 @@ import pprint
 con = get_redis_connection("default")
 
 def index(request):
-    store()
     return render(request, "securities/ranks.html")
 
 
