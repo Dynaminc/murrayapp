@@ -27,9 +27,10 @@
         <div class="pt-4 font-bold text-2xl">Contractor - Top 5 Strikes</div>
         <div class="pt-4 font-bold text-2xl">Short Positions</div>
         <div id="shorttab">
+            <div class="animate-spin p-4 h-4 w-4 rounded-lg bg-slate-500 my-16" ></div>
         </div>
         <div class="pt-4 font-bold text-2xl">Long Positions</div>
-
+            <div class="animate-spin p-4 h-4 w-4 rounded-lg bg-slate-500 my-16" ></div>
         <div id="longtab">
         </div>
     </div>
@@ -61,9 +62,9 @@
         data.map(item=>{
             table_data += `
                 <tr>
-                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.date}</td>
-                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.symbol}</td>
-                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${item.score}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.date)}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.symbol)}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.score)}</td>
                 </tr>
             `
         }) 
@@ -71,7 +72,7 @@
         table_data += `</tbody></table>`
         document.getElementById(table_id).innerHTML = table_data
     }
-
+    load_data()
     setInterval(load_data, 60000)
 </script>
 </html>
