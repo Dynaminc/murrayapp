@@ -13,9 +13,9 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from .models import Stock, Company, Combination, Cronny
-
+from pprint import pprint
 con = get_redis_connection("default")
-
+print(cache.get("last_datetime"))
 res = {'status_code': 200,
  'stocks': {'AAPL': {'meta': {'currency': 'USD',
                               'exchange': 'NASDAQ',
@@ -494,6 +494,7 @@ def store():
     try:
         res = get_data()
         print(res["status_code"])
+        
         if not 'log.txt' in os.listdir(os.getcwd()):
             f = open('log.txt', 'w')
             f.close()
@@ -503,13 +504,20 @@ def store():
             
             
         # import pprint
-        # pprint.pprint(res)
+        print('res here ')
+        print(res.keys())
+        print('res here', res["status_code"])
+        print('res worked ')
         if res["status_code"] == 200:
             stocks = res["stocks"]
             current_datetime = stocks[Company.DOW_JONES]["values"][0][
                 "datetime"
             ]
+            print('current', current_datetime)
+            print(cache)
+            print(cache.get("last_datetime"))
             if current_datetime == cache.get("last_datetime"):
+                print('this is the issue ignore')
                 return False
             print(current_datetime, cache.get("last_datetime"))
             cache.set("last_datetime", current_datetime, timeout=None)
@@ -603,6 +611,8 @@ def store():
                 )
                 Combination.objects.bulk_create(strikes_list)
 
+        else:
+            print('status code bad')
     except Exception as e:
         print("Exception for stock update after crone execution. Message:", e)
 

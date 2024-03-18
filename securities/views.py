@@ -13,6 +13,7 @@ import pprint
 con = get_redis_connection("default")
 
 def index(request):
+    store()
     return render(request, "securities/ranks.html")
 
 
@@ -25,6 +26,7 @@ def clean_end(request):
 @api_view(['GET', 'POST'])
 def test_end(request):
     combs = []
+    
     try:
         latest_data = Combination.objects.latest('date_time')
         if latest_data:
