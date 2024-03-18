@@ -77,7 +77,7 @@ INSTALLED_APPS = [
 
 CRONJOBS = [
     ('* 4-11 * * 1-5', 'securities.cronjob.store'),
-    ('* * * * *', 'securities.cronjob.cronny'),
+    # ('* * * * *', 'securities.cronjob.cronny'),
     ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
 
@@ -181,13 +181,15 @@ DATABASES = {
 #     }
 # }
 # "redis://127.0.0.1:6379/1"
-
+# "OPTIONS": {
+#             "PASSWORD": os.environ.get('REDIS_PASSWORD'),
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION":  os.environ.get('REDIS_URL'),
         "OPTIONS": {
-            "PASSWORD": os.environ.get('REDIS_PASSWORD'),
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
