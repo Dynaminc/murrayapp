@@ -120,9 +120,10 @@ def store():
                 stock_combs = stock_combs.to_json(orient="records")
                 con.set("last_120", stock_combs)
 
-            if stocks_list:
+            
+                
+            if stocks_list and strikes_list:
                 Stock.objects.bulk_create(stocks_list)
-            if strikes_list:
                 dow_stocks_serialized = json.dumps(stock_items["dow_stocks"])
                 con.set("last_30", dow_stocks_serialized)
                 channel_layer = get_channel_layer()
