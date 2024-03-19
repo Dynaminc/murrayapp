@@ -33,7 +33,7 @@ def test_end(request):
             
         info['latest_time'] = Combination.objects.latest('date_time')
         if info['latest_time'] == info['previous_time']:
-            current_time = str(info['latest_time']).split('.')[0]
+            current_time = str(info['latest_time'].date_time).split('.')[0]
         else:
             current_time = str(datetime.now()).split('.')[0]
             info['previous_time'] = info['latest_time']
