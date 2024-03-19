@@ -11,7 +11,7 @@ from .models import Combination
 from datetime import datetime 
 import pprint
 con = get_redis_connection("default")
-info = {'previous_time': Combination.objects.latest('date_time'), 'latest_time': None}
+info = {'previous_time': Combination.objects.latest('date_time').date_time, 'latest_time': None}
 def index(request):
     return render(request, "securities/ranks.html")
 
