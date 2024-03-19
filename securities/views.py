@@ -29,9 +29,9 @@ def test_end(request):
     
     try:
         if not info['previous_time']:
-            info['previous_time'] = Combination.objects.latest('date_time').date_time
+            info['previous_time'] = Combination.objects.latest('date_time')
             
-        info['latest_time'] = Combination.objects.latest('date_time').date_time
+        info['latest_time'] = Combination.objects.latest('date_time')
         if info['latest_time'] == info['previous_time']:
             current_time = str(info['latest_time']).split('.')[0]
         else:
