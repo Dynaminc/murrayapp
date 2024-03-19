@@ -28,7 +28,7 @@ def test_end(request):
     combs = []
     
     try:
-        info['latest_time'] = Combination.objects.latest('date_time')
+        info['latest_time'] = Combination.objects.latest('date_time').date_time
         if info['latest_time'] == info['previous_time']:
             current_time = str(info['latest_time']).split('.')[0]
         else:
