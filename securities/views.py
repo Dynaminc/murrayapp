@@ -11,7 +11,7 @@ from .models import Combination
 from datetime import datetime 
 import pprint
 con = get_redis_connection("default")
-info = {'previous_time': Combination.objects.latest('date_time').date_time, 'latest_time': None}
+info = {'previous_time': None, 'latest_time': None}
 def index(request):
     return render(request, "securities/ranks.html")
 
@@ -28,6 +28,9 @@ def test_end(request):
     combs = []
     
     try:
+        if not info['previous_time']:
+            info['previous_time'] = Combination.objects.latest('date_time').date_time
+            
         info['latest_time'] = Combination.objects.latest('date_time').date_time
         if info['latest_time'] == info['previous_time']:
             current_time = str(info['latest_time']).split('.')[0]
