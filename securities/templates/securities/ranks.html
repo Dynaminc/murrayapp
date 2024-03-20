@@ -75,7 +75,7 @@
                 <tr>
                     <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.date)}</td>
                     <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.symbol)}</td>
-                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.score/2.5)}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String((item.score/2.5).toFixed(3))}</td>
                 </tr>
             `
         }) 
