@@ -7,21 +7,21 @@
     
     <div class='h-screen grid-rows-12 font-sans overflow-y-auto p-4 pb-24'>
         <!-- Navbar -->
-        <div class="p-4 flex justify-between mb-1">
+        <div class="p-4 flex justify-between items-center mb-1">
             <div class="flex justify-between items-center gap-4">
-                <div class="min-h-12 min-w-12 bg-slate-500">
+                    <image src ="/static/pllogo.jpeg" class="h-36 w-100 max-w-100 max-h-36" alt="logo">
 
-                </div>
-                <div>
-                    <div class="text-xl">Pacific</div>
-                    <div class="text-xl">Liberty</div>
-                </div>
-
+                    </image>
             </div>
-            <div class="flex justify-between items-center">
-                <div>Market Status</div>
-                <div class="h-4 w-4 rounded-lg"></div>
+            <div class="flex justify-evenly items-center gap-2">
+                <div id = "timecount">s</div>
+                <div class="flex justify-between items-center gap-2">
+                    
+                    <div>Market Status</div>
+                    <div class=" p-4 h-4 w-4 rounded-full  my-16" id="statusdot" ></div>
+                </div>
             </div>
+            
 
         </div>
         <div class="pt-4 font-bold text-2xl">Contractor - Top 5 Strikes</div>
@@ -39,6 +39,7 @@
 </body>
 
 <script>
+    let initial_time = 0
     const load_data = ()=>{
         fetch("/api/test")
             .then(response => response.json())
@@ -46,7 +47,16 @@
                 // let stockData = JSON.parse(data)
                 make_table('shorttab',data['top_5'])
                 make_table('longtab',data['low_5'])
-                
+                market_state = data['market']
+                let elem = document.getElementById('statusdot')
+                try{
+                elem.classList.remove('bg-green-500')
+                elem.classList.remove('bg-red-500')
+                elem.classList.remove('bg-slate-500')
+                elem.classList.remove('bg-yellow-500')
+                elem.classList.add(`bg-${market}-500`)
+                initial_time = 60000
+            }catch (error){console.log('error', error)}
             });
     }
 
@@ -56,7 +66,7 @@
             <tr class='text-xs font-bold'>
                         <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Time</th>
                         <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Code</th>
-                        <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Score</th>
+                        <th  class="text-lg p-2 border-2 font-bold  text-center min-w-64">Value</th>
                     </tr>
                     </thead>
                     <tbody>`
@@ -65,7 +75,7 @@
                 <tr>
                     <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.date)}</td>
                     <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.symbol)}</td>
-                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.score)}</td>
+                    <td class="text-lg px-4 border-2  font-light text-center border-x-2  min-w-fit">${String(item.score/2.5)}</td>
                 </tr>
             `
         }) 
@@ -74,6 +84,19 @@
         document.getElementById(table_id).innerHTML = table_data
     }
     load_data()
-    setInterval(load_data, 40000)
+    setInterval(load_data, 50000)
+    
+    
+    const down_timer =()=>{
+        if (initial_time > 0){
+            initial_time = (initial_time - 1000)
+            document.getElementById("timecount").textContent = `${String(initial_time/1000)}s`
+        }
+        else{
+            document.getElementById("timecount").textContent = `0s`
+        }
+    }
+
+    setInterval(down_timer, 1000)
 </script>
 </html>
