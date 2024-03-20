@@ -9,6 +9,7 @@ from .cronjob import store, cronny
 from securities.models import Stock
 from .models import Combination
 from datetime import datetime, time
+import pytz
 import pprint
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
@@ -22,7 +23,10 @@ def clean_end(request):
     data.delete()
     return JsonResponse({'message':"Deleted Succesfully"})    
 
-def check_market_hours(dt):
+def check_market_hours(dat):
+    eastern = pytz.timezone('US/Eastern')
+    dt = eastern.localize(dat)
+    print(dt)
     if dt.weekday() >= 5:  # Weekend
         return "slate"
     elif dt.weekday() < 5 and (dt.time() < time(9, 30) or dt.time() > time(16, 0)):  # Weekday before 9:30 or after 4:00
@@ -71,6 +75,7 @@ def test_end(request):
             
         
         market_state = check_market_hours(current_time)
+        # print(market_state)
         current_time = str(current_time).split('.')[0]
         latest_data = info['latest_time']
         if latest_data:
