@@ -28,9 +28,9 @@ def check_market_hours(dat):
     dt = eastern.localize(dat)
     print(dt)
     if dt.weekday() >= 5:  # Weekend
-        return "slate"
+        return "red"
     elif dt.weekday() < 5 and (dt.time() < time(9, 30) or dt.time() > time(16, 0)):  # Weekday before 9:30 or after 4:00
-        return "slate"
+        return "red"
     elif dt.time() >= time(9, 30) and dt.time() <= time(9, 45):  # 9:30 to 9:45
         return "yellow"
     elif dt.time() >= time(15, 45) and dt.time() <= time(16, 0):  # 15:45 to 16:00
@@ -42,7 +42,7 @@ def check_market_hours(dat):
     elif dt.time() >= time(9, 45) and dt.time() <= time(15, 45):  # 9:45 to 15:45
         return "green"
     else:
-        return "slate"
+        return "red"
     
 @api_view(['GET', 'POST'])
 def test_end(request):
@@ -55,28 +55,29 @@ def test_end(request):
             ad = Combination.objects.latest('date_time')
             info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
             print('setting the prvious time', )
-            current_time = ad.date_time
+            display_time = ad.date_time
             market_state = "slate"
             
         else:
             ad = Combination.objects.latest('date_time')
             info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
             print('previos time existing', info['previous_time'], info['latest_time'])
+            
+            market_state = check_market_hours(datetime.now())
             if info['latest_time'] == info['previous_time']:
-                current_time = ad.date_time
+                display_time = ad.date_time
                 market_state = "slate"
                 
             else:
-                print('previous time existing', info['latest_time'], info['previous_time'])
-                current_time = datetime.now()
+                print('previous ssstime existing', info['latest_time'], info['previous_time'])
+                display_time = datetime.now()
                 info['previous_time'] = info['latest_time']
-                market_state = "green"
-                
+
             
         
-        market_state = check_market_hours(current_time)
+        
         # print(market_state)
-        current_time = str(current_time).split('.')[0]
+        current_time = str(display_time).split('.')[0]
         latest_data = info['latest_time']
         if latest_data:
             latest_time = latest_data

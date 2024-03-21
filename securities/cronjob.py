@@ -122,8 +122,9 @@ def store():
 
             
                 
-            if stocks_list and strikes_list:
+            if stocks_list:
                 Stock.objects.bulk_create(stocks_list)
+            if strikes_list:
                 dow_stocks_serialized = json.dumps(stock_items["dow_stocks"])
                 con.set("last_30", dow_stocks_serialized)
                 channel_layer = get_channel_layer()
