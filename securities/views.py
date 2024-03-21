@@ -50,6 +50,7 @@ def test_end(request):
     combs = []
     market_state = "off"
     try:
+        market_state = check_market_hours(datetime.now())
         if not info['previous_time']:
             
             ad = Combination.objects.latest('date_time')
@@ -63,10 +64,10 @@ def test_end(request):
             info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
             print('previos time existing', info['previous_time'], info['latest_time'])
             
-            market_state = check_market_hours(datetime.now())
+            
             if info['latest_time'] == info['previous_time']:
                 display_time = ad.date_time
-                market_state = "slate"
+                # market_state = "slate"
                 
             else:
                 print('previous ssstime existing', info['latest_time'], info['previous_time'])
