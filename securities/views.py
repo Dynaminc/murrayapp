@@ -56,7 +56,7 @@ def test_end(request):
             info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
             print('setting the prvious time', )
             display_time = ad.date_time
-            market_state = "slate"
+            # market_state = "slate"
             
         else:
             ad = Combination.objects.latest('date_time')
