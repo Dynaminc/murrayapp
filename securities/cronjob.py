@@ -53,92 +53,93 @@ def store():
 
             stock_items = create_stocks(stocks)
             stocks_list = stock_items["stocks_list"]
-            
-            current_datetime = datetime.fromisoformat(current_datetime)
-            combinations_list = get_combinations(stocks, current_datetime)
-
-            if combinations_list:
-                first_datetime = datetime.fromisoformat(
-                    con.lindex("last_200", 0).decode("utf-8")
-                )
-                combs = Combination.objects.filter(
-                    date_time__gte=first_datetime
-                ).values("symbol", "strike", "date_time", "z_score")
-                
-                combinations_df = pd.DataFrame(
-                    data=list(combs) + combinations_list
-                )
-                
-                combinations_df["date_time"] = pd.to_datetime(
-                    combinations_df["date_time"]
-                )
-                calculated_combs = calc_stats(combinations_df)
-                strikes_list = []
-                for comb in calculated_combs.to_numpy():
-                    strikes_list.append(
-                        Combination(
-                            symbol=comb[0],
-                            avg=comb[1],
-                            stdev=None if pd.isnull(comb[2]) else comb[2],
-                            strike=comb[3],
-                            date_time=current_datetime,
-                            z_score=None if pd.isnull(comb[5]) else comb[5],
-                        )
-                    )
-                low_high = pd.concat(
-                    [calculated_combs.head(), calculated_combs.tail()]
-                )["symbol"].to_list()
-                low_high.append(Company.DOW_JONES)
-                low_high = list(set(low_high))
-                if con.llen("last_200") > 120:
-                    combinations_portion = con.lindex("last_200", -120)
-                else:
-                    combinations_portion = con.lindex("last_200", 0)
-
-                stock_combs = combinations_df[
-                    (combinations_df["symbol"].isin(low_high))
-                    & (
-                        combinations_df["date_time"]
-                        >= datetime.fromisoformat(
-                            combinations_portion.decode("utf-8")
-                        )
-                    )
-                    & (combinations_df["date_time"] < current_datetime)
-                ][["symbol", "z_score", "date_time"]]
-
-                stock_combs = pd.concat(
-                    [
-                        stock_combs,
-                        calculated_combs[
-                            calculated_combs["symbol"].isin(low_high)
-                        ][["symbol", "z_score", "date_time"]],
-                    ]
-                )
-                stock_combs["date_time"] = stock_combs["date_time"].astype(
-                    "string"
-                )
-                stock_combs = stock_combs.to_json(orient="records")
-                con.set("last_120", stock_combs)
-
-            
-                
             if stocks_list:
-                Stock.objects.bulk_create(stocks_list)
-            if strikes_list:
-                dow_stocks_serialized = json.dumps(stock_items["dow_stocks"])
-                con.set("last_30", dow_stocks_serialized)
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
-                    "stock-update",
-                    {
-                        "type": "stock_update_data",
-                        "data": {
-                            "stocks": dow_stocks_serialized,
-                            "combinations": stock_combs,
+                current_datetime = datetime.fromisoformat(current_datetime)
+                combinations_list = get_combinations(stocks, current_datetime)
+
+                if combinations_list:
+                    first_datetime = datetime.fromisoformat(
+                        con.lindex("last_200", 0).decode("utf-8")
+                    )
+                    combs = Combination.objects.filter(
+                        date_time__gte=first_datetime
+                    ).values("symbol", "strike", "date_time", "z_score")
+                    
+                    combinations_df = pd.DataFrame(
+                        data=list(combs) + combinations_list
+                    )
+                    
+                    combinations_df["date_time"] = pd.to_datetime(
+                        combinations_df["date_time"]
+                    )
+                    calculated_combs = calc_stats(combinations_df)
+                    strikes_list = []
+                    for comb in calculated_combs.to_numpy():
+                        strikes_list.append(
+                            Combination(
+                                symbol=comb[0],
+                                avg=comb[1],
+                                stdev=None if pd.isnull(comb[2]) else comb[2],
+                                strike=comb[3],
+                                date_time=current_datetime,
+                                z_score=None if pd.isnull(comb[5]) else comb[5],
+                            )
+                        )
+                    low_high = pd.concat(
+                        [calculated_combs.head(), calculated_combs.tail()]
+                    )["symbol"].to_list()
+                    low_high.append(Company.DOW_JONES)
+                    low_high = list(set(low_high))
+                    if con.llen("last_200") > 120:
+                        combinations_portion = con.lindex("last_200", -120)
+                    else:
+                        combinations_portion = con.lindex("last_200", 0)
+
+                    stock_combs = combinations_df[
+                        (combinations_df["symbol"].isin(low_high))
+                        & (
+                            combinations_df["date_time"]
+                            >= datetime.fromisoformat(
+                                combinations_portion.decode("utf-8")
+                            )
+                        )
+                        & (combinations_df["date_time"] < current_datetime)
+                    ][["symbol", "z_score", "date_time"]]
+
+                    stock_combs = pd.concat(
+                        [
+                            stock_combs,
+                            calculated_combs[
+                                calculated_combs["symbol"].isin(low_high)
+                            ][["symbol", "z_score", "date_time"]],
+                        ]
+                    )
+                    stock_combs["date_time"] = stock_combs["date_time"].astype(
+                        "string"
+                    )
+                    stock_combs = stock_combs.to_json(orient="records")
+                    con.set("last_120", stock_combs)
+
+                
+                    
+                
+                    
+                if stocks_list and strikes_list:
+                    dow_stocks_serialized = json.dumps(stock_items["dow_stocks"])
+                    con.set("last_30", dow_stocks_serialized)
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        "stock-update",
+                        {
+                            "type": "stock_update_data",
+                            "data": {
+                                "stocks": dow_stocks_serialized,
+                                "combinations": stock_combs,
+                            },
                         },
-                    },
-                )
-                Combination.objects.bulk_create(strikes_list)
+                    )
+                    Stock.objects.bulk_create(stocks_list)
+                    Combination.objects.bulk_create(strikes_list)
 
         else:
             print('status code bad')

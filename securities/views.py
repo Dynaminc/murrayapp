@@ -83,13 +83,13 @@ def test_end(request):
         if latest_data:
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score]
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
     except Exception as E:
-        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "error", 'error':str(E)})
+        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E)})
     
 def stocks(request):
     combinations = con.get("last_120").decode("utf-8")
