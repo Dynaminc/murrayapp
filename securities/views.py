@@ -54,9 +54,13 @@ def get_strike_breakdown(request):
 
 @api_view(['GET', 'POST'])
 def clean_end(request):
-    d = tz.now() - timedelta(days=5)
+    id = int(request.GET.get('id', 10))
+    delete = request.GET.get('delete',False)
+    d = tz.now() - timedelta(days=id)
+    print(d)
     data = Combination.objects.filter(date_time__lt=d)
-    data.delete()
+    if not delete:
+        data.delete()
     return JsonResponse({'message':f"Deleted Succesfully {len(data)}"})    
 
 def check_market_hours(dat):
