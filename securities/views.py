@@ -13,6 +13,7 @@ from datetime import datetime, time, timedelta
 import pytz
 import pprint
 from .serializer import *
+from .cronjob  import store
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
 def index(request):
@@ -53,14 +54,25 @@ def get_strike_breakdown(request):
     return JsonResponse({'data':data, 'message':"Loaded Succesfully"})  
 
 @api_view(['GET', 'POST'])
+def trigger_store(request):
+    store()
+    return JsonResponse({'message':"Loaded Succesfully"})  
+
+@api_view(['GET', 'POST'])
 def clean_end(request):
     id = int(request.GET.get('id', 10))
     delete = request.GET.get('delete',False)
     d = tz.now() - timedelta(days=id)
     print(d)
-    data = Combination.objects.filter(date_time__lt=d)
-    if not delete:
-        data.delete()
+    data = Combination.objects.first()
+    print(data.date_time, d)
+    if data.date_time > d:
+        print('greater')
+    else:
+         print('lesser')   
+    # data = Combination.objects.filter(date_time__gt=d)
+    # if delete:
+        # data.delete()
     return JsonResponse({'message':f"Deleted Succesfully {len(data)}"})    
 
 def check_market_hours(dat):
