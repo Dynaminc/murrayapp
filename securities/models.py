@@ -40,7 +40,7 @@ class Company(models.Model):
     all_symbols = list(SYMBOLS) + [DOW_JONES]
 
     def __str__(self):
-        return self.name
+        return self.name 
 
     name = models.CharField(max_length=255, unique=True)
     symbol = models.CharField(max_length=10, unique=True)

@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="home"),
+    path("api/managestrike", views.get_strike_breakdown),
     path("api/stocks/", views.stocks),
     path("api/test", views.test_end),
     path("api/clean", views.clean_end),

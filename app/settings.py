@@ -73,6 +73,7 @@ INSTALLED_APPS = [
 
     # Internal Apps
     'securities.apps.SecuritiesConfig',
+    'accounts.apps.AccountsConfig',
 ]
 
 CRONJOBS = [
