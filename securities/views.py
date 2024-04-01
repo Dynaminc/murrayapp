@@ -53,8 +53,8 @@ def get_chart(request):
     # short = serialized['short'] 
     # long = serialized['long'] 
     
-    short_combs = [{'time':comb.date_time, 'value': comb.stdev} for comb in Combination.objects.filter(symbol=short)]
-    long_combs = [{'time':comb.date_time, 'value': comb.stdev} for comb in Combination.objects.filter(symbol=long)]
+    short_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=short)]
+    long_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=long)]
     
     merged = []
     for comb in short_combs:
@@ -315,6 +315,7 @@ def test_end(request):
             print(len(filtered_combinations))
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ]#if item.stdev and item.z_score
             combs.sort(key=lambda x: x['score'], reverse=True)
+            print(len(combs), {"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
