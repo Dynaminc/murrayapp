@@ -5,15 +5,15 @@ from rest_framework import status
 from django.core.paginator import Paginator
 from django_redis import get_redis_connection
 from django.utils import timezone as tz
-from .cronjob import store, cronny
+# from .cronjob import store, cronny
 from securities.models import Stock
 from .models import Combination
-from accounts.models import Profile
+from accounts.models import Strike, Profile
+from accounts.serializer import StrikeSerializer
 from datetime import datetime, time, timedelta
 import pytz
 import pprint
-from .serializer import *
-from .cronjob  import store
+from .serializer import *   
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
 def index(request):
@@ -36,6 +36,186 @@ def process_strike_symbol(symbol):
         data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final']})
     return data
 
+def get_correct_close(array, title):
+    data = [item for item in array if item['title'] == title][0]
+    return data
+
+@api_view(['GET','POST'])
+def get_chart(request):
+    short = request.GET.get('short', "")
+    long = request.GET.get('long', "")
+    # serializer = StrikeManagementSerializer(data=request.POST)
+    # if not serializer.is_valid():
+    #     return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
+    #                             status=status.HTTP_400_BAD_REQUEST)
+        
+    # serialized = serializer.data
+    # short = serialized['short'] 
+    # long = serialized['long'] 
+    
+    short_combs = [{'time':comb.date_time, 'value': comb.stdev} for comb in Combination.objects.filter(symbol=short)]
+    long_combs = [{'time':comb.date_time, 'value': comb.stdev} for comb in Combination.objects.filter(symbol=long)]
+    
+    merged = []
+    for comb in short_combs:
+        time, value = comb['time'], comb['value']
+        long_equivalent = [item for item in long_combs if item['time'] == time]
+        if len(long_equivalent) > 0:
+            merged.append({'time':time, 'svalue': value, 'lvalue': long_equivalent[0]['value']})
+    
+    return JsonResponse({ 'message':"Chart loaded Succesfully", "data":merged})
+
+@api_view(['GET'])
+def load_strikes(request):
+    data = [StrikeSerializer(strike).data for strike in Strike.objects.all()]
+    return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
+
+def update_strike(id):
+    
+    strike_instance = Strike.objects.filter(id=id).first() 
+    if not strike_instance:
+        return 
+    if not strike_instance.closed:
+        long = strike_instance.long_symbol
+        short = strike_instance.short_symbol
+        
+        long_data = process_strike_symbol(long)
+        short_data = process_strike_symbol(short)
+        
+        sum_total = 0
+        sum_total += sum([item['final'] for item in long_data])
+        sum_total += sum([item['final'] for item in short_data])
+        
+        strike_instance.current_price = sum_total
+        strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        
+        strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
+        strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
+        strike_instance.sls_close = get_correct_close(long_data, strike_instance.second_long_stock)['price']
+        strike_instance.sls_close_price = get_correct_close(long_data, strike_instance.second_long_stock)['final']                
+        strike_instance.tls_close = get_correct_close(long_data, strike_instance.third_long_stock)['price']
+        strike_instance.tls_close_price = get_correct_close(long_data, strike_instance.third_long_stock)['final']                
+
+        strike_instance.fss_close = get_correct_close(short_data, strike_instance.first_short_stock)['price']
+        strike_instance.fss_close_price = get_correct_close(short_data, strike_instance.first_short_stock)['final']
+        strike_instance.sss_close = get_correct_close(short_data, strike_instance.second_short_stock)['price']
+        strike_instance.sss_close_price = get_correct_close(short_data, strike_instance.second_short_stock)['final']                
+        strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
+        strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
+        # process for exit signal             
+        #signal_exit = models.BooleanField(default=False
+                
+        strike_instance.save()
+
+
+@api_view(['GET'])
+def close_strike(request):
+    id = request.GET.get('strike_id', 10)
+    
+    close_time = str(Stock.objects.latest('date_time').date_time)
+    
+    strike_instance = Strike.objects.filter(id=id).first() 
+    if not strike_instance:
+        return JsonResponse({ 'message':"Strike not found"}, status=status.HTTP_400_BAD_REQUEST)     
+    if not strike_instance.closed:
+        long = strike_instance.long_symbol
+        short = strike_instance.short_symbol
+        
+        long_data = process_strike_symbol(long)
+        short_data = process_strike_symbol(short)
+        
+        stock_time = Stock.objects.latest('date_time').date_time
+        
+        sum_total = 0
+        sum_total += sum([item['final'] for item in long_data])
+        sum_total += sum([item['final'] for item in short_data])
+        
+        strike_instance.total_close_price = sum_total
+        strike_instance.close_time = stock_time
+        strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
+        strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
+        strike_instance.sls_close = get_correct_close(long_data, strike_instance.second_long_stock)['price']
+        strike_instance.sls_close_price = get_correct_close(long_data, strike_instance.second_long_stock)['final']                
+        strike_instance.tls_close = get_correct_close(long_data, strike_instance.third_long_stock)['price']
+        strike_instance.tls_close_price = get_correct_close(long_data, strike_instance.third_long_stock)['final']                
+
+        strike_instance.fss_close = get_correct_close(short_data, strike_instance.first_short_stock)['price']
+        strike_instance.fss_close_price = get_correct_close(short_data, strike_instance.first_short_stock)['final']
+        strike_instance.sss_close = get_correct_close(short_data, strike_instance.second_short_stock)['price']
+        strike_instance.sss_close_price = get_correct_close(short_data, strike_instance.second_short_stock)['final']                
+        strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
+        strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']     
+        strike_instance.closed = True
+        
+        strike_instance.save()
+        return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
+    else:
+        return JsonResponse({ 'message':"Trade Closed Already", "data":StrikeSerializer(strike_instance).data})
+
+
+
+
+
+@api_view(['POST'])
+def confirm_strike(request):
+    serializer = StrikeManagementSerializer(data=request.POST)
+    if not serializer.is_valid():
+        return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
+                                status=status.HTTP_400_BAD_REQUEST)
+        
+    serialized = serializer.data
+    short = serialized['short'] 
+    long = serialized['long'] 
+    stock_time = Stock.objects.latest('date_time').date_time
+
+    long_data = process_strike_symbol(long)
+    short_data = process_strike_symbol(short)
+    
+    sum_total = 0
+    sum_total += sum([item['final'] for item in long_data])
+    sum_total += sum([item['final'] for item in short_data])
+    
+    strike_instance = Strike.objects.create( 
+            user = Profile.objects.first().user,
+            long_symbol = long,
+            short_symbol = short,
+            total_open_price = sum_total,
+            open_time = stock_time,
+            
+            first_long_stock = long_data[0]['title'],
+            fls_quantity = long_data[0]['quantity'],
+            fls_price = long_data[0]['final'],
+            fls_open = long_data[0]['price'],
+            
+            second_long_stock = long_data[1]['title'],
+            sls_quantity = long_data[1]['quantity'],
+            sls_price = long_data[1]['final'],
+            sls_open = long_data[1]['price'],
+            
+            third_long_stock = long_data[2]['title'],
+            tls_quantity = long_data[2]['quantity'],
+            tls_price = long_data[2]['final'],
+            tls_open = long_data[2]['price'],
+            
+            first_short_stock = short_data[0]['title'],
+            fss_quantity = short_data[0]['quantity'],
+            fss_price = short_data[0]['final'],
+            fss_open = short_data[0]['price'],
+            
+            second_short_stock = short_data[1]['title'],
+            sss_quantity = short_data[1]['quantity'],
+            sss_price = short_data[1]['final'],
+            sss_open = short_data[1]['price'],
+            
+            third_short_stock = short_data[2]['title'],
+            tss_quantity = short_data[2]['quantity'],
+            tss_price = short_data[2]['final'],
+            tss_open = short_data[2]['price'],
+            )
+    
+    return JsonResponse({ 'message':"Strike Saved Succesfully", "data":StrikeSerializer(strike_instance).data})
+
+
 @api_view(['POST'])
 def get_strike_breakdown(request):
     serializer = StrikeManagementSerializer(data=request.POST)
@@ -55,7 +235,7 @@ def get_strike_breakdown(request):
 
 @api_view(['GET', 'POST'])
 def trigger_store(request):
-    store()
+    # store()
     return JsonResponse({'message':"Loaded Succesfully"})  
 
 @api_view(['GET', 'POST'])
@@ -123,16 +303,17 @@ def test_end(request):
                 info['previous_time'] = info['latest_time']
 
             
-        
+        print(info)
         
         # print(market_state)
         current_time = str(display_time).split('.')[0]
         latest_data = info['latest_time']
+        print(latest_data)
         if latest_data:
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
             print(len(filtered_combinations))
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ]#if item.stdev and item.z_score
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:
@@ -141,6 +322,8 @@ def test_end(request):
         return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E)})
     
 def stocks(request):
+    combo = Combination.objects.filter(symbol__icontains='CSCO')
+    print(len(combo))
     combinations = con.get("last_120").decode("utf-8")
     pprint.pprint(combinations)
     stocks_list = con.get("last_30").decode("utf-8")

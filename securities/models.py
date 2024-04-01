@@ -80,3 +80,6 @@ class Combination(models.Model):
 
     class Meta:
         unique_together = [["symbol", "date_time"]]
+
+
+

@@ -11,14 +11,19 @@ from django.core.cache import cache
 from django_redis import get_redis_connection
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from .views import update_strike
 from .models import Stock, Company, Combination, Cronny
+
+from accounts.models import Strike, Profile
 from pprint import pprint
 con = get_redis_connection("default")
 print(cache.get("last_datetime"))
 
+
+
 def cronny():
-    Cronny.objects.create(symbol="crone good")
+    data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
+    Cronny.objects.create(symbol="crone good ")
     
 def store():
     """

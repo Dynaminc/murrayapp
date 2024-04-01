@@ -78,7 +78,7 @@ INSTALLED_APPS = [
 
 CRONJOBS = [
     ('* 9-16 * * 1-5', 'securities.cronjob.store'),
-    # ('* * * * *', 'securities.cronjob.cronny'),
+    ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
     ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
 
