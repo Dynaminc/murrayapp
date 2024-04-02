@@ -42,19 +42,13 @@ def get_correct_close(array, title):
 
 @api_view(['GET','POST'])
 def get_chart(request):
-    short = request.GET.get('short', "")
-    long = request.GET.get('long', "")
-    # serializer = StrikeManagementSerializer(data=request.POST)
-    # if not serializer.is_valid():
-    #     return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
-    #                             status=status.HTTP_400_BAD_REQUEST)
-        
-    # serialized = serializer.data
-    # short = serialized['short'] 
-    # long = serialized['long'] 
+    id = request.GET.get('id', "")
+    strike_instance = Strike.objects.filter(id=id).first() 
+    short = strike_instance.short_symbol
+    long = strike_instance.long_symbol
     
-    short_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=short)]
-    long_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=long)]
+    short_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
+    long_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=long) if comb.date_time > strike_instance.open_time]
     
     merged = []
     for comb in short_combs:
