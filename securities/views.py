@@ -229,7 +229,7 @@ def get_strike_breakdown(request):
     stock_time = str(Stock.objects.latest('date_time').date_time)
     
     data = {'stock_time':stock_time, 'portfolio':Profile.objects.first().porfolio, 'shortSymbol':short,'shortData':process_strike_symbol(short), 'longSymbol': long, 'longData': process_strike_symbol(long) }
-    pprint.pprint(data)
+    
     
     return JsonResponse({'data':data, 'message':"Loaded Succesfully"})  
 
@@ -244,16 +244,16 @@ def clean_end(request):
     delete = request.GET.get('delete',False)
     d = tz.now() - timedelta(days=id)
     print(d)
-    data = Combination.objects.first()
-    print(data.date_time, d)
-    if data.date_time > d:
-        print('greater')
+    data = Combination.objects.filter(date_time__lt=d)
+    m = len(data)
+    if delete:  
+        data.delete()
+        return JsonResponse({'message':f"Deleted Succesfully {m}"})    
     else:
-         print('lesser')   
-    # data = Combination.objects.filter(date_time__gt=d)
-    # if delete:
-        # data.delete()
-    return JsonResponse({'message':f"Deleted Succesfully {len(data)}"})    
+        return JsonResponse({'message':f"Count {m}"})    
+    
+    
+    
 
 def check_market_hours(dat):
     eastern = pytz.timezone('US/Eastern')
