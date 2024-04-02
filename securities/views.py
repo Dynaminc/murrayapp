@@ -307,7 +307,7 @@ def test_end(request):
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
             print(len(filtered_combinations))
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ]#if item.stdev and item.z_score
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score]
             combs.sort(key=lambda x: x['score'], reverse=True)
             print(len(combs), {"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
