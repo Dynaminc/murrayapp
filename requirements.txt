@@ -23,6 +23,7 @@ djangorestframework-simplejwt==5.2.2
 hyperlink==21.0.0
 idna==3.6
 incremental==22.10.0
+gunicorn
 msgpack==1.0.8
 mysqlclient==2.1.0
 numpy==1.26.4
