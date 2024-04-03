@@ -68,7 +68,7 @@ def update_strike(id):
     
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
-        return 
+        return False
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
@@ -100,8 +100,7 @@ def update_strike(id):
         #signal_exit = models.BooleanField(default=False
                 
         strike_instance.save()
-
-
+    return True
 @api_view(['GET'])
 def close_strike(request):
     id = request.GET.get('strike_id', 10)

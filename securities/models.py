@@ -67,7 +67,7 @@ class Cronny(models.Model):
     
 
     def __str__(self):
-        return self.date_time
+        return f"{str(self.date_time)}: {self.symbol}"
         
         
 class Combination(models.Model):

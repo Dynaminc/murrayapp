@@ -23,7 +23,11 @@ print(cache.get("last_datetime"))
 
 def cronny():
     data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
-    Cronny.objects.create(symbol="crone good ")
+    if False in data:
+        Cronny.objects.create(symbol=f"{len(data)}: False")
+    else:
+        Cronny.objects.create(symbol=f"{len(data)}: True")
+    
     
 def store():
     """
