@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/closestrike", views.close_strike),
     # path("api/test", views.trigger_store),
     path("api/clean", views.clean_end),
+    path("api/cronny", views.update_striker),
     path(
         "api/stocks/<str:symbol>/",
         views.get_security_info,

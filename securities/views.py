@@ -64,6 +64,47 @@ def load_strikes(request):
     data = [StrikeSerializer(strike).data for strike in Strike.objects.all()]
     return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
 
+@api_view(['GET'])
+def update_striker(request):
+    id = request.GET.get('id', '0')
+    strike_instance = Strike.objects.filter(id=id).first() 
+    if not strike_instance:
+        return False
+    if not strike_instance.closed:
+        long = strike_instance.long_symbol
+        short = strike_instance.short_symbol
+        
+        long_data = process_strike_symbol(long)
+        short_data = process_strike_symbol(short)
+        
+        sum_total = 0
+        sum_total += sum([item['final'] for item in long_data])
+        sum_total += sum([item['final'] for item in short_data])
+        
+        strike_instance.current_price = sum_total
+        strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        
+        strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
+        strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
+        strike_instance.sls_close = get_correct_close(long_data, strike_instance.second_long_stock)['price']
+        strike_instance.sls_close_price = get_correct_close(long_data, strike_instance.second_long_stock)['final']                
+        strike_instance.tls_close = get_correct_close(long_data, strike_instance.third_long_stock)['price']
+        strike_instance.tls_close_price = get_correct_close(long_data, strike_instance.third_long_stock)['final']                
+
+        strike_instance.fss_close = get_correct_close(short_data, strike_instance.first_short_stock)['price']
+        strike_instance.fss_close_price = get_correct_close(short_data, strike_instance.first_short_stock)['final']
+        strike_instance.sss_close = get_correct_close(short_data, strike_instance.second_short_stock)['price']
+        strike_instance.sss_close_price = get_correct_close(short_data, strike_instance.second_short_stock)['final']                
+        strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
+        strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
+        # process for exit signal             
+        #signal_exit = models.BooleanField(default=False
+                
+        strike_instance.save()
+        
+        return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
+    return True
+
 def update_strike(id):
     
     strike_instance = Strike.objects.filter(id=id).first() 
@@ -99,7 +140,6 @@ def update_strike(id):
         # process for exit signal             
         #signal_exit = models.BooleanField(default=False
                 
-        strike_instance.save()
     return True
 @api_view(['GET'])
 def close_strike(request):
