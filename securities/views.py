@@ -66,10 +66,12 @@ def load_strikes(request):
 
 @api_view(['GET'])
 def update_striker(request):
+    
     id = request.GET.get('id', '0')
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
-        return False
+        return JsonResponse({ 'message':"strike not found"})
+        
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
@@ -102,8 +104,9 @@ def update_striker(request):
                 
         strike_instance.save()
         
-        return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
-    return True
+        return JsonResponse({ 'message':"Trade loaded", "data":StrikeSerializer(strike_instance).data})
+    else:
+        return JsonResponse({ 'message':"Trade closed", "data":StrikeSerializer(strike_instance).data})
 
 def update_strike(id):
     
