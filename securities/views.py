@@ -31,7 +31,8 @@ def process_strike_symbol(symbol):
     portfolio = Profile.objects.first().porfolio
     data = []
     for item in split_symbol:
-        price = Stock.objects.filter(symbol=item).first().close
+        price = Stock.objects.latest('date_time').close
+        # price = Stock.objects.filter(symbol=item).first().close
         portfolio_data = quantify_strike(portfolio, price)
         data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final']})
     return data
