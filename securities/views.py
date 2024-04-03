@@ -143,6 +143,7 @@ def update_strike(id):
         strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
         # process for exit signal             
         #signal_exit = models.BooleanField(default=False
+        strike_instance.save()
                 
     return True
 @api_view(['GET'])
