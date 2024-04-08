@@ -47,18 +47,39 @@ def get_chart(request):
     strike_instance = Strike.objects.filter(id=id).first() 
     short = strike_instance.short_symbol
     long = strike_instance.long_symbol
+
+    data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
     
-    short_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
-    long_combs = [{'time':comb.date_time, 'value': comb.z_score} for comb in Combination.objects.filter(symbol=long) if comb.date_time > strike_instance.open_time]
-    
-    merged = []
-    for comb in short_combs:
-        time, value = comb['time'], comb['value']
-        long_equivalent = [item for item in long_combs if item['time'] == time]
-        if len(long_equivalent) > 0:
-            merged.append({'time':time, 'svalue': value, 'lvalue': long_equivalent[0]['value']})
-    
-    return JsonResponse({ 'message':"Chart loaded Succesfully", "data":merged})
+    for item in data:
+        item["time"] = datetime.fromisoformat(str(item["time"]))
+
+    # Get the start and current time
+    start_time = data[0]["time"]
+    current_time = datetime.now()
+
+    # Fill in missing data points
+    new_data = []
+    prev_item = None
+    for i in range((current_time - start_time).seconds // 60):
+        new_time = start_time + timedelta(minutes=i)
+        eastern = pytz.timezone('US/Eastern')
+        dt = eastern.localize(new_time)
+        if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
+            for item in data:
+                if item["time"] <= new_time:
+                    prev_item = item
+            new_data.append({
+                "time": new_time,
+                "svalue": prev_item["svalue"],
+                "lvalue": prev_item["lvalue"]
+            })        
+        
+    for item in new_data:
+        item["time"] = item["time"].isoformat()
+
+    for item in new_data:
+        print(item)  
+    return JsonResponse({ 'message':"Chart loaded Succesfully", "data":new_data})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -351,7 +372,7 @@ def test_end(request):
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
             print(len(filtered_combinations))
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ]#if item.stdev and item.z_score
             combs.sort(key=lambda x: x['score'], reverse=True)
             print(len(combs), {"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
