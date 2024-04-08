@@ -360,21 +360,16 @@ def test_end(request):
             else:
                 display_time = datetime.now()
                 info['previous_time'] = info['latest_time']
-
-            
-        print(info)
         
         # print(market_state)
         current_time = str(display_time).split('.')[0]
         latest_data = info['latest_time']
-        print(latest_data)
+  
         if latest_data:
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
-            print(len(filtered_combinations))
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ]#if item.stdev and item.z_score
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score ]
             combs.sort(key=lambda x: x['score'], reverse=True)
-            print(len(combs), {"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
