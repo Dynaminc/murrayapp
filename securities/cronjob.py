@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import numpy as np
 import json, random
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import combinations
 
 from django.conf import settings
@@ -339,7 +339,8 @@ def store_new():
                 current_datetime = datetime.fromisoformat(current_datetime)
                 combinations_list = get_combinations(stocks, current_datetime)
                 if combinations_list:
-                    combs = Combination.objects.all().values("symbol", "strike", "date_time", "z_score")
+                    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+                    combs = Combination.objects.filter(created_at__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
                     combinations_df = pd.DataFrame(
                         data=list(combs) + combinations_list
                     )
