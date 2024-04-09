@@ -365,9 +365,15 @@ def test_end(request):
                 info['previous_time'] = info['latest_time']
         
         # print(market_state)
-        display_time = datetime.now()
+        # display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
+        eastern = pytz.timezone('US/Eastern')
+        dt = eastern.localize(datetime.now())
+        if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
+            display_time = datetime.now()
+            current_time = str(display_time).split('.')[0]
+            
         latest_data = info['latest_time']
   
         if latest_data:
