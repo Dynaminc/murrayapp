@@ -25,8 +25,8 @@ class Strike(models.Model):
     total_close_price = models.FloatField(null=True, blank=True)
     current_price = models.FloatField(null=True, blank=True)
     current_percentage = models.FloatField(default=0)
-    # max_percentage = models.FloatField(default=0)
-    # min_percentage = models.FloatField(default=0)
+    max_percentage = models.FloatField(default=0)
+    min_percentage = models.FloatField(default=0)
      
     open_time = models.DateTimeField(auto_now_add=True)
     close_time = models.DateTimeField(null=True, blank=True)
