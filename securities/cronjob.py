@@ -335,38 +335,44 @@ def store_new():
 
             stock_items = create_stocks(stocks)
             stocks_list = stock_items["stocks_list"]
+            # if stocks_list:
             if stocks_list:
-                current_datetime = datetime.fromisoformat(current_datetime)
-                combinations_list = get_combinations(stocks, current_datetime)
-                if combinations_list:
-                    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-                    combs = Combination.objects.filter(created_at__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
-                    combinations_df = pd.DataFrame(
-                        data=list(combs) + combinations_list
-                    )
-                    combinations_df["date_time"] = pd.to_datetime(
-                        combinations_df["date_time"]
-                    )
-                    calculated_combs = calc_stats_b(combinations_df)
-                    strikes_list = [
-                            Combination(
-                                symbol=comb['symbol'],
-                                avg=comb['avg'],
-                                stdev=comb['stdev'],
-                                strike=comb['strike'],
-                                date_time=comb['date_time'],
-                                z_score=comb['z_score'],
-                            ) for comb in calculated_combs ]
-                    
-                if stocks_list:
                     Stock.objects.bulk_create(stocks_list)
-                Combination.objects.bulk_create(strikes_list)
-                Cronny.objects.create(symbol=f"laoded bulk")
+                    
+            current_datetime = datetime.fromisoformat(current_datetime)
+            combinations_list = get_combinations(stocks, current_datetime)
+            Cronny.objects.create(symbol=f"laoded list, {len(combinations_list)}")
+            if combinations_list:
+                twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+                combs = Combination.objects.filter(created_at__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
+                combinations_df = pd.DataFrame(
+                    data=list(combs) + combinations_list
+                )
+                combinations_df["date_time"] = pd.to_datetime(
+                    combinations_df["date_time"]
+                )
+                calculated_combs = calc_stats_b(combinations_df)
+                Cronny.objects.create(symbol=f"laoded combs, {len(calculated_combs)}")
+                strikes_list = [
+                        Combination(
+                            symbol=comb['symbol'],
+                            avg=comb['avg'],
+                            stdev=comb['stdev'],
+                            strike=comb['strike'],
+                            date_time=comb['date_time'],
+                            z_score=comb['z_score'],
+                        ) for comb in calculated_combs ]
+                    
+                
+            Combination.objects.bulk_create(strikes_list)
+            Cronny.objects.create(symbol=f"laoded bulk")
                     
                     
 
         else:
             print('status code bad')
+            Cronny.objects.create(symbol=f"Estatus code ba")
     except Exception as e:
+        Cronny.objects.create(symbol=f"Exception for stock update after crone execution. Message: {e}")
         print("Exception for stock update after crone execution. Message:", e)
 
