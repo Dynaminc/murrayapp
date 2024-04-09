@@ -358,9 +358,11 @@ def store_new():
                                 z_score=comb['z_score'],
                             ) for comb in calculated_combs ]
                     
-                if stocks_list and strikes_list:
+                if stocks_list:
                     Stock.objects.bulk_create(stocks_list)
-                    Combination.objects.bulk_create(strikes_list)
+                Combination.objects.bulk_create(strikes_list)
+                Cronny.objects.create(symbol=f"laoded bulk")
+                    
                     
 
         else:
