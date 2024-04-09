@@ -5,7 +5,6 @@ from rest_framework import status
 from django.core.paginator import Paginator
 from django_redis import get_redis_connection
 from django.utils import timezone as tz
-# from .cronjob import store, cronny
 from securities.models import Stock
 from .models import Combination
 from accounts.models import Strike, Profile
@@ -213,8 +212,6 @@ def close_strike(request):
 
 
 
-
-
 @api_view(['POST'])
 def confirm_strike(request):
     serializer = StrikeManagementSerializer(data=request.POST)
@@ -337,7 +334,7 @@ def check_market_hours(dat):
     
 @api_view(['GET', 'POST'])
 def test_end(request):
-    # store()
+
     combs = []
     market_state = "off"
     try:
@@ -368,7 +365,7 @@ def test_end(request):
         if latest_data:
             latest_time = latest_data
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score ]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations ] 
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:

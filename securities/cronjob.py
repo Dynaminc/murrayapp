@@ -54,7 +54,7 @@ def store():
             ]
             if current_datetime == cache.get("last_datetime"):
                 print('this is the issue ignore')
-                return False
+                # return False
             # print(current_datetime, cache.get("last_datetime"))
             cache.set("last_datetime", current_datetime, timeout=None)
             con.rpush("last_200", str(current_datetime))
@@ -294,4 +294,76 @@ def remove_data():
         print("Stock/Combination data removed!")
     else:
         print("Nothing to delete!")
+
+
+
+def calc_stats_b(df):
+    # Convert 'date_time' to datetime format
+    df['date_time'] = pd.to_datetime(df['date_time'])
+
+    # Group by 'symbol' and calculate statistics for each group
+    groups = df.groupby('symbol')
+    data = []
+    for symbol, group_df in groups:
+        most_recent_200 = group_df.nlargest(200, 'date_time')['strike']
+        most_recent_strike = most_recent_200.iat[-1]
+        avg = most_recent_200.mean()
+        stdev = most_recent_200.std()
+        z_score = (most_recent_strike - avg) / stdev
+        most_recent_time = group_df['date_time'].max()
+        data.append({"symbol": symbol, "strike": most_recent_strike, "avg": avg, "stdev": stdev, "date_time": most_recent_time, "z_score": z_score})
+
+    return data
+
+# Create your tests here.
+def store_new():
+    """
+    Stores to the database then sends to the socket.
+    """
+    try:
+        res = get_data()
+        if res["status_code"] == 200:
+            stocks = res["stocks"]
+            current_datetime = stocks[Company.DOW_JONES]["values"][0][
+                "datetime"
+            ]
+            if current_datetime == cache.get("last_datetime"):
+                return False
+            cache.set("last_datetime", current_datetime, timeout=None)
+            con.rpush("last_200", str(current_datetime))
+            con.ltrim("last_200", -200, -1)
+
+            stock_items = create_stocks(stocks)
+            stocks_list = stock_items["stocks_list"]
+            if stocks_list:
+                current_datetime = datetime.fromisoformat(current_datetime)
+                combinations_list = get_combinations(stocks, current_datetime)
+                if combinations_list:
+                    combs = Combination.objects.all().values("symbol", "strike", "date_time", "z_score")
+                    combinations_df = pd.DataFrame(
+                        data=list(combs) + combinations_list
+                    )
+                    combinations_df["date_time"] = pd.to_datetime(
+                        combinations_df["date_time"]
+                    )
+                    calculated_combs = calc_stats_b(combinations_df)
+                    strikes_list = [
+                            Combination(
+                                symbol=comb['symbol'],
+                                avg=comb['avg'],
+                                stdev=comb['stdev'],
+                                strike=comb['strike'],
+                                date_time=comb['date_time'],
+                                z_score=comb['z_score'],
+                            ) for comb in calculated_combs ]
+                    
+                if stocks_list and strikes_list:
+                    Stock.objects.bulk_create(stocks_list)
+                    Combination.objects.bulk_create(strikes_list)
+                    
+
+        else:
+            print('status code bad')
+    except Exception as e:
+        print("Exception for stock update after crone execution. Message:", e)
 
