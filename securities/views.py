@@ -69,8 +69,8 @@ def get_chart(request):
                     prev_item = item
             new_data.append({
                 "time": new_time,
-                "svalue": prev_item["svalue"] + random.choice([-0.01,-0.02,-0.02,0.01,0.02,0.03]),
-                "lvalue": prev_item["lvalue"] + random.choice([-0.03,-0.02,-0.01,0.01,0.02,0.03])
+                "svalue": prev_item["svalue"],
+                "lvalue": prev_item["lvalue"] 
             })        
         
     for item in new_data:
