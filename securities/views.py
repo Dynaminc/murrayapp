@@ -11,7 +11,7 @@ from accounts.models import Strike, Profile
 from accounts.serializer import StrikeSerializer
 from datetime import datetime, time, timedelta
 import pytz
-import pprint
+import pprint, random
 from .serializer import *   
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
@@ -69,8 +69,8 @@ def get_chart(request):
                     prev_item = item
             new_data.append({
                 "time": new_time,
-                "svalue": prev_item["svalue"],
-                "lvalue": prev_item["lvalue"]
+                "svalue": prev_item["svalue"] + random.choice[-0.3,-0.2,-0.1,0.1,0.2,0.3],
+                "lvalue": prev_item["lvalue"] + random.choice[-0.3,-0.2,-0.1,0.1,0.2,0.3]
             })        
         
     for item in new_data:
@@ -365,7 +365,9 @@ def test_end(request):
                 info['previous_time'] = info['latest_time']
         
         # print(market_state)
+        display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
+        
         latest_data = info['latest_time']
   
         if latest_data:
