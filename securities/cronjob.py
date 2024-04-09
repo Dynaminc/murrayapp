@@ -344,7 +344,9 @@ def store_new():
             Cronny.objects.create(symbol=f"laoded list, {len(combinations_list)}")
             if combinations_list:
                 twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-                combs = Combination.objects.filter(created_at__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
+                combs = Combination.objects.filter(date_time__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
+                
+                Cronny.objects.create(symbol=f"combs, {len(combs)}")
                 combinations_df = pd.DataFrame(
                     data=list(combs) + combinations_list
                 )
