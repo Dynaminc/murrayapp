@@ -107,8 +107,8 @@ def update_striker(request):
         strike_instance.current_price = sum_total
         strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
         
-        strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
-        strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
+        # strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
+        # strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
         
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
@@ -151,8 +151,8 @@ def update_strike(id):
         strike_instance.current_price = sum_total
         strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
         
-        strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
-        strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
+        # strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
+        # strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
         
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
