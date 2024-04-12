@@ -7,8 +7,8 @@ from django_redis import get_redis_connection
 from django.utils import timezone as tz
 from securities.models import Stock
 from .models import Combination
-from accounts.models import Strike, Profile
-from accounts.serializer import StrikeSerializer
+from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
+from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
 from datetime import datetime, time, timedelta
 import pytz
 import pprint, random
@@ -20,9 +20,10 @@ def index(request):
 
 
 def quantify_strike(portfolio, price):
-    unit_portfolio_size = portfolio / 50
+    unit_portfolio_size = 1000000 / 50
     quantity = unit_portfolio_size / price
     final_portfolio_size = int(quantity) * price
+    
     return {'unit':unit_portfolio_size, 'quantity': int(quantity), 'final':final_portfolio_size}
 
 def process_strike_symbol(symbol):
@@ -151,8 +152,8 @@ def update_strike(id):
         strike_instance.current_price = sum_total
         strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
         
-        # strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
-        # strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
+        strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
+        strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
         
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
@@ -167,11 +168,37 @@ def update_strike(id):
         strike_instance.sss_close_price = get_correct_close(short_data, strike_instance.second_short_stock)['final']                
         strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
         strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
+        
         # process for exit signal             
-        #signal_exit = models.BooleanField(default=False
+        if strike_instance.current_percentage > 1.5 and not strike_instance.signal_exit:
+            strike_instance.signal_exit = True
+            Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the {strike_instance.current_percentage}% mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
+        else:
+            detail = f"Strike has exceeded the {strike_instance.current_percentage}% mark"
+            if strike_instance.current_percentage > 1: 
+                
+                if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
+                    Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)   
+            if strike_instance.current_percentage < - 1:
+                if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
+                    Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                       
+            if strike_instance.current_percentage < - 1.5:
+                if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
+                    Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                     
         strike_instance.save()
+        
                 
     return True
+
+@api_view(['GET'])
+def cronat(response):
+    data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
+    if False in data:
+        Cronny.objects.create(symbol=f"{len(data)}: False")
+    else:
+        Cronny.objects.create(symbol=f"{len(data)}: True")
+    return JsonResponse({'message': f'Updated', 'status': 400}, 
+                                status=status.HTTP_200_OK)        
 @api_view(['GET'])
 def close_strike(request):
     id = request.GET.get('strike_id', 10)
@@ -194,6 +221,7 @@ def close_strike(request):
         sum_total += sum([item['final'] for item in long_data])
         sum_total += sum([item['final'] for item in short_data])
         
+        
         strike_instance.total_close_price = sum_total
         strike_instance.close_time = stock_time
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
@@ -212,6 +240,21 @@ def close_strike(request):
         strike_instance.closed = True
         
         strike_instance.save()
+
+        profile_instance = Profile.objects.first()
+        previous_balance = profile_instance.porfolio
+        profile_instance.porfolio = previous_balance  + sum_total
+        profile_instance.save()
+        
+        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)       
+        
+        previous_balance = profile_instance.porfolio
+        profile_instance.porfolio = previous_balance  - 10
+        profile_instance.save()
+        
+        Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+        Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
+        
         return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
     else:
         return JsonResponse({ 'message':"Trade Closed Already", "data":StrikeSerializer(strike_instance).data})
@@ -267,6 +310,7 @@ def confirm_strike(request):
             second_short_stock = short_data[1]['title'],
             sss_quantity = short_data[1]['quantity'],
             sss_price = short_data[1]['final'],
+    
             sss_open = short_data[1]['price'],
             
             third_short_stock = short_data[2]['title'],
@@ -275,8 +319,99 @@ def confirm_strike(request):
             tss_open = short_data[2]['price'],
             )
     
+    profile_instance = Profile.objects.first()
+    previous_balance = profile_instance.porfolio 
+    profile_instance.porfolio = previous_balance - sum_total
+    profile_instance.save()
+    
+    Transaction.objects.create(user=profile_instance.user, details=f'Your order has been placed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=sum_total, transaction_type=tran_not_type.TRADE_OPENED)
+
+    previous_balance = profile_instance.porfolio
+    profile_instance.porfolio = previous_balance  - 10
+    profile_instance.save()
+    
+    Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+            
+    Notification.objects.create(user=strike_instance.user, details=f"Trade {strike_instance.id} has been opened", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_OPENED)   
     return JsonResponse({ 'message':"Strike Saved Succesfully", "data":StrikeSerializer(strike_instance).data})
 
+
+@api_view(['POST'])
+def add_fund(request):
+    try:
+        serializer = FundSerializer(data=request.POST)
+        if not serializer.is_valid():
+            return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+            
+        serialized = serializer.data
+        fund = int(serialized['fund'])
+        
+        profile_instance = Profile.objects.first()
+        previous_balance = profile_instance.porfolio 
+        profile_instance.porfolio = previous_balance + fund
+        profile_instance.save()
+        
+        Transaction.objects.create(user=profile_instance.user,  details=f"Wallet has been funded",
+                                new_balance=profile_instance.porfolio, 
+                                credit=True, amount=fund, transaction_type=tran_not_type.WALLET_FUNDED)
+        Notification.objects.create(user=profile_instance.user, details=f"Wallet has been funded with {fund}", notification_type=tran_not_type.WALLET_FUNDED)   
+        
+        return JsonResponse({'message':"Fund added Succesfully"})  
+    except:
+        return JsonResponse({'message':"Fund not added"})  
+
+@api_view(['GET'])
+def load_transactions(request):
+    data = {}
+    profile_instance = Profile.objects.first()
+    transaction_instances = Transaction.objects.filter(user=profile_instance.user).all()
+    data = [TransactionSerializer(item).data for item in transaction_instances]
+    return JsonResponse({'data':data , 'message':"Trnasactions Loaded"})  
+
+@api_view(['GET'])
+def load_notifications(request):
+    data = {}
+    profile_instance = Profile.objects.first()
+    notification_instances = Notification.objects.filter(user=profile_instance.user).all()
+    data = [NotificationSerializer(item).data for item in notification_instances]
+    return JsonResponse({'data':data , 'message':"Notifations Loaded"})  
+
+@api_view(['GET'])
+def load_stats(request):
+    data = {}
+    profile_instance = Profile.objects.first()
+    for key, value in ProfileSerializer(profile_instance).data.items():
+        data[key] = value
+        
+    strikes = Strike.objects.filter(user=profile_instance.user).all()
+    profit_trades = [(strike.total_close_price - strike.total_open_price) for strike in strikes if strike.closed and strike.total_close_price > strike.total_open_price]
+    data['total_profits'] = sum(profit_trades)
+    data['win_rate'] = len(profit_trades) / len(strikes) * 10
+    
+    data['total_loss'] = sum([(strike.total_open_price - strike.total_close_price  ) for strike in strikes if strike.closed and strike.total_close_price < strike.total_open_price])
+    
+    data['operating_balance'] = sum([strike.total_close_price if strike.total_close_price else 0 for strike in strikes if not strike.closed ]) 
+    
+    open_prices = sum([strike.total_open_price if strike.total_open_price else 0  for strike in strikes if not strike.closed ])
+    close_prices = sum([strike.total_close_price if strike.total_close_price else 0   for strike in strikes if not strike.closed ])
+    
+    data['operating_percent'] = 0
+    data['cent_color'] = 'gray'
+    if open_prices > 0:
+        data['operating_percent'] = (close_prices - open_prices) / open_prices * 100
+        if data['operating_percent'] > 0:
+            data['cent_color'] = 'green'
+        else:
+            data['cent_color'] = 'red'
+    
+    data['total_trades'] = len(strikes)
+    
+    data['open_trades'] = len([strike for strike in strikes if not strike.closed])
+    data['closed_trades'] = len([strike for strike in strikes if strike.closed])
+    
+    data['exit_alerts'] = len([strikes for strike in strikes if strike.signal_exit])
+    return JsonResponse({'data':data , 'message':"Loaded Succesfully"})  
 
 @api_view(['POST'])
 def get_strike_breakdown(request):

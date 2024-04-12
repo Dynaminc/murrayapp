@@ -11,7 +11,15 @@ urlpatterns = [
     path("api/loadstrikes", views.load_strikes),
     path("api/getchart", views.get_chart),
     path("api/closestrike", views.close_strike),
-    # path("api/test", views.trigger_store),
+    
+    path("api/add_fund", views.add_fund),
+    path("api/load_stats", views.load_stats),
+    path("api/load_notifs", views.load_notifications),
+    path("api/load_transactions", views.load_transactions),
+    
+    
+    
+    path("api/load_percent", views.cronat),
     path("api/clean", views.clean_end),
     path("api/cronny", views.update_striker),
     path(
