@@ -5,8 +5,9 @@ import numpy as np
 import json, random
 from datetime import datetime, timedelta
 from itertools import combinations
-
+from django.core.paginator import Paginator
 from django.conf import settings
+from django.utils import timezone as tz
 from django.core.cache import cache
 from django_redis import get_redis_connection
 from channels.layers import get_channel_layer
@@ -28,6 +29,17 @@ def cronny():
     else:
         Cronny.objects.create(symbol=f"{len(data)}: True")
     
+
+def cleaner():
+    d = tz.now() - timedelta(days=4)
+    count = 0
+    paginator = Paginator(Combination.objects.filter(date_time__lt=d), 1000) # chunks of 1000
+    for page_idx in range(1, paginator.num_pages):
+        for row in paginator.page(page_idx).object_list:
+            count += 1
+            row.delete()
+            
+    Cronny.objects.create(symbol=f"clean session: {count}")
     
 def store():
     """

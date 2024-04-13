@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from rest_framework import status
 from django.core.paginator import Paginator
+from rest_framework import status
+
 from django_redis import get_redis_connection
 from django.utils import timezone as tz
 from securities.models import Stock
@@ -54,6 +55,9 @@ def get_chart(request):
         item["time"] = datetime.fromisoformat(str(item["time"]))
 
     # Get the start and current time
+    if len(data) < 1:
+        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":[]})
+        
     start_time = data[0]["time"]
     current_time = datetime.now()
 
@@ -437,17 +441,24 @@ def trigger_store(request):
 
 @api_view(['GET', 'POST'])
 def clean_end(request):
-    id = int(request.GET.get('id', 10))
-    delete = request.GET.get('delete',False)
-    d = tz.now() - timedelta(days=id)
-    print(d)
-    data = Combination.objects.filter(date_time__lt=d)
-    m = len(data)
-    if delete:  
-        data.delete()
-        return JsonResponse({'message':f"Deleted Succesfully {m}"})    
-    else:
-        return JsonResponse({'message':f"Count {m}"})    
+    try:
+        print('cleaning')
+        id = int(request.GET.get('id', 10))
+        delete = request.GET.get('delete',False)
+        d = tz.now() - timedelta(days=id)
+        print(d)
+        count = 0
+        paginator = Paginator(Combination.objects.filter(date_time__lt=d), 1000) # chunks of 1000
+        print('paginated')
+        for page_idx in range(1, paginator.num_pages):
+            for row in paginator.page(page_idx).object_list:
+                if delete:  
+                    count += 1
+                    print('deleteded, ', count, row.date_time)
+                    row.delete()
+        return JsonResponse({'message':f"Deleted Succesfully {count}"})    
+    except Exception as E:
+        return JsonResponse({'message':f"Exception {E}"})    
     
     
     
