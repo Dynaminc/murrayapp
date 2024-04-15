@@ -256,7 +256,7 @@ def close_strike(request):
         profile_instance.porfolio = previous_balance  - 10
         profile_instance.save()
         
-        Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+        # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
         Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
         
         return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
@@ -334,7 +334,7 @@ def confirm_strike(request):
     profile_instance.porfolio = previous_balance  - 10
     profile_instance.save()
     
-    Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+    # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
             
     Notification.objects.create(user=strike_instance.user, details=f"Trade {strike_instance.id} has been opened", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_OPENED)   
     return JsonResponse({ 'message':"Strike Saved Succesfully", "data":StrikeSerializer(strike_instance).data})
@@ -391,7 +391,11 @@ def load_stats(request):
     strikes = Strike.objects.filter(user=profile_instance.user).all()
     profit_trades = [(strike.total_close_price - strike.total_open_price) for strike in strikes if strike.closed and strike.total_close_price > strike.total_open_price]
     data['total_profits'] = sum(profit_trades)
-    data['win_rate'] = len(profit_trades) / len(strikes) * 10
+    data['win_rate'] =  0
+    
+    if len(strikes) > 0:
+        data['win_rate'] = len(profit_trades) / len(strikes) * 10
+        
     
     data['total_loss'] = sum([(strike.total_open_price - strike.total_close_price  ) for strike in strikes if strike.closed and strike.total_close_price < strike.total_open_price])
     
