@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from django.core.paginator import Paginator
 from rest_framework import status
-
+from django.db.models import F, Q
 from django_redis import get_redis_connection
 from django.utils import timezone as tz
 from securities.models import Stock
@@ -48,6 +48,22 @@ def get_chart(request):
     strike_instance = Strike.objects.filter(id=id).first() 
     short = strike_instance.short_symbol
     long = strike_instance.long_symbol
+    
+    shorts = Combination.objects.filter(symbol=short, date_time__gt=strike_instance.open_time)
+    longs = Combination.objects.filter(symbol=long, date_time__gt=strike_instance.open_time)
+
+  
+    data = [
+        {
+            'time': comb.date_time,
+            'svalue': comb.z_score,
+            'lvalue': [item for item in longs if item.date_time == comb.date_time][0].z_score
+        }
+        for comb in shorts
+    ]   
+    strike_instance = Strike.objects.filter(id=id).first() 
+    short = strike_instance.short_symbol
+    long = strike_instance.long_symbol
 
     data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
     
@@ -84,6 +100,7 @@ def get_chart(request):
     for item in new_data:
         print(item)  
     return JsonResponse({ 'message':"Chart loaded Succesfully", "data":new_data})
+    # return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -252,9 +269,9 @@ def close_strike(request):
         
         Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)       
         
-        previous_balance = profile_instance.porfolio
-        profile_instance.porfolio = previous_balance  - 10
-        profile_instance.save()
+        # previous_balance = profile_instance.porfolio
+        # profile_instance.porfolio = previous_balance  - 10
+        # profile_instance.save()
         
         # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
         Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
@@ -290,6 +307,7 @@ def confirm_strike(request):
             short_symbol = short,
             total_open_price = sum_total,
             open_time = stock_time,
+            current_price = sum_total,
             
             first_long_stock = long_data[0]['title'],
             fls_quantity = long_data[0]['quantity'],
@@ -330,9 +348,9 @@ def confirm_strike(request):
     
     Transaction.objects.create(user=profile_instance.user, details=f'Your order has been placed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=sum_total, transaction_type=tran_not_type.TRADE_OPENED)
 
-    previous_balance = profile_instance.porfolio
-    profile_instance.porfolio = previous_balance  - 10
-    profile_instance.save()
+    # previous_balance = profile_instance.porfolio
+    # profile_instance.porfolio = previous_balance  - 10
+    # profile_instance.save()
     
     # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
             
@@ -488,9 +506,9 @@ def check_market_hours(dat):
     else:
         return "red"
     
+
 @api_view(['GET', 'POST'])
 def test_end(request):
-
     combs = []
     market_state = "off"
     try:

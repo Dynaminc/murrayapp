@@ -349,16 +349,14 @@ def store_new():
             stocks_list = stock_items["stocks_list"]
             # if stocks_list:
             if stocks_list:
-                    Stock.objects.bulk_create(stocks_list)
+                Stock.objects.bulk_create(stocks_list)
                     
             current_datetime = datetime.fromisoformat(current_datetime)
             combinations_list = get_combinations(stocks, current_datetime)
-            Cronny.objects.create(symbol=f"laoded list, {len(combinations_list)}")
+            
             if combinations_list:
                 twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
                 combs = Combination.objects.filter(date_time__gte=twenty_four_hours_ago).values("symbol", "strike", "date_time", "z_score")
-                
-                Cronny.objects.create(symbol=f"combs, {len(combs)}")
                 combinations_df = pd.DataFrame(
                     data=list(combs) + combinations_list
                 )
@@ -366,7 +364,7 @@ def store_new():
                     combinations_df["date_time"]
                 )
                 calculated_combs = calc_stats_b(combinations_df)
-                Cronny.objects.create(symbol=f"laoded combs, {len(calculated_combs)}")
+            
                 strikes_list = [
                         Combination(
                             symbol=comb['symbol'],
@@ -379,13 +377,9 @@ def store_new():
                     
                 
             Combination.objects.bulk_create(strikes_list)
-            Cronny.objects.create(symbol=f"laoded bulk")
-                    
-                    
 
         else:
-            print('status code bad')
-            Cronny.objects.create(symbol=f"Estatus code ba")
+            Cronny.objects.create(symbol=f"Error Loaing")
     except Exception as e:
         Cronny.objects.create(symbol=f"Exception for stock update after crone execution. Message: {e}")
         print("Exception for stock update after crone execution. Message:", e)
