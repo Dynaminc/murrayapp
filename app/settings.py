@@ -80,7 +80,7 @@ CRONJOBS = [
     ('* 9-16 * * 1-5', 'securities.cronjob.new_calc'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.store_new'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
-    ('* * * * *', 'securities.cronjob.clean_comb'),
+    # ('* * * * *', 'securities.cronjob.clean_comb'),
     # ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
 

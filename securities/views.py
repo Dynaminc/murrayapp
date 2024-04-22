@@ -14,9 +14,9 @@ from datetime import datetime, time, timedelta
 import pytz
 import pprint, random
 from .utils import quick_run
-from .cronjob import new_calc
+from .cronjob import new_calc, clean_comb
 from .serializer import *   
-from .assess import get_test_data, json_migrator, all_strikes, export_file, clean_comb, top_low
+from .assess import get_test_data, json_migrator, all_strikes, export_file, top_low
 
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
