@@ -13,7 +13,11 @@ from accounts.serializer import StrikeSerializer, ProfileSerializer, Transaction
 from datetime import datetime, time, timedelta
 import pytz
 import pprint, random
+from .utils import quick_run
+from .cronjob import new_calc
 from .serializer import *   
+from .assess import get_test_data, json_migrator, all_strikes, export_file, clean_comb, top_low
+
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
 def index(request):
@@ -456,11 +460,39 @@ def get_strike_breakdown(request):
     
     return JsonResponse({'data':data, 'message':"Loaded Succesfully"})  
 
+
+
 @api_view(['GET', 'POST'])
 def trigger_store(request):
-    # store()
-    return JsonResponse({'message':"Loaded Succesfully"})  
+    print("initiated")    
+    data = clean_comb()
+    # print("Fetching")
+    # data = get_test_data()
+    # print("Migrating")
+    # json_migrator()
+    # print("Getting all strikes ")
+    # data = all_strikes()
+    # print("Completed strikes")
+    # print("Exporting")
+    # data = export_file()
+    # now to export the last minute ranking
+    
+    # data = new_calc()
+    # data = top_low()
+    
+    
+    # print("Exported") 
+    return JsonResponse({'message':"Loaded Succesfully", 'data': data})  
 
+@api_view(['GET', 'POST'])
+def trigger_lens(request):
+    item = datetime(2024, 4, 19, 12)
+    
+    combination_data = Combination.objects.filter(date_time__gte=item).all()
+    stock_data = Stock.objects.filter(date_time__gte=item).all()
+    
+    return JsonResponse({'message':"Loaded Succesfully",'combs':len(combination_data), 'stocks': len(stock_data)})  
+    
 @api_view(['GET', 'POST'])
 def clean_end(request):
     try:

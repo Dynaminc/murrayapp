@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from datetime import timedelta
 import pandas as pd
 from django.db.models import F, Q
-
+from django.db.models.functions import ExtractMinute
 from .models import Combination
 from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
 from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
@@ -27,20 +27,83 @@ def convert_csv_to_excel(respose):
     df.to_excel(excel_file_path, index=False)
     return JsonResponse({'message': 'File converted to Excel successfully'}, status=200)
 
-def get_combination_data_last_200(combination):
-    # Get the latest timestamp
-    latest_time = Combination.objects.latest('date_time').date_time
-    comba  = combination.split('-')
 
-    # Fetch the last 200 distinct timestamps
-    # distinct_timestamps = Combination.objects.filter(symbol=combination).order_by('date_time').values('date_time').distinct()[:200]
-    distinct_timestamps = Combination.objects.filter(symbol=combination).order_by('-date_time').values('date_time').distinct()[:200]
+def get_per_strike():
+    strike_instances = Strike.objects.all()
+    
+    count = 0
+    missing = 0
+    fixed = 0
+    
+    for main_item in strike_instances:
+        long, short = main_item.long_symbol, main_item.short_symbol
+        for combo in [long, short]:
+            comba  = combo.split('-')
+            m = Combination.objects.filter(symbol=combo, date_time=main_item.open_time).first()
+            strike = m.strike
+            mean = m.avg
+            stdev = m.stdev
+            z_score = m.z_score
+            # Create a dictionary to store the data
+            data_dict = {
+                'Strike Price': strike,
+                'Mean': mean,
+                'Std Deviation': stdev,
+                'Z-Score': z_score,
+                'date': str(main_item.open_time)
+            }
+
+            # Initialize keys for 'AAPL', 'PG', and 'WMT'
+            data_dict[comba[0]] = None
+            data_dict[comba[1]] = None
+            data_dict[comba[2]] = None
+            
+            next_minute = main_item.open_time + timedelta(minutes=1)
+
+
+            a = Stock.objects.filter(Q(symbol=comba[0]),date_time=main_item.open_time).first()
+            b = Stock.objects.filter(Q(symbol=comba[1]),date_time=main_item.open_time).first()
+            c = Stock.objects.filter(Q(symbol=comba[2]),date_time=main_item.open_time).first()
+            if a:
+                data_dict[comba[0]] = a.close
+            else:
+                missing += 1
+                new_a = Stock.objects.filter(Q(symbol=comba[0]), date_time=next_minute).first()
+                if new_a:
+                    fixed += 1
+                    data_dict[comba[0]] = new_a.close
+            if b: 
+                data_dict[comba[1]] = b.close
+            else:
+                missing += 1
+                new_b = Stock.objects.filter(Q(symbol=comba[1]), date_time=next_minute).first()
+                if new_b:
+                    fixed += 1
+                    data_dict[comba[1]] = new_b.close
+            if c:
+                data_dict[comba[2]] = c.close 
+            else:
+                missing += 1       
+                new_c = Stock.objects.filter(Q(symbol=comba[2]), date_time=next_minute).first()
+                if new_c:
+                    fixed += 1
+                    data_dict[comba[2]] = new_c.close                
+
+def get_combination_data_last_200(combination, initial_timestamp):
+    # Get the latest timestamp
+    comba  = combination.split('-')
+    
+    # distinct_timestamps = Combination.objects.filter(symbol=combination).order_by('-date_time').values('date_time').distinct()[:200]
+    distinct_timestamps = Combination.objects.filter(date_time__gte=initial_timestamp).order_by('-date_time').values('date_time').distinct()
      
     
     # Create a list to store DataFrames for each timestamp
     dfs = []
-    print('itereationg')
+    print('iterationg')
     count = 0
+    
+    missing = 0
+    fixed = 0
     # Iterate over each distinct timestamp
     for timestamp in distinct_timestamps:
         count += 1
@@ -51,13 +114,6 @@ def get_combination_data_last_200(combination):
         mean = m.avg
         stdev = m.stdev
         z_score = m.z_score
-
-        # Fetch the records for AAPL-PG-WMT at the current timestamp
-        records = Stock.objects.filter(
-            Q(symbol=comba[0]) | Q(symbol=comba[1]) | Q(symbol=comba[2]),
-            date_time=timestamp['date_time']
-        )
-
         # Create a dictionary to store the data
         data_dict = {
             'Strike Price': strike,
@@ -71,19 +127,28 @@ def get_combination_data_last_200(combination):
         data_dict[comba[0]] = None
         data_dict[comba[1]] = None
         data_dict[comba[2]] = None
+        
+        next_minute = timestamp['date_time'] + timedelta(minutes=1)
 
-        # Fill in the price per symbol per minute
-        for record in records:
-            data_dict[record.symbol] = record.close
 
-        # Convert the dictionary to a DataFrame and append to the list
+        a = Stock.objects.filter(Q(symbol=comba[0]),date_time=timestamp['date_time']).first()
+        b = Stock.objects.filter(Q(symbol=comba[1]),date_time=timestamp['date_time']).first()
+        c = Stock.objects.filter(Q(symbol=comba[2]),date_time=timestamp['date_time']).first()
+        if a:
+            data_dict[comba[0]] = a.close
+        if b: 
+            data_dict[comba[1]] = b.close
+        if c:
+            data_dict[comba[2]] = c.close 
         df = pd.DataFrame(data_dict, index=[0])
         dfs.append(df)
-    print('done')
+    print('done', ' missing ', missing, ' fixed ', fixed , ' total ', count)
     # Concatenate all DataFrames into a single DataFrame
     result_df = pd.concat(dfs, ignore_index=True)
 
     return result_df
+
+
 def check_empties():
     # Fetch the last 200 Stock records without the close value
     # stocks_without_close = Stock.objects.order_by('-date_time').values('symbol', 'date_time', 'open', 'high', 'low', 'previous_close')[:200]
@@ -94,12 +159,13 @@ def check_empties():
     for stock in stocks_without_close[:5]:
         print(stock)
     return JsonResponse({"data":stocks_without_close})
-def quick_run(combination):
+
+def quick_run(combination, initial_timestamp ):
     # Example usage
-    df = get_combination_data_last_200(combination)
+    df = get_combination_data_last_200(combination, initial_timestamp)
 
     # Save the DataFrame to an Excel file
-    excel_file_path = f'{combination}_data_last_200.xlsx'
+    excel_file_path = f'{combination}_data_{str(initial_timestamp)}.xlsx'
     df.to_excel(excel_file_path, index=False)
 
 

@@ -17,6 +17,9 @@ urlpatterns = [
     path("api/load_notifs", views.load_notifications),
     path("api/load_transactions", views.load_transactions),
     
+    path("api/testit", views.trigger_store),
+    path("api/check", views.trigger_lens),
+    
     
     
     path("api/load_percent", views.cronat),

@@ -77,11 +77,11 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('* 9-16 * * 1-5', 'securities.cronjob.store'),
+    ('* 9-16 * * 1-5', 'securities.cronjob.new_calc'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.store_new'),
-    ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
-    # ('* * * * *', 'securities.cronjob.cleaner'),
-    ('30 01 */15 * *', 'securities.cronjob.remove_data'),
+    # ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
+    ('* * * * *', 'securities.cronjob.clean_comb'),
+    # ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
 
 ASGI_APPLICATION = 'app.asgi.application'
@@ -156,19 +156,20 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    'default': dj_database_url.config(
-        default= os.getenv('DATABASE_URL'),
-        conn_max_age=0
-    )
-}
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
+#     'default': dj_database_url.config(
+#         default= os.getenv('DATABASE_URL'),
+#         conn_max_age=0
+#     )
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # DATABASES = {
 #     'default': {
