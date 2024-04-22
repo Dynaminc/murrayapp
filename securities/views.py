@@ -67,7 +67,7 @@ def get_chart(request):
     ]   
     strike_instance = Strike.objects.filter(id=id).first() 
     short = strike_instance.short_symbol
-    long = strike_instance.long_symbol
+    long = stri ke_instance.long_symbol
 
     data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
     

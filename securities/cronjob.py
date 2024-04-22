@@ -192,20 +192,26 @@ def new_calc():
     
         
 def clean_comb(): # rmove the precalculated combs for a new calculation
-    
+    count = 0 
     times = [datetime(2024, 4, 19, 12)]
     # strike = "VZ-WBA-WMT"
     for item in times:
         print('fetcging ')
-        data = Combination.objects.filter(date_time__gte=item).all()
-        print(len(data))
+        paginator = Paginator(Combination.objects.filter(date_time__gte=item), 1000)
+        for page_idx in range(1, paginator.num_pages):
+            for row in paginator.page(page_idx).object_list:
+                count += 1
+                row.delete()
         # data = Combination.objects.filter(date_time__date=item.date()).all()
-        data.delete()
         print('cleaned combinations')
         
+        paginator = Paginator(Stock.objects.filter(date_time__gte=item), 1000) # chunks of 1000
         data = Stock.objects.filter(date_time__gte=item).all()
-        print(len(data))
-        data.delete()
+        for page_idx in range(1, paginator.num_pages):
+            for row in paginator.page(page_idx).object_list:
+                count += 1
+                row.delete()
         
         print('cleaned stocks')
+    Cronny.objects.create(symbol=f"clean stock and combo {count}")
     return 'cleaned'
