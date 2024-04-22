@@ -38,11 +38,14 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
+        count = 0
+        stock_count = 0
         try:
 
             combos = []
             stock_list = []
             for file in ['combination_1.json', 'combination_2.json']:
+                print('Fetching ', file)
                 with open(file, 'r') as f:
                     data = json.load(f)
 
@@ -53,12 +56,14 @@ class Command(BaseCommand):
                     stdev = item['stdev']
                     z_score = item['z_score']
                     date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
-
-                    combos.append(Combination(symbol=symbol, strike=strike, avg=avg, stdev=stdev, z_score=z_score, date_time=date_time))
-                
-            Combination.objects.bulk_create(combos)
-            
-
+                    try:
+                        
+                        Combination.objects.create(symbol=symbol, strike=strike, avg=avg, stdev=stdev, z_score=z_score, date_time=date_time)
+                        count += 1
+                        print('count', count)
+                    except Exception as E:
+                        print('Error', E)
+                        
             with open('stocks.json', 'r') as f:
                 data = json.load(f)
 
@@ -70,11 +75,11 @@ class Command(BaseCommand):
                 low_price = item['low']
                 close_price = item['close']
                 previous_close = item.get('previous_close', None)
-
-                stock_list.append(Stock(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close))
+                Stock.objects.create(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close)
+                # stock_list.append()
+                stock_count += 1
+                print('Combos ', stock_count)    
                 
-                
-            Stock.objects.bulk_create(stock_list)
             
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
             
