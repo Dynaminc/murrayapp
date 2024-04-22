@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
             combos = []
             stock_list = []
-            for file in ['combination_1.json', 'combination_2.json']:
+            for file in ['combination_3.json']: # for file in ['combination_1.json', 'combination_2.json']:
                 print('Fetching ', file)
                 with open(file, 'r') as f:
                     data = json.load(f)
@@ -64,24 +64,25 @@ class Command(BaseCommand):
                     except Exception as E:
                         print('Error', E)
                         
-            with open('stocks.json', 'r') as f:
-                data = json.load(f)
+            self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
+            # with open('stocks.json', 'r') as f:
+            #     data = json.load(f)
 
-            for item in data:
-                symbol = item['symbol']
-                date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
-                open_price = item['open']
-                high_price = item['high']
-                low_price = item['low']
-                close_price = item['close']
-                previous_close = item.get('previous_close', None)
-                Stock.objects.create(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close)
-                # stock_list.append()
-                stock_count += 1
-                print('Combos ', stock_count)    
+            # for item in data:
+            #     symbol = item['symbol']
+            #     date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
+            #     open_price = item['open']
+            #     high_price = item['high']
+            #     low_price = item['low']
+            #     close_price = item['close']
+            #     previous_close = item.get('previous_close', None)
+            #     Stock.objects.create(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close)
+            #     # stock_list.append()
+            #     stock_count += 1
+            #     print('Combos ', stock_count)    
                 
             
-            self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
+            # self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
             
         except Exception as E:
             self.stdout.write(self.style.SUCCESS(E))
