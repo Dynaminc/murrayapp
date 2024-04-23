@@ -308,8 +308,11 @@ def begin_calcs():
     if timestamp_bytes is not None:
     # Decode the bytes to a string
         last_time = timestamp_bytes.decode("utf-8")
-        last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
-        if last_time.date() != datetime.now().date():
+        try:
+            last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
+            if last_time.date() != datetime.now().date():
+                process_calcs()
+        except:
             process_calcs()
     else:
         process_calcs()
