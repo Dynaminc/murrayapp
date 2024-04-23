@@ -199,7 +199,7 @@ def create_stocks(stocks):
                     stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
                     stocks_list.append(stock_obj)
                     f = open('missing_data.txt', 'a')
-                    f.append(f"\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}")
+                    f.append(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
                     f.close()
         except:
             pass            
