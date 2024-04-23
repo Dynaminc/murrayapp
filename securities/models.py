@@ -29,7 +29,7 @@ class Company(models.Model):
         "CRM",
         "VZ",
         "V",
-        "WBA",
+        "AMZN",
         "WMT",
         "DIS",
         "DOW",

@@ -12,6 +12,11 @@ from django.utils import timezone as tz
 from django.core.cache import cache
 from .models import Stock, Company, Combination, Cronny
 from scipy.stats import zscore
+from django.db.models import F
+
+from django_redis import get_redis_connection
+con = get_redis_connection("default")
+print(cache.get("last_datetime"))
 
 
 ## Contains the most recent build for data retrieval, processing and storage, skips redis for now
@@ -157,7 +162,32 @@ def calc_stats_b(df, timestamp):
         
         print('error at symbol', sym, timestamp, E)
         return False   
-                
+            
+def initiate_calcs():
+    # Get the distinct timestamps
+    distinct_timestamps = Combination.objects.values("date_time").annotate(min_id=F("id")).order_by("-date_time")[:200]
+
+    # Retrieve the data for the last 200 distinct timestamps
+    combinations_data = Combination.objects.filter(id__in=distinct_timestamps.values("min_id")).values("symbol", "strike", "date_time", "z_score")
+    
+    # Serialize the data to JSON
+    serialized_data = json.dumps(list(combinations_data))
+
+    # Get the Redis connection
+    redis_conn = get_redis_connection("default")
+
+    # Check if the key already exists in Redis
+    if redis_conn.exists("combinations_data"):
+        # Update the existing data
+        existing_data = json.loads(redis_conn.get("combinations_data"))
+        existing_data.extend(json.loads(serialized_data))
+        updated_data = json.dumps(existing_data)
+        redis_conn.set("combinations_data", updated_data)
+    else:
+        # Save the new data
+        redis_conn.set("combinations_data", serialized_data)
+    
+    
 def new_calc():
     res = get_data()
     stocks = res["stocks"]

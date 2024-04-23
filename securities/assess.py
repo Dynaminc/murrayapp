@@ -41,7 +41,7 @@ def get_test_data():
         "CRM:NYSE",
         "VZ:NYSE",
         "V:NYSE",
-        "WBA",
+        "AMZN:NASDAQ",
         "WMT:NYSE",
         "DIS:NYSE",
         "DOW:NYSE",
@@ -225,13 +225,13 @@ def top_low():
     df = pd.DataFrame(combs)
     
     # Export the DataFrame to an Excel file
-    df.to_excel('new_combs_1.xlsx', index=False)
+    df.to_excel('new_combs_3.xlsx', index=False)
     
     return len(combs)
     
 def clean_comb(): # rmove the precalculated combs for a new calculation
     
-    times = [datetime(2024, 4, 19, 12)]
+    times = [datetime(2024, 4, 22)]
     # strike = "VZ-WBA-WMT"
     for item in times:
         print('fetcging ')
