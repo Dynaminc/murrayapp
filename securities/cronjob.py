@@ -176,6 +176,10 @@ def create_stocks(stocks):
     for item in SYMBOLS:
         company = item.split(':')[0]
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
+        try:
+            stock = stock_data["values"][0]
+        except:
+            print(company)
         stock = stock_data["values"][0]
         try:
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
