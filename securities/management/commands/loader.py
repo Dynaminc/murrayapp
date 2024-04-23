@@ -31,6 +31,7 @@ from securities.models import Combination, Stock
 import json
 from django.core.paginator import Paginator
 from datetime import datetime
+from securities.cronjob import new_calc_migrator
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -39,39 +40,21 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        
-        count = 0 
-        times = [datetime(2024, 4, 22)]
-        # strike = "VZ-WBA-WMT"
-        for item in times:
-            print('fetcging ')
-            data = Combination.objects.filter(date_time__gte=item).all()
-            data.delete()
-            print('cleaned combinations')
-            data = Stock.objects.filter(date_time__gte=item).all()
-            data.delete()
-            print('cleaned stocks')
+        new_calc_migrator()
+####    CLEANER BLOCK     
+        # count = 0 
+        # times = [datetime(2024, 4, 22)]
+        # # strike = "VZ-WBA-WMT"
+        # for item in times:
+        #     print('fetcging ')
+        #     data = Combination.objects.filter(date_time__gte=item).all()
+        #     data.delete()
+        #     print('cleaned combinations')
+        #     data = Stock.objects.filter(date_time__gte=item).all()
+        #     data.delete()
+        #     print('cleaned stocks')
             
-            # paginator = Paginator(Combination.objects.filter(date_time__gte=item), 1000)
-            # print('paginated', paginator)
-            # for page_idx in range(1, paginator.num_pages):
-            #     print(page_idx)
-            #     for row in paginator.page(page_idx).object_list:
-            #         count += 1
-            #         print(count)
-            #         row.delete()
-            # # data = Combination.objects.filter(date_time__date=item.date()).all()
-            
-            
-            # paginator = Paginator(Stock.objects.filter(date_time__gte=item), 1000) # chunks of 1000
-            # data = Stock.objects.filter(date_time__gte=item).all()
-            # for page_idx in range(1, paginator.num_pages):
-            #     print(page_idx)
-            #     for row in paginator.page(page_idx).object_list:
-            #         count += 1
-            #         print(count)
-            #         row.delete()
-            # print('cleaned stocks')
+####
             
         try:
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))

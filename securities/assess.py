@@ -11,7 +11,7 @@ import pprint
 
 
 # fetched all the needed data and saved it in a json
-def get_test_data():
+def get_test_data(timestamp):
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
     SYMBOLS = (
@@ -54,14 +54,21 @@ def get_test_data():
         start_date = "2024-04-22"
         end_date = "2024-04-23"
 
-        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
+        # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
+        specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+
+        # Construct the URL with the specific minute
+        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
+
+        # url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
         res = requests.get(url)
 
-        if res.status_code == 200:
-            data = res.json()
-            with open('tmp.json','w') as json_file:
-                json.dump(data, json_file)            
+        # if res.status_code == 200:
+        #     data = res.json()
+        #     with open('tmp.json','w') as json_file:
+        #         json.dump(data, json_file)            
         return {"status_code": res.status_code, "stocks": res.json()}
+    
     
     except Exception as e:
         print(
@@ -95,13 +102,13 @@ def json_migrator():
                 stock_obj = Stock(open=stock["open"], **stock_dict)
 
                 stocks_list.append(stock_obj)
-    timestamp = datetime(2024, 4, 19, 12)
+    timestamp = datetime(2024, 4, 22)
     filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
     print(len(filtered_stock_data), 'filtered')
     if filtered_stock_data:
         Stock.objects.bulk_create(filtered_stock_data)
     
-    timestamp = datetime(2024, 4, 19, 12)
+    timestamp = datetime(2024, 4, 22)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
     distinct_timestamps = Stock.objects.filter(date_time__gte=timestamp).values_list('date_time', flat=True).distinct()

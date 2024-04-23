@@ -7,3 +7,9 @@ class StrikeManagementSerializer(serializers.Serializer):
     
 class FundSerializer(serializers.Serializer):
     fund = serializers.CharField() 
+    
+class StockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stock
+        include = ['pk']
+        fields = '__all__'

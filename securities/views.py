@@ -465,7 +465,7 @@ def get_strike_breakdown(request):
 @api_view(['GET', 'POST'])
 def trigger_store(request):
     print("initiated")    
-    data = clean_comb()
+    # data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
     # print("Migrating")
@@ -473,24 +473,29 @@ def trigger_store(request):
     # print("Getting all strikes ")
     # data = all_strikes()
     # print("Completed strikes")
-    print("Exporting")
+    
+    
+    data = new_calc()
+    
+    # print("Exporting")
     # data = export_file()
     # now to export the last minute ranking
     
     # data = new_calc()
     # data = top_low()
     
-    
     print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully", 'data': data})  
 
+            
+
+        
 @api_view(['GET', 'POST'])
 def trigger_lens(request):
     item = datetime(2024, 4, 19, 12)
     
     combination_data = Combination.objects.filter(date_time__gte=item).all()
     stock_data = Stock.objects.filter(date_time__gte=item).all()
-    
     return JsonResponse({'message':"Loaded Succesfully",'combs':len(combination_data), 'stocks': len(stock_data)})  
     
 @api_view(['GET', 'POST'])
@@ -538,6 +543,7 @@ def check_market_hours(dat):
     else:
         return "red"
     
+      
 
 @api_view(['GET', 'POST'])
 def test_end(request):
