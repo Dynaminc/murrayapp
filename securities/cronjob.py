@@ -223,7 +223,7 @@ def new_calc():
         
 def clean_comb(): # rmove the precalculated combs for a new calculation
     count = 0 
-    times = [datetime(2024, 4, 19, 12)]
+    times = [datetime(2024, 4, 22)]
     # strike = "VZ-WBA-WMT"
     for item in times:
         print('fetcging ')

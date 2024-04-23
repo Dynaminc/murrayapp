@@ -29,6 +29,7 @@
 from django.core.management.base import BaseCommand
 from securities.models import Combination, Stock
 import json
+from django.core.paginator import Paginator
 from datetime import datetime
 
 class Command(BaseCommand):
@@ -38,52 +39,85 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        count = 0
-        stock_count = 0
+        
+        count = 0 
+        times = [datetime(2024, 4, 22)]
+        # strike = "VZ-WBA-WMT"
+        for item in times:
+            print('fetcging ')
+            paginator = Paginator(Combination.objects.filter(date_time__gte=item), 1000)
+            print('paginated', paginator)
+            for page_idx in range(1, paginator.num_pages):
+                print(page_idx)
+                for row in paginator.page(page_idx).object_list:
+                    count += 1
+                    print(count)
+                    row.delete()
+            # data = Combination.objects.filter(date_time__date=item.date()).all()
+            print('cleaned combinations')
+            
+            paginator = Paginator(Stock.objects.filter(date_time__gte=item), 1000) # chunks of 1000
+            data = Stock.objects.filter(date_time__gte=item).all()
+            for page_idx in range(1, paginator.num_pages):
+                print(page_idx)
+                for row in paginator.page(page_idx).object_list:
+                    count += 1
+                    print(count)
+                    row.delete()
+            print('cleaned stocks')
+            
         try:
-
-            combos = []
-            stock_list = []
-            for file in ['combination_3.json']: # for file in ['combination_1.json', 'combination_2.json']:
-                print('Fetching ', file)
-                with open(file, 'r') as f:
-                    data = json.load(f)
-
-                for item in data:
-                    symbol = item['symbol']
-                    strike = item['strike']
-                    avg = item['avg']
-                    stdev = item['stdev']
-                    z_score = item['z_score']
-                    date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
-                    try:
-                        
-                        Combination.objects.create(symbol=symbol, strike=strike, avg=avg, stdev=stdev, z_score=z_score, date_time=date_time)
-                        count += 1
-                        print('count', count)
-                    except Exception as E:
-                        print('Error', E)
-                        
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
-            # with open('stocks.json', 'r') as f:
-            #     data = json.load(f)
-
-            # for item in data:
-            #     symbol = item['symbol']
-            #     date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
-            #     open_price = item['open']
-            #     high_price = item['high']
-            #     low_price = item['low']
-            #     close_price = item['close']
-            #     previous_close = item.get('previous_close', None)
-            #     Stock.objects.create(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close)
-            #     # stock_list.append()
-            #     stock_count += 1
-            #     print('Combos ', stock_count)    
-                
-            
-            # self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
-            
         except Exception as E:
             self.stdout.write(self.style.SUCCESS(E))
+        
+        
+        # count = 0
+        # stock_count = 0
+        # try:
+
+        #     combos = []
+        #     stock_list = []
+        #     for file in ['combination_3.json']: # for file in ['combination_1.json', 'combination_2.json']:
+        #         print('Fetching ', file)
+        #         with open(file, 'r') as f:
+        #             data = json.load(f)
+
+        #         for item in data:
+        #             symbol = item['symbol']
+        #             strike = item['strike']
+        #             avg = item['avg']
+        #             stdev = item['stdev']
+        #             z_score = item['z_score']
+        #             date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
+        #             try:
+                        
+        #                 Combination.objects.create(symbol=symbol, strike=strike, avg=avg, stdev=stdev, z_score=z_score, date_time=date_time)
+        #                 count += 1
+        #                 print('count', count)
+        #             except Exception as E:
+        #                 print('Error', E)
+                        
+        #     self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
+        #     # with open('stocks.json', 'r') as f:
+        #     #     data = json.load(f)
+
+        #     # for item in data:
+        #     #     symbol = item['symbol']
+        #     #     date_time = datetime.strptime(item['date_time'], '%Y-%m-%d %H:%M:%S')
+        #     #     open_price = item['open']
+        #     #     high_price = item['high']
+        #     #     low_price = item['low']
+        #     #     close_price = item['close']
+        #     #     previous_close = item.get('previous_close', None)
+        #     #     Stock.objects.create(symbol=symbol, date_time=date_time, open=open_price, high=high_price, low=low_price, close=close_price, previous_close=previous_close)
+        #     #     # stock_list.append()
+        #     #     stock_count += 1
+        #     #     print('Combos ', stock_count)    
+                
+            
+        #     # self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
+            
+        # except Exception as E:
+        #     self.stdout.write(self.style.SUCCESS(E))
             
