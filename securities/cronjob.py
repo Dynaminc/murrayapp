@@ -303,14 +303,17 @@ def calc_stats_b(df, timestamp):
         return False   
     
 def begin_calcs():
-    last_time  = con.get("comb_time").decode("utf-8")
-    if not last_time:
-        process_calcs()
-    else:
+    timestamp_bytes = con.get("comb_time")
+
+    if timestamp_bytes is not None:
+    # Decode the bytes to a string
+        last_time = timestamp_bytes.decode("utf-8")
         last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
         if last_time.date() != datetime.now().date():
             process_calcs()
-            
+    else:
+        process_calcs()
+        
 def process_calcs():
     
     start_time = datetime.now()
