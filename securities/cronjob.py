@@ -304,23 +304,25 @@ def calc_stats_b(df, timestamp):
     
 def begin_calcs():
     timestamp_bytes = con.get("comb_time")
-
     if timestamp_bytes is not None:
-    # Decode the bytes to a string
         last_time = timestamp_bytes.decode("utf-8")
         try:
             last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
             if last_time.date() != datetime.now().date():
+                print('hjsdfasa')
                 process_calcs()
-        except:
+        except Exception as E:
+            print('hjsdfasd')
             process_calcs()
     else:
+        print('hjsdsdaf')
         process_calcs()
         
 def process_calcs():
     
     start_time = datetime.now()
     distinct_timestamps = Combination.objects.values("date_time").order_by("-date_time").distinct()[:200]
+    print(len(distinct_timestamps))
     end_timestamp = distinct_timestamps[0]["date_time"]
     start_timestamp = end_timestamp - timedelta(days=1) 
     combinations_data = Combination.objects.filter(
@@ -426,7 +428,7 @@ def new_calc_migrator():
             timestamp += timedelta(minutes=1)
             
             combinations_list = generate_combinations(stock_time) 
-            begin_calcs()
+            # begin_calcs()
             combs = json.loads(con.get("combinations_data"))
                 
             combinations_df = pd.DataFrame(
