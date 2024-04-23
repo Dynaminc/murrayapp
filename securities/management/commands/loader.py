@@ -45,26 +45,33 @@ class Command(BaseCommand):
         # strike = "VZ-WBA-WMT"
         for item in times:
             print('fetcging ')
-            paginator = Paginator(Combination.objects.filter(date_time__gte=item), 1000)
-            print('paginated', paginator)
-            for page_idx in range(1, paginator.num_pages):
-                print(page_idx)
-                for row in paginator.page(page_idx).object_list:
-                    count += 1
-                    print(count)
-                    row.delete()
-            # data = Combination.objects.filter(date_time__date=item.date()).all()
+            data = Combination.objects.filter(date_time__gte=item).all()
+            data.delete()
             print('cleaned combinations')
-            
-            paginator = Paginator(Stock.objects.filter(date_time__gte=item), 1000) # chunks of 1000
             data = Stock.objects.filter(date_time__gte=item).all()
-            for page_idx in range(1, paginator.num_pages):
-                print(page_idx)
-                for row in paginator.page(page_idx).object_list:
-                    count += 1
-                    print(count)
-                    row.delete()
+            data.delete()
             print('cleaned stocks')
+            
+            # paginator = Paginator(Combination.objects.filter(date_time__gte=item), 1000)
+            # print('paginated', paginator)
+            # for page_idx in range(1, paginator.num_pages):
+            #     print(page_idx)
+            #     for row in paginator.page(page_idx).object_list:
+            #         count += 1
+            #         print(count)
+            #         row.delete()
+            # # data = Combination.objects.filter(date_time__date=item.date()).all()
+            
+            
+            # paginator = Paginator(Stock.objects.filter(date_time__gte=item), 1000) # chunks of 1000
+            # data = Stock.objects.filter(date_time__gte=item).all()
+            # for page_idx in range(1, paginator.num_pages):
+            #     print(page_idx)
+            #     for row in paginator.page(page_idx).object_list:
+            #         count += 1
+            #         print(count)
+            #         row.delete()
+            # print('cleaned stocks')
             
         try:
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))

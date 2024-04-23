@@ -51,8 +51,8 @@ def get_test_data():
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-04-18"
-        end_date = "2024-04-20"
+        start_date = "2024-04-22"
+        end_date = "2024-04-23"
 
         url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
         res = requests.get(url)
@@ -141,7 +141,7 @@ def json_migrator():
     
 # to calculate the strikes for the data from 18 april    
 def all_strikes():
-    timestamp = datetime(2024, 4, 19, 12)
+    timestamp = datetime(2024, 4, 22)
     combs = combinations(Company.SYMBOLS, 3)
     count = 0
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
@@ -256,6 +256,7 @@ def export_file():
         for item in times:
             quick_run(strike, item)
     return 'exported'
+
 def calc_stats_b(df, timestamp):
     
     df['date_time'] = pd.to_datetime(df['date_time'])
@@ -283,3 +284,7 @@ def calc_stats_b(df, timestamp):
         print('error at symbol', sym, timestamp, E)
         return False
 
+def create_all():
+    get_test_data()
+    json_migrator()
+    all_strikes()
