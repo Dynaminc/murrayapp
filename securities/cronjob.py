@@ -206,7 +206,7 @@ def create_stocks(stocks, tmp_time):
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
             # new_current = latest_datetime + timedelta(minutes=1)
-            current_datetime = datetime.strptime(tmp_time, "%Y-%m-%d %H:%M:%S")
+            current_datetime = datetime.strptime(str(tmp_time), "%Y-%m-%d %H:%M:%S")
             current_time.append(current_datetime)
             f = open('missing_data.txt', 'a')
             f.write(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
