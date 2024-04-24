@@ -178,55 +178,82 @@ def create_stocks(stocks):
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
         try:
             stock = stock_data["values"][0]
+            stock_dict = {
+            "symbol": company,
+            "close": float(stock["close"]),
+            "low": stock["low"],
+            "high": stock["high"],
+            "previous_close": float(stock["previous_close"]),
+            "date_time": stock["datetime"],
+            }
+            stock_dict_json = {
+                "open": stock['open'],
+                "symbol": company,
+                "close": float(stock["close"]),
+                "low": stock["low"],
+                "high": stock["high"],
+                "previous_close": float(stock["previous_close"]),
+                "date_time": stock["datetime"],
+            }
+            stock_obj = Stock(open=stock["open"], **stock_dict)
+            stocks_list.append(stock_obj)
+            json_stocks_list.append(stock_dict_json)
         except:
-            print(company)
-        stock = stock_data["values"][0]
-        try:
+            f = open('missing_data.txt', 'a')
+            f.append(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
+            f.close()
+        
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
-            current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
-            current_time.append(current_datetime)
-            time_diff = (current_datetime - latest_datetime)
+            # current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
+            # current_time.append(current_datetime)
+            # time_diff = (current_datetime - latest_datetime)
             
-            if time_diff > timedelta(minutes=1) and time_diff < timedelta(minutes=2): 
-                while (current_datetime - latest_datetime) > timedelta(minutes=1):
-                    latest_datetime += timedelta(minutes=1)
-                    new_stock_dict = {
-                        "symbol": company,
-                        "close": float(latest_stock.close),
-                        "low": latest_stock.low,
-                        "high": latest_stock.high,
-                        "previous_close": float(latest_stock.previous_close),
-                        "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                    }
-                    
-                    stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
-                    stocks_list.append(stock_obj)
-                    f = open('missing_data.txt', 'a')
-                    f.append(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
-                    f.close()
-        except:
-            pass            
-        stock_dict = {
-            "symbol": company,
-            "close": float(stock["close"]),
-            "low": stock["low"],
-            "high": stock["high"],
-            "previous_close": float(stock["previous_close"]),
-            "date_time": stock["datetime"],
-        }
-        stock_dict_json = {
-            "open": stock['open'],
-            "symbol": company,
-            "close": float(stock["close"]),
-            "low": stock["low"],
-            "high": stock["high"],
-            "previous_close": float(stock["previous_close"]),
-            "date_time": stock["datetime"],
-        }
-        stock_obj = Stock(open=stock["open"], **stock_dict)
-        stocks_list.append(stock_obj)
-        json_stocks_list.append(stock_dict_json)
+            # if time_diff > timedelta(minutes=1) and time_diff < timedelta(minutes=2): 
+            #     while (current_datetime - latest_datetime) > timedelta(minutes=1):
+            #         latest_datetime += timedelta(minutes=1)
+            new_stock_dict = {
+                "symbol": company,
+                "close": float(latest_stock.close),
+                "low": latest_stock.low,
+                "high": latest_stock.high,
+                "previous_close": float(latest_stock.previous_close),
+                "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            stock_dict_json = {
+                "open": latest_stock.open,
+                "symbol": company,
+                "close": float(latest_stock.close),
+                "low": latest_stock.low,
+                "high": latest_stock.high,
+                "previous_close": float(latest_stock.previous_close),
+                "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+          
+            stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
+            stocks_list.append(stock_obj)
+            json_stocks_list.append(stock_dict_json)
+            
+        # except:
+        #     pass            
+        # stock_dict = {
+        #     "symbol": company,
+        #     "close": float(stock["close"]),
+        #     "low": stock["low"],
+        #     "high": stock["high"],
+        #     "previous_close": float(stock["previous_close"]),
+        #     "date_time": stock["datetime"],
+        # }
+        # stock_dict_json = {
+        #     "open": stock['open'],
+        #     "symbol": company,
+        #     "close": float(stock["close"]),
+        #     "low": stock["low"],
+        #     "high": stock["high"],
+        #     "previous_close": float(stock["previous_close"]),
+        #     "date_time": stock["datetime"],
+        # }
+        
 
         stock_to_redis(json_stocks_list)                        
     
