@@ -296,7 +296,6 @@ def generate_combinations(current_datetime):
     for comb in combs:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        print('strike', strike)
         stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'] == str(timestamp)][0]['close']
         stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'] == str(timestamp)][0]['close']
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'] == str(timestamp)][0]['close']
@@ -308,7 +307,6 @@ def generate_combinations(current_datetime):
                                     "z_score" : 0,
                                 }
                             )    
-    print(len(combinations_list), 'culprit')
     return combinations_list
         
 def calc_stats_b(df, timestamp):
