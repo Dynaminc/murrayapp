@@ -555,6 +555,7 @@ def test_end(request):
         if not info['previous_time']:
             ad = Combination.objects.latest('date_time')
             info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
+            info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
             display_time = ad.date_time
             # market_state = "slate"
             
@@ -582,14 +583,17 @@ def test_end(request):
             current_time = str(display_time).split('.')[0]
             
         latest_data = info['latest_time']
-  
+        print(latest_data, 'latest')
         if latest_data:
             latest_time = latest_data
+            print(latest_time, current_time)
             filtered_combinations = Combination.objects.filter(date_time__hour=latest_time.hour, date_time__minute=latest_time.minute)
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':current_time} for item in filtered_combinations if item.stdev and item.z_score ]
+            print(len(filtered_combinations))
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':latest_time} for item in filtered_combinations]
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
         else:
+            
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
     except Exception as E:
         return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E)})
