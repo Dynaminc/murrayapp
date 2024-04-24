@@ -446,7 +446,21 @@ def new_calc():
     Cronny.objects.create(symbol=f"{stock_time}")    
     return f"{stock_time} created in {time_difference.total_seconds()} seconds"
             
+            
+            
+            
 def new_calc_migrator():
+    combs = []
+    market_state = "off"
+    ad = Combination.objects.latest('date_time')
+    latest_time = ad.date_time
+    filtered_combinations = Combination.objects.filter(date_time = latest_time )
+    print(len(filtered_combinations))
+    combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':latest_time} for item in filtered_combinations if item.z_score and item.stdev]
+    combs.sort(key=lambda x: x['score'], reverse=True)
+    print({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
+                
+def new_calc_migratorb():
     return
     error_count = 0
     print('Cleaning')
