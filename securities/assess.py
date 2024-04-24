@@ -232,7 +232,7 @@ def top_low():
     df = pd.DataFrame(combs)
     
     # Export the DataFrame to an Excel file
-    df.to_excel('new_combs_3.xlsx', index=False)
+    df.to_excel('new_combs_4.xlsx', index=False)
     
     return len(combs)
     
