@@ -443,9 +443,11 @@ def new_calc():
     end_time = datetime.now()
     time_difference = end_time - start_time
     print(stock_time, f" created in {time_difference.total_seconds()} seconds", 'Saved')
+    Cronny.objects.create(symbol=f"{stock_time}")    
     return f"{stock_time} created in {time_difference.total_seconds()} seconds"
             
 def new_calc_migrator():
+    return
     error_count = 0
     print('Cleaning')
     clean_comb()
@@ -530,9 +532,10 @@ def clean_redis():
     
     
     return 'cleaned'            
+
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 24, 15)]
+    times = [datetime(2024, 4, 24, 16)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()

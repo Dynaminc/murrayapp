@@ -465,7 +465,7 @@ def get_strike_breakdown(request):
 @api_view(['GET', 'POST'])
 def trigger_store(request):
     print("initiated")    
-    data = clean_comb()
+    # data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
     # print("Migrating")
@@ -483,7 +483,7 @@ def trigger_store(request):
     
     # data = new_calc()
     
-    # data = top_low()
+    data = top_low()
     
     print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully", 'data': data})  
