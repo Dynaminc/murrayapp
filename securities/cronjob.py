@@ -449,7 +449,7 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4,  24, 12)
+    initial_timestamp = datetime(2024, 4,  24, 14)
     # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  24, 16)
@@ -529,7 +529,7 @@ def clean_redis():
     return 'cleaned'            
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 24, 12)]
+    times = [datetime(2024, 4, 24, 14)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()

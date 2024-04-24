@@ -20,13 +20,14 @@ django-redis==5.4.0
 django-restframework==0.0.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
+et-xmlfile==1.1.0
 hyperlink==21.0.0
 idna==3.6
 incremental==22.10.0
-gunicorn
 msgpack==1.0.8
 mysqlclient==2.1.0
 numpy==1.26.4
+openpyxl==3.1.2
 pandas==2.1.4
 psycopg2==2.9.9
 pyasn1==0.5.1
@@ -39,6 +40,7 @@ python-dotenv==1.0.1
 pytz==2024.1
 redis==5.0.3
 requests==2.31.0
+scipy==1.13.0
 service-identity==24.1.0
 six==1.16.0
 sqlparse==0.4.4
