@@ -449,7 +449,7 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4, 22, 13, 11)
+    initial_timestamp = datetime(2024, 4, 22, 13, 10)
     current_timestamp = datetime.now()
 
     # Ensure initial_timestamp is before current_timestamp
@@ -507,7 +507,7 @@ def new_calc_migrator():
         
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 22, 13, 11)]
+    times = [datetime(2024, 4, 22, 13, 10)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
