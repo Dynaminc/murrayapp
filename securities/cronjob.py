@@ -176,6 +176,8 @@ def create_stocks(stocks):
     for item in SYMBOLS:
         company = item.split(':')[0]
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
+        current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
+        current_time.append(current_datetime)
         try:
             stock = stock_data["values"][0]
             stock_dict = {
@@ -205,8 +207,9 @@ def create_stocks(stocks):
         
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
-            # current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
-            # current_time.append(current_datetime)
+            new_current = latest_datetime + timedelta(minutes=1)
+            current_datetime = datetime.strptime(new_current, "%Y-%m-%d %H:%M:%S")
+            current_time.append(current_datetime)
             # time_diff = (current_datetime - latest_datetime)
             
             # if time_diff > timedelta(minutes=1) and time_diff < timedelta(minutes=2): 
