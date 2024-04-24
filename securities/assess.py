@@ -225,7 +225,7 @@ def top_low():
     
     filtered_combinations = Combination.objects.filter(date_time = latest_time )
     print(len(filtered_combinations))
-    combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':str(item.date_time)} for item in filtered_combinations if item.z_score and item.stdev]
+    combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':str(item.date_time)} for item in filtered_combinations if item.z_score]
     combs.sort(key=lambda x: x['score'], reverse=True)
     
     # Create a DataFrame from the combs list
