@@ -446,7 +446,7 @@ def new_calc():
 def new_calc_migrator():
     error_count = 0
     print('Cleaning')
-    clean_comb()
+    # clean_comb()
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
@@ -513,6 +513,7 @@ def new_calc_migrator():
                 Cronny.objects.create(symbol=f"{timestamp}")    
             
 def clean_comb():
+    
     count = 0 
     times = [datetime(2024, 4, 23, 10, 2)]
     for item in times:
