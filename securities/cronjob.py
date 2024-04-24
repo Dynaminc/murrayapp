@@ -449,17 +449,22 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4,  24)
+    initial_timestamp = datetime(2024, 4,  24, 11, 53)
     # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  24, 16)
-
+    main_count = 0
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
         initial_timestamp += timedelta(minutes=1)
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
+            main_count += 1 
+            if main_count == 20:
+                clean_redis()
+                process_calcs()
+                print('Cleaned data for more redis speed')   
             timestamp = initial_timestamp
             start_time = datetime.now()
             res = get_data(timestamp)
@@ -519,20 +524,19 @@ def clean_redis():
     con.set("comb_time", "[]")
     con.set("stock_data", "[]")
     print('cleaned redis')
-        
+    
     
     return 'cleaned'            
 def clean_comb():
-    
     count = 0 
-    times = [datetime(2024, 4, 24)]
+    times = [datetime(2024, 4, 24, 11, 53)]
     for item in times:
-        # print('Running clean module ')
-        # data = Combination.objects.filter(date_time__gte=item).all()
-        # data.delete()
-        # print('cleaned combinations')
-        # data = Stock.objects.filter(date_time__gte=item).all()
-        # data.delete()
+        print('Running clean module ')
+        data = Combination.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned combinations')
+        data = Stock.objects.filter(date_time__gte=item).all()
+        data.delete()
         print('cleaned stocks')
         con.set("combinations_data", "[]")
         con.set("comb_time", "[]")
