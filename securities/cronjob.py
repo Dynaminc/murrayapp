@@ -203,7 +203,7 @@ def create_stocks(stocks, tmp_time):
             json_stocks_list.append(stock_dict_json)
         except:
             f = open('missing_data.txt', 'a')
-            f.append(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
+            f.write(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
             f.close()
         
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
@@ -445,7 +445,7 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4, 22, 9, 30)
+    initial_timestamp = datetime(2024, 4, 22, 9, 45)
     current_timestamp = datetime.now()
 
     # Ensure initial_timestamp is before current_timestamp
@@ -503,15 +503,15 @@ def new_calc_migrator():
         
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 22)]
+    times = [datetime(2024, 4, 22, 9, 45)]
     for item in times:
-        print('fetcging ')
-        data = Combination.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned combinations')
-        data = Stock.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned stocks')
+        print('Running clean module ')
+        # data = Combination.objects.filter(date_time__gte=item).all()
+        # data.delete()
+        # print('cleaned combinations')
+        # data = Stock.objects.filter(date_time__gte=item).all()
+        # data.delete()
+        # print('cleaned stocks')
         con.set("combinations_data", "[]")
         con.set("comb_time", "[]")
         con.set("stock_data", "[]")
