@@ -349,7 +349,7 @@ def begin_calcs():
         try:
             last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
             if last_time.date() != datetime.now().date():
-                print('hjsdfasa')
+                clean_redis()
                 process_calcs()
         except Exception as E:
             print('hjsdfasd')
@@ -402,7 +402,6 @@ def new_calc():
     stocks = res["stocks"]
     stock_time = create_stocks(stocks, start_time)
     combinations_list = generate_combinations(stock_time) 
-    
     begin_calcs()
     combs = json.loads(con.get("combinations_data"))
         
@@ -446,7 +445,7 @@ def new_calc():
 def new_calc_migrator():
     error_count = 0
     print('Cleaning')
-    # clean_comb()
+    clean_comb()
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
@@ -511,11 +510,21 @@ def new_calc_migrator():
                 time_difference = end_time - start_time
                 print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
                 Cronny.objects.create(symbol=f"{timestamp}")    
-            
+
+def clean_redis():
+    
+    count = 0 
+    con.set("combinations_data", "[]")
+    con.set("comb_time", "[]")
+    con.set("stock_data", "[]")
+    print('cleaned redis')
+        
+    
+    return 'cleaned'            
 def clean_comb():
     
     count = 0 
-    times = [datetime(2024, 4, 23, 10, 2)]
+    times = [datetime(2024, 4, 23, 12, 36)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
