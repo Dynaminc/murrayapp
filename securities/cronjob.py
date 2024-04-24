@@ -237,7 +237,10 @@ def create_stocks(stocks, tmp_time):
             }
             print('stock dict', stock_dict_json)
             stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
-            stock_obj.save()
+            try:
+                stock_obj.save()
+            except:
+                print("Except")
             # stocks_list.append(stock_obj)
             print('saved')
             json_stocks_list.append(stock_dict_json)
@@ -449,7 +452,7 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4,  24, 13, 59)
+    initial_timestamp = datetime(2024, 4,  24, 14, 17)
     # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  24, 16)
@@ -529,7 +532,7 @@ def clean_redis():
     return 'cleaned'            
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 24, 13, 59)]
+    times = [datetime(2024, 4, 24, 14, 17)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
