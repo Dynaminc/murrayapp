@@ -469,43 +469,47 @@ def new_calc_migrator():
             
             combinations_list = generate_combinations(stock_time) 
             # begin_calcs()
-            combs = json.loads(con.get("combinations_data"))
-                
-            combinations_df = pd.DataFrame(
-                data=list(combs) + combinations_list
-            )
-            combinations_df["date_time"] = pd.to_datetime(
-                combinations_df["date_time"],  format='mixed'
-            )
-
-            calculated_combs = []
-            calculated_combs = calc_stats_b(combinations_df, stock_time)
-            strikes_list = [
-                Combination(
-                    symbol=comb['symbol'],
-                    avg=comb['avg'],
-                    stdev=comb['stdev'],
-                    strike=comb['strike'],
-                    date_time=comb['date_time'],
-                    z_score=comb['z_score'],
-                ) for comb in calculated_combs ]
-
-            try:
-                Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
-            except IntegrityError:
-                error_count += 1
-                pass
-            existing_data = json.loads(con.get("combinations_data") or "[]")
-            existing_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in existing_data}
-            combined_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in json.loads(json.dumps(calculated_combs, cls=DjangoJSONEncoder))}
-            existing_data_dict.update(combined_data_dict)
-            updated_data = json.dumps(list(existing_data_dict.values()))
-            con.set("combinations_data", updated_data)
             
-            end_time = datetime.now()
-            time_difference = end_time - start_time
-            print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
-            Cronny.objects.create(symbol=f"{timestamp} created in {time_difference.total_seconds()} seconds")    
+            combs = json.loads(con.get("combinations_data"))
+            if not combs:
+                break
+                     
+            else:
+                combinations_df = pd.DataFrame(
+                    data=list(combs) + combinations_list
+                )
+                combinations_df["date_time"] = pd.to_datetime(
+                    combinations_df["date_time"],  format='mixed'
+                )
+
+                calculated_combs = []
+                calculated_combs = calc_stats_b(combinations_df, stock_time)
+                strikes_list = [
+                    Combination(
+                        symbol=comb['symbol'],
+                        avg=comb['avg'],
+                        stdev=comb['stdev'],
+                        strike=comb['strike'],
+                        date_time=comb['date_time'],
+                        z_score=comb['z_score'],
+                    ) for comb in calculated_combs ]
+
+                try:
+                    Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
+                except IntegrityError:
+                    error_count += 1
+                    pass
+                existing_data = json.loads(con.get("combinations_data") or "[]")
+                existing_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in existing_data}
+                combined_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in json.loads(json.dumps(calculated_combs, cls=DjangoJSONEncoder))}
+                existing_data_dict.update(combined_data_dict)
+                updated_data = json.dumps(list(existing_data_dict.values()))
+                con.set("combinations_data", updated_data)
+                
+                end_time = datetime.now()
+                time_difference = end_time - start_time
+                print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
+                Cronny.objects.create(symbol=f"{timestamp} {time_difference.total_seconds()} s")    
             
 def clean_comb():
     count = 0 
