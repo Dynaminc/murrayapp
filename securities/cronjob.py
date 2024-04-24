@@ -132,7 +132,7 @@ def get_minute_data():
 
 
 
-def create_stocks(stocks):
+def create_stocks(stocks, tmp_time):
     stocks_list = []    
     json_stocks_list = []    
     dow_stocks = []
@@ -207,8 +207,8 @@ def create_stocks(stocks):
         
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
-            new_current = latest_datetime + timedelta(minutes=1)
-            current_datetime = datetime.strptime(new_current, "%Y-%m-%d %H:%M:%S")
+            # new_current = latest_datetime + timedelta(minutes=1)
+            current_datetime = datetime.strptime(tmp_time, "%Y-%m-%d %H:%M:%S")
             current_time.append(current_datetime)
             # time_diff = (current_datetime - latest_datetime)
             
@@ -394,7 +394,7 @@ def new_calc():
     res = get_minute_data()
     
     stocks = res["stocks"]
-    stock_time = create_stocks(stocks)
+    stock_time = create_stocks(stocks, start_time)
     combinations_list = generate_combinations(stock_time) 
     
     begin_calcs()
@@ -458,7 +458,7 @@ def new_calc_migrator():
             res = get_data(timestamp)
             
             stocks = res["stocks"]
-            stock_time = create_stocks(stocks)
+            stock_time = create_stocks(stocks, timestamp)
             timestamp += timedelta(minutes=1)
             
             combinations_list = generate_combinations(stock_time) 
