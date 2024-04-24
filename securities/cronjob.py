@@ -504,8 +504,9 @@ def new_calc_migrator():
             
             end_time = datetime.now()
             time_difference = end_time - start_time
-            print(timestamp, f" created in {time_difference.total_seconds()} seconds" 'Saved')
-        
+            print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
+            Cronny.objects.create(symbol=f"{timestamp} created in {time_difference.total_seconds()} seconds")    
+            
 def clean_comb():
     count = 0 
     times = [datetime(2024, 4, 23, 10, 2)]
@@ -522,5 +523,5 @@ def clean_comb():
         con.set("stock_data", "[]")
         print('cleaned redis')
         
-    Cronny.objects.create(symbol=f"clean stock and combo {count}")
+    
     return 'cleaned'
