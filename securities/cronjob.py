@@ -209,7 +209,7 @@ def create_stocks(stocks, tmp_time):
             current_datetime = datetime.strptime(str(tmp_time), "%Y-%m-%d %H:%M:%S")
             current_time.append(current_datetime)
             f = open('missing_data.txt', 'a')
-            f.write(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
+            f.write(f'\n {company} : {current_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
             f.close()
         
             # time_diff = (current_datetime - latest_datetime)
@@ -223,7 +223,7 @@ def create_stocks(stocks, tmp_time):
                 "low": latest_stock.low,
                 "high": latest_stock.high,
                 "previous_close": float(latest_stock.previous_close),
-                "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "date_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             }
             
             stock_dict_json = {
@@ -233,7 +233,7 @@ def create_stocks(stocks, tmp_time):
                 "low": latest_stock.low,
                 "high": latest_stock.high,
                 "previous_close": float(latest_stock.previous_close),
-                "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "date_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             }
             print('stock dict', stock_dict_json)
             stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
