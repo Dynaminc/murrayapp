@@ -509,7 +509,7 @@ def new_calc_migrator():
                 end_time = datetime.now()
                 time_difference = end_time - start_time
                 print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
-                Cronny.objects.create(symbol=f"{timestamp} {time_difference.total_seconds()} s")    
+                Cronny.objects.create(symbol=f"{timestamp}")    
             
 def clean_comb():
     count = 0 
