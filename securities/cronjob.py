@@ -277,7 +277,8 @@ def create_stocks(stocks, tmp_time):
 
 def stock_to_redis(json_stocks_list):
     existing_data = json.loads(con.get("stock_data") or "[]")
-    combined_data = existing_data + json_stocks_list
+    # combined_data = existing_data + json_stocks_list
+    combined_data = json_stocks_list
     unique_data = {f"{d['symbol']}_{d['date_time']}": d for d in combined_data}.values()
     serialized_data = json.dumps(list(unique_data))
     con.set("stock_data", serialized_data)
@@ -449,7 +450,7 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4, 22, 16, 00)
+    initial_timestamp = datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime.now()
 
     # Ensure initial_timestamp is before current_timestamp
@@ -507,7 +508,7 @@ def new_calc_migrator():
         
 def clean_comb():
     count = 0 
-    times = [datetime(2024, 4, 22, 16, 00)]
+    times = [datetime(2024, 4, 23, 10, 2)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
