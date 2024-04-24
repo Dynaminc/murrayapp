@@ -51,16 +51,16 @@ def get_test_data(timestamp):
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-04-22"
-        end_date = "2024-04-23"
+        start_date = "2024-04-24"
+        end_date = "2024-04-24"
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
         # Construct the URL with the specific minute
-        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
+        # url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
 
-        # url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
+        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
         res = requests.get(url)
 
         # if res.status_code == 200:
@@ -256,7 +256,7 @@ def clean_comb(): # rmove the precalculated combs for a new calculation
     return 'cleaned'
 
 def export_file():
-    times = [datetime(2024, 4, 19, 13)]
+    times = [datetime(2024, 4, 22)]
     
     # strike = "AXP-AMGN-AAPL"
     for strike in ["HON-JNJ-MMM", "INTC-NKE-VZ"]:

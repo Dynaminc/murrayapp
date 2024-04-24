@@ -449,9 +449,10 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
+    initial_timestamp = datetime(2024, 4,  24)
+    # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  23, 16)
+    current_timestamp = datetime(2024, 4,  24, 16)
 
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -524,14 +525,14 @@ def clean_redis():
 def clean_comb():
     
     count = 0 
-    times = [datetime(2024, 4, 23, 12, 36)]
+    times = [datetime(2024, 4, 24)]
     for item in times:
-        print('Running clean module ')
-        data = Combination.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned combinations')
-        data = Stock.objects.filter(date_time__gte=item).all()
-        data.delete()
+        # print('Running clean module ')
+        # data = Combination.objects.filter(date_time__gte=item).all()
+        # data.delete()
+        # print('cleaned combinations')
+        # data = Stock.objects.filter(date_time__gte=item).all()
+        # data.delete()
         print('cleaned stocks')
         con.set("combinations_data", "[]")
         con.set("comb_time", "[]")
