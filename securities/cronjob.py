@@ -225,6 +225,7 @@ def create_stocks(stocks, tmp_time):
                 "previous_close": float(latest_stock.previous_close),
                 "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             }
+            
             stock_dict_json = {
                 "open": latest_stock.open,
                 "symbol": company,
@@ -234,9 +235,11 @@ def create_stocks(stocks, tmp_time):
                 "previous_close": float(latest_stock.previous_close),
                 "date_time": latest_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             }
-          
+            print('stock dict', stock_dict_json)
             stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
-            stocks_list.append(stock_obj)
+            stock_obj.save()
+            # stocks_list.append(stock_obj)
+            print('saved')
             json_stocks_list.append(stock_dict_json)
             
         # except:
