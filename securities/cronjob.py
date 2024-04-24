@@ -202,15 +202,16 @@ def create_stocks(stocks, tmp_time):
             stocks_list.append(stock_obj)
             json_stocks_list.append(stock_dict_json)
         except:
-            f = open('missing_data.txt', 'a')
-            f.write(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
-            f.close()
-        
+
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
             # new_current = latest_datetime + timedelta(minutes=1)
             current_datetime = datetime.strptime(tmp_time, "%Y-%m-%d %H:%M:%S")
             current_time.append(current_datetime)
+            f = open('missing_data.txt', 'a')
+            f.write(f'\n {company} : {latest_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
+            f.close()
+        
             # time_diff = (current_datetime - latest_datetime)
             
             # if time_diff > timedelta(minutes=1) and time_diff < timedelta(minutes=2): 
