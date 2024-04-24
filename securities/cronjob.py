@@ -176,8 +176,7 @@ def create_stocks(stocks, tmp_time):
     for item in SYMBOLS:
         company = item.split(':')[0]
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
-        current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
-        current_time.append(current_datetime)
+
         try:
             stock = stock_data["values"][0]
             stock_dict = {
@@ -197,6 +196,8 @@ def create_stocks(stocks, tmp_time):
                 "previous_close": float(stock["previous_close"]),
                 "date_time": stock["datetime"],
             }
+            current_datetime = datetime.strptime(stock["datetime"], "%Y-%m-%d %H:%M:%S")
+            current_time.append(current_datetime)
             stock_obj = Stock(open=stock["open"], **stock_dict)
             stocks_list.append(stock_obj)
             json_stocks_list.append(stock_dict_json)
