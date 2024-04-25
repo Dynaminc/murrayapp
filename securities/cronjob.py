@@ -334,11 +334,11 @@ def calc_stats_b(df, timestamp):
             # zscore_values = zscore(most_recent_200)
             # group_df['strike_zscore'] = zscore_values
             # avg = most_recent_200.mean()
-            # stdev = most_recent_200.std()
+            stdev = most_recent_200.std()
             # z_scoreb = (most_recent_strike_B - avg) / stdev
             # print(most_recent_time , "symbol", symbol, "z-score scipy: ", z_score, "z-score pandas", z_scoreb )
             
-            data.append({"symbol": symbol, "strike": most_recent_strike, "avg": 0, "date_time": most_recent_time, "stdev": 0, "z_score": z_score})
+            data.append({"symbol": symbol, "strike": most_recent_strike, "avg": 0, "date_time": most_recent_time, "stdev": stdev, "z_score": z_score})
             
         return data        
     except Exception as E:
@@ -479,7 +479,7 @@ def new_calc_migrator():
         initial_timestamp += timedelta(minutes=1)
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
             main_count += 1 
-            if main_count == 20:
+            if main_count == 10:
                 clean_redis()
                 process_calcs()
                 print('Cleaned data for more redis speed')   
