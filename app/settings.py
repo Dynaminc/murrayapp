@@ -77,7 +77,7 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('* 9-16 * * 1-5', 'securities.cronjob.new_calc'),
+    # ('* 9-16 * * 1-5', 'securities.cronjob.new_calc'),
     ('2 * * * 1-5', 'securities.cronjob.new_calc_migrator'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.store_new'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
