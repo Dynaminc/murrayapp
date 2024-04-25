@@ -482,7 +482,7 @@ def new_calc_migrator():
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
-        initial_timestamp += timedelta(minutes=1)
+        
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
             if con.get('initiated').decode("utf-8") != my_time:
                 print(con.get('initiated').decode("utf-8"), my_time, 'unequal')
@@ -546,6 +546,7 @@ def new_calc_migrator():
                 print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
                 Cronny.objects.create(symbol=f"{timestamp}")    
 
+        initial_timestamp += timedelta(minutes=1)
 def clean_redis():
     
     count = 0 
