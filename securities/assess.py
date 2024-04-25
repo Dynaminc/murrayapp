@@ -1,14 +1,17 @@
 from django.conf import settings    
+from django.db.models import DateTimeField, ExpressionWrapper, F
 import pandas as pd
 from .models import Stock, Company, Combination, Cronny
 import requests, json
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import combinations
 from django.db.models import Q
 from .utils import quick_run
 from scipy.stats import zscore,  describe
 import pprint
 
+from django.db.models import Min, Max
+from django.db import models
 
 # fetched all the needed data and saved it in a json
 def get_test_data(timestamp):
@@ -221,7 +224,35 @@ def all_strikes():
     return "Cmmbinatoins computed"
 
 def top_low():
-    latest_time = Combination.objects.latest('date_time').date_time
+    
+    
+
+    target_time = datetime(2024, 4, 24, 15, 0)
+
+    # Specify the target time
+
+    # Get the closest timestamp
+    closest_timestamp = Combination.objects.filter(
+        date_time__gte=target_time.replace(second=0),
+        date_time__lt=(target_time + timedelta(minutes=1)).replace(second=0)
+    ).aggregate(
+        closest_time=Min('date_time', output_field=models.DateTimeField()),
+        farthest_time=Max('date_time', output_field=models.DateTimeField())
+    )
+
+    # Get the timestamp that is closest to the target time
+    closest_timestamp = closest_timestamp['closest_time'] if closest_timestamp['closest_time'] else None
+
+
+    # Get the timestamp that is closest to the target time
+    # closest_timestamp = 
+    # closest_timestamp['closest_time'] if closest_timestamp['closest_time'] else None
+
+    print(closest_timestamp)
+
+    latest_time = closest_timestamp
+
+    # Combination.objects.latest('date_time').date_time
     
     filtered_combinations = Combination.objects.filter(date_time = latest_time )
     print(len(filtered_combinations))
@@ -232,7 +263,7 @@ def top_low():
     df = pd.DataFrame(combs)
     
     # Export the DataFrame to an Excel file
-    df.to_excel('new_combs_4.xlsx', index=False)
+    df.to_excel(f'new_combs_{latest_time}.xlsx', index=False)
     
     return len(combs)
     
@@ -256,10 +287,10 @@ def clean_comb(): # rmove the precalculated combs for a new calculation
     return 'cleaned'
 
 def export_file():
-    times = [datetime(2024, 4, 22)]
+    times = [datetime(2024, 4, 24)]
     
     # strike = "AXP-AMGN-AAPL"
-    for strike in ["HON-JNJ-MMM", "INTC-NKE-VZ"]:
+    for strike in ["CSCO-MRK-VZ", "IBM_MRK-WM"]:
         for item in times:
             quick_run(strike, item)
     return 'exported'

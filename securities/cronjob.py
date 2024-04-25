@@ -449,7 +449,7 @@ def new_calc():
             
             
             
-def new_calc_migrator():
+def new_calc_migratorb():
     combs = []
     market_state = "off"
     ad = Combination.objects.latest('date_time')
@@ -460,18 +460,17 @@ def new_calc_migrator():
     combs.sort(key=lambda x: x['score'], reverse=True)
     print({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
                 
-def new_calc_migratorb():
-    return
+def new_calc_migrator():
     error_count = 0
     print('Cleaning')
     clean_comb()
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4,  24, 15)
+    initial_timestamp = datetime(2024, 4,  25, 9)
     # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 16)
+    current_timestamp = datetime(2024, 4,  25, 15, 59)
     main_count = 0
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
