@@ -485,6 +485,7 @@ def new_calc_migrator():
         initial_timestamp += timedelta(minutes=1)
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
             if con.get('initiated') != my_time:
+                print(con.get('initiated'),my_time, 'unequal')
                 
                 break
             info['main_count'] = info['main_count'] + 1
