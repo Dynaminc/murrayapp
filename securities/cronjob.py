@@ -21,7 +21,8 @@ con = get_redis_connection("default")
 print(cache.get("last_datetime"))
 from django.core.serializers.json import DjangoJSONEncoder
 
-
+info = {}
+info['main_count'] = 0
 ## Contains the most recent build for data retrieval, processing and storage, skips redis for now
 def get_data(timestamp):
     """Gets third-party API data"""
@@ -467,21 +468,22 @@ def new_calc_migrator():
     print('Initiating Calcs')
     begin_calcs() 
     print('Initiated')   
-    initial_timestamp = datetime(2024, 4,  25, 9)
-    # datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
+    # initial_timestamp = datetime(2024, 4,  25, 9)
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  25, 15, 59)
-    main_count = 0
+    
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
         initial_timestamp += timedelta(minutes=1)
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
-            main_count += 1 
-            if main_count == 10:
+            info['main_count'] = info['main_count'] + 1
+            if info['main_count'] == 10:
                 clean_redis()
                 process_calcs()
+                info['main_count'] = 0
                 print('Cleaned data for more redis speed')   
             timestamp = initial_timestamp
             start_time = datetime.now()
@@ -547,6 +549,9 @@ def clean_redis():
     return 'cleaned'            
 
 def clean_comb():
+    clean_redis()
+    return 'cleaned'
+
     count = 0 
     times = [datetime(2024, 4, 24, 16)]
     for item in times:
