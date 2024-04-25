@@ -466,8 +466,13 @@ def new_calc_migrator():
     print('Cleaning')
     clean_comb()
     print('Initiating Calcs')
-    begin_calcs() 
+    # begin_calcs() 
+    process_calcs()
+    
+    my_time = str(datetime.now())
+    con.set("initiated", my_time)
     print('Initiated')   
+    
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
@@ -479,6 +484,9 @@ def new_calc_migrator():
     while initial_timestamp < current_timestamp:
         initial_timestamp += timedelta(minutes=1)
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
+            if con.get('initiated') != my_time:
+                
+                break
             info['main_count'] = info['main_count'] + 1
             if info['main_count'] == 10:
                 clean_redis()
@@ -490,6 +498,7 @@ def new_calc_migrator():
             res = get_data(timestamp)
             
             stocks = res["stocks"]
+            
             stock_time = create_stocks(stocks, timestamp)
             timestamp += timedelta(minutes=1)
             
@@ -499,7 +508,6 @@ def new_calc_migrator():
             combs = json.loads(con.get("combinations_data"))
             if not combs:
                 break
-                     
             else:
                 combinations_df = pd.DataFrame(
                     data=list(combs) + combinations_list
@@ -543,6 +551,7 @@ def clean_redis():
     con.set("combinations_data", "[]")
     con.set("comb_time", "[]")
     con.set("stock_data", "[]")
+    
     print('cleaned redis')
     
     
