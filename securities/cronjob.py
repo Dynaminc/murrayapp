@@ -410,11 +410,18 @@ def new_calc():
     start_time = datetime.now()
     error_count = 0
     res = get_minute_data()
-    
+
+        
     stocks = res["stocks"]
     stock_time = create_stocks(stocks, start_time)
     combinations_list = generate_combinations(stock_time) 
-    # begin_calcs()
+    if info['main_count'] == 10:
+        clean_redis()
+        process_calcs()
+        info['main_count'] = 0
+        print('Cleaned data for more redis speed')   
+    else:
+        begin_calcs()
     combs = json.loads(con.get("combinations_data"))
         
         
@@ -453,6 +460,7 @@ def new_calc():
     time_difference = end_time - start_time
     print(stock_time, f" created in {time_difference.total_seconds()} seconds", 'Saved')
     Cronny.objects.create(symbol=f"{stock_time}")    
+    info['main_count'] = info['main_count'] + 1
     return f"{stock_time} created in {time_difference.total_seconds()} seconds"
             
             
