@@ -608,25 +608,21 @@ def clean_comb():
     return 'cleaned'
 
 def generate_flow_combinations(current_datetime):
-    print('in here')
     timestamp = current_datetime
     distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
-    print(len(distinct_timestamps), distinct_timestamps[0])
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    print(previous, current, final)
-    
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
         Q(date_time=new_distinct_timestamps[final])
     ).all()
     
-    print(len(dataset))
+    
     
     previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
     final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
-    print(len(previous_set), len(final_set))
+    
     
     for comb_instance in final_set:
         previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
