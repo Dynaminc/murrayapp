@@ -414,7 +414,7 @@ def new_calc():
     stocks = res["stocks"]
     stock_time = create_stocks(stocks, start_time)
     combinations_list = generate_combinations(stock_time) 
-    begin_calcs()
+    # begin_calcs()
     combs = json.loads(con.get("combinations_data"))
         
         
