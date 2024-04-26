@@ -476,14 +476,14 @@ def new_calc_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  25, 15, 59)
+    current_timestamp = datetime(2024, 4,  26, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
         
-        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(16, 0):
+        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59):
             if con.get('initiated').decode("utf-8") != my_time:
                 print(con.get('initiated').decode("utf-8"), my_time, 'unequal')
                 
