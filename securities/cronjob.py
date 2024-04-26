@@ -655,7 +655,7 @@ def new_flow_migrator():
     print('Initiated')   
     
     # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime(2024, 4,  24, 9, 30)
+    initial_timestamp = datetime(2024, 4,  24, 9, 31)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  24, 9, 33)
     
