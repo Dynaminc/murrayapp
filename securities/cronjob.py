@@ -492,7 +492,7 @@ def new_calc_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  26, 16)
+    current_timestamp = datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -580,7 +580,7 @@ def clean_comb():
     return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 24, 16)]
+    times = [datetime(2024, 4, 25, 16)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
