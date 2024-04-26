@@ -19,11 +19,19 @@ from pprint import pprint
 from django_redis import get_redis_connection
 con = get_redis_connection("default")
 print(cache.get("last_datetime"))
+from accounts.models import Strike, Profile
+from .views import update_strike
 from django.core.serializers.json import DjangoJSONEncoder
 
 info = {}
 info['main_count'] = 0
 ## Contains the most recent build for data retrieval, processing and storage, skips redis for now
+def cronny():
+    data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
+    
+
+
+
 def get_data(timestamp):
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
