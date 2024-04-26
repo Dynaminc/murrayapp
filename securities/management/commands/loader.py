@@ -31,7 +31,7 @@ from securities.models import Combination, Stock
 import json
 from django.core.paginator import Paginator
 from datetime import datetime
-from securities.cronjob import new_calc_migrator
+from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -40,7 +40,11 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        new_calc_migrator()
+        new_flow_migrator()
+        # new_calc_migrator()
+        
+        # clean_comb()
+        # new_calc()
 ####    CLEANER BLOCK     
         # count = 0 
         # times = [datetime(2024, 4, 22)]

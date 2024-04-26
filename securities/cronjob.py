@@ -321,7 +321,50 @@ def generate_combinations(current_datetime):
                                 }
                             )    
     return combinations_list
-        
+
+def generate_flow_combinations(current_datetime):
+    print('in here')
+    timestamp = current_datetime
+    distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
+    print(len(distinct_timestamps), distinct_timestamps[0])
+    distinct_timestamps.append(timestamp)
+    new_distinct_timestamps = sorted(distinct_timestamps)
+    current = new_distinct_timestamps.index(timestamp)
+    previous = new_distinct_timestamps.index(timestamp) - 1
+    final = new_distinct_timestamps.index(timestamp) + 1 
+    print(previous, current, final)
+    symbol = "AXP-BA-PG"
+    # previous_set = Combination.objects.filter(date_time=new_distinct_timestamps[previous]).all()
+    # final_set = Combination.objects.filter(date_time=new_distinct_timestamps[final]).all()
+    print('data here')
+    dataset = Combination.objects.filter(
+        Q(date_time=new_distinct_timestamps[previous]) |
+        Q(date_time=new_distinct_timestamps[final])
+    ).all()
+    
+    print(len(dataset))
+    
+    previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
+    final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
+    print(len(previous_set), len(final_set))
+    
+    symbol_instances = [item for item in final_set if item.symbol == symbol]
+    print(len(symbol_instances))
+    
+    combination_list = {}
+    for comb_instance in symbol_instances:
+        previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
+        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance * 100
+        cummulative_percent  =  previous_instance.avg + current_percent
+        print('previous avg',  previous_instance.avg, comb_instance.date_time, previous_instance.date_time)
+        comb_instance.avg = cummulative_percent
+        print('current avg',  comb_instance.avg,  comb_instance.date_time,  previous_instance.date_time)
+        comb_instance.save()
+        print('saved')
+        print({'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg})
+        # combination_list[current_datetime] = {'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg}
+    
+                
 def calc_stats_b(df, timestamp):
  
     df['date_time'] = pd.to_datetime(df['date_time'])
@@ -409,18 +452,25 @@ def process_calcs():
 def new_calc():
     start_time = datetime.now()
     error_count = 0
+    print('Gettng minute data')
     res = get_minute_data()
 
-        
+    print('Gotten minute data')
     stocks = res["stocks"]
+    print('GCrateing stocks')
     stock_time = create_stocks(stocks, start_time)
+    print(stock_time)
+    
     combinations_list = generate_combinations(stock_time) 
+    print(len(combinations_list))
+    
     if info['main_count'] == 10:
         clean_redis()
         process_calcs()
         info['main_count'] = 0
         print('Cleaned data for more redis speed')   
     else:
+        print('beginngng caslcs')
         begin_calcs()
     combs = json.loads(con.get("combinations_data"))
         
@@ -443,13 +493,13 @@ def new_calc():
             date_time=comb['date_time'],
             z_score=comb['z_score'],
         ) for comb in calculated_combs ]
-
-    try:
-        Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
+    print(len(strikes_list))
+    # try:
+    #     Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
         
-    except IntegrityError:
-        error_count += 1
-        pass
+    # except IntegrityError:
+    #     error_count += 1
+    #     pass
     existing_data = json.loads(con.get("combinations_data") or "[]")
     existing_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in existing_data}
     combined_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in json.loads(json.dumps(calculated_combs, cls=DjangoJSONEncoder))}
@@ -576,8 +626,8 @@ def clean_redis():
     return 'cleaned'            
 
 def clean_comb():
-    clean_redis()
-    return 'cleaned'
+    # clean_redis()
+    # return 'cleaned'
 
     count = 0 
     times = [datetime(2024, 4, 25, 16)]
@@ -596,3 +646,27 @@ def clean_comb():
         
     
     return 'cleaned'
+
+
+def new_flow_migrator():
+    error_count = 0
+    my_time = str(datetime.now())
+    con.set("initiated", my_time)
+    print('Initiated')   
+    
+    # initial_timestamp = datetime(2024, 4,  25, 9)
+    initial_timestamp = datetime(2024, 4,  24, 9, 30)
+    # datetime(2024, 4,  23, 10, 2)
+    current_timestamp = datetime(2024, 4,  24, 9, 33)
+    
+    # Ensure initial_timestamp is before current_timestamp
+    if initial_timestamp > current_timestamp:
+        initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
+    while initial_timestamp < current_timestamp:
+        
+        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
+            timestamp = initial_timestamp
+            print(timestamp)
+            generate_flow_combinations(timestamp)
+
+        initial_timestamp += timedelta(minutes=1)
