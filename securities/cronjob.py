@@ -354,7 +354,7 @@ def generate_flow_combinations(current_datetime):
     combination_list = {}
     for comb_instance in symbol_instances:
         previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
-        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance * 100
+        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
         cummulative_percent  =  previous_instance.avg + current_percent
         print('previous avg',  previous_instance.avg, comb_instance.date_time, previous_instance.date_time)
         comb_instance.avg = cummulative_percent
