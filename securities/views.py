@@ -14,7 +14,7 @@ from datetime import datetime, time, timedelta
 import pytz
 import pprint, random
 from .utils import quick_run
-from .cronjob import new_calc, clean_comb
+# from .cronjob import new_calc, clean_comb
 from .serializer import *   
 from .assess import get_test_data, json_migrator, all_strikes, export_file, top_low
 
