@@ -353,18 +353,20 @@ def generate_flow_combinations(current_datetime):
     
     combination_list = {}
     for comb_instance in symbol_instances:
-        comb_instance.avg = 0
-        comb_instance.save()
-        # previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
-        # current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
-        # cummulative_percent  =  previous_instance.avg + current_percent
-        # print('previous avg',  previous_instance.avg, comb_instance.date_time, previous_instance.date_time)
-        # comb_instance.avg = cummulative_percent
-        # print('current avg',  comb_instance.avg,  comb_instance.date_time,  previous_instance.date_time)
+        # comb_instance.avg = 0
         # comb_instance.save()
-        # print('saved')
-        # print({'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg})
-        # combination_list[current_datetime] = {'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg}
+        previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
+        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
+        print('current_percent',current_percent)
+        cummulative_percent  =  previous_instance.avg + current_percent
+        print('cummulative_percent',cummulative_percent)
+        print('previous avg',  previous_instance.avg, comb_instance.date_time, previous_instance.date_time)
+        comb_instance.avg = cummulative_percent
+        print('current avg',  comb_instance.avg, 'cummu', cummulative_percent, comb_instance.date_time,  previous_instance.date_time)
+        comb_instance.save()
+        print('saved')
+        print({'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg})
+        combination_list[current_datetime] = {'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg}
     
                 
 def calc_stats_b(df, timestamp):
