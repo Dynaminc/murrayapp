@@ -322,51 +322,7 @@ def generate_combinations(current_datetime):
                             )    
     return combinations_list
 
-def generate_flow_combinations(current_datetime):
-    print('in here')
-    timestamp = current_datetime
-    distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
-    print(len(distinct_timestamps), distinct_timestamps[0])
-    distinct_timestamps.append(timestamp)
-    new_distinct_timestamps = sorted(distinct_timestamps)
-    current = new_distinct_timestamps.index(timestamp)
-    previous = new_distinct_timestamps.index(timestamp) - 1
-    final = new_distinct_timestamps.index(timestamp) + 1 
-    print(previous, current, final)
-    symbol = "AXP-BA-PG"
-    # previous_set = Combination.objects.filter(date_time=new_distinct_timestamps[previous]).all()
-    # final_set = Combination.objects.filter(date_time=new_distinct_timestamps[final]).all()
-    print('data here')
-    dataset = Combination.objects.filter(
-        Q(date_time=new_distinct_timestamps[previous]) |
-        Q(date_time=new_distinct_timestamps[final])
-    ).all()
-    
-    print(len(dataset))
-    
-    previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
-    final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
-    print(len(previous_set), len(final_set))
-    
-    symbol_instances = [item for item in final_set if item.symbol == symbol]
-    print(len(symbol_instances))
-    
-    combination_list = {}
-    for comb_instance in symbol_instances:
-        # comb_instance.avg = 0
-        # comb_instance.save()
-        previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
-        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
-        print('current_percent',current_percent)
-        cummulative_percent  =  previous_instance.avg + current_percent
-        print('cummulative_percent',cummulative_percent, current_percent, previous_instance.avg)
-        print('previous avg',  previous_instance.avg, comb_instance.date_time, previous_instance.date_time)
-        comb_instance.avg = cummulative_percent
-        print('current avg',  comb_instance.avg, 'cummu', cummulative_percent, comb_instance.date_time,  previous_instance.date_time)
-        comb_instance.save()
-        print('saved')
-        print({'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg})
-        combination_list[current_datetime] = {'symbol': symbol, 'date_time': comb_instance.date_time, 'avg':comb_instance.avg}
+
     
                 
 def calc_stats_b(df, timestamp):
@@ -651,6 +607,34 @@ def clean_comb():
     
     return 'cleaned'
 
+def generate_flow_combinations(current_datetime):
+    print('in here')
+    timestamp = current_datetime
+    distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
+    print(len(distinct_timestamps), distinct_timestamps[0])
+    distinct_timestamps.append(timestamp)
+    new_distinct_timestamps = sorted(distinct_timestamps)
+    previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+    print(previous, current, final)
+    
+    dataset = Combination.objects.filter(
+        Q(date_time=new_distinct_timestamps[previous]) |
+        Q(date_time=new_distinct_timestamps[final])
+    ).all()
+    
+    print(len(dataset))
+    
+    previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
+    final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
+    print(len(previous_set), len(final_set))
+    
+    for comb_instance in final_set:
+        previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
+        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
+        cummulative_percent  =  previous_instance.avg + current_percent
+        comb_instance.avg = cummulative_percent
+        comb_instance.save()
+        
 
 def new_flow_migrator():
     error_count = 0
@@ -661,7 +645,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime(2024, 4,  24, 9, 31)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 9, 33)
+    current_timestamp = datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -674,3 +658,5 @@ def new_flow_migrator():
             generate_flow_combinations(timestamp)
 
         initial_timestamp += timedelta(minutes=1)
+        
+        
