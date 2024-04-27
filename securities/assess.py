@@ -225,25 +225,26 @@ def all_strikes():
 
 
 def top_flow():
-    timestamp = datetime(2024, 4, 24, 11, 15)
-    distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
-    distinct_timestamps.append(timestamp)
-    new_distinct_timestamps = sorted(distinct_timestamps)
-    previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    
-    filtered_combinations = Combination.objects.filter(date_time=new_distinct_timestamps[final]).all()
-    # Get the closest timestamp
-    print(len(filtered_combinations))
-    combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(item.date_time)} for item in filtered_combinations]
-    combs.sort(key=lambda x: x['score'], reverse=True)
-    
-    # Create a DataFrame from the combs list
-    df = pd.DataFrame(combs)
-    
-    # Export the DataFrame to an Excel file
-    df.to_excel(f'cummulatives_{timestamp}.xlsx', index=False)
-    
-    return len(combs)
+    for timestamp in [datetime(2024, 4, 24, 11, 1), datetime(2024, 4, 24, 11, 2), datetime(2024, 4, 24, 11, 3)]:
+        print(timestamp)
+        distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
+        distinct_timestamps.append(timestamp)
+        new_distinct_timestamps = sorted(distinct_timestamps)
+        previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+        
+        filtered_combinations = Combination.objects.filter(date_time=new_distinct_timestamps[final]).all()
+        # Get the closest timestamp
+        print(len(filtered_combinations))
+        combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(item.date_time)} for item in filtered_combinations]
+        combs.sort(key=lambda x: x['score'], reverse=True)
+        
+        # Create a DataFrame from the combs list
+        df = pd.DataFrame(combs)
+        
+        # Export the DataFrame to an Excel file
+        df.to_excel(f'cummulatives_{timestamp}.xlsx', index=False)
+        print(len(combs))
+        # return len(combs)
 
 def top_low():
     
