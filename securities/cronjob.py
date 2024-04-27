@@ -641,14 +641,22 @@ def generate_flow_combinations(current_datetime):
         
         
         previous_instance = [item for item in previous_set if item.symbol == strike][0]
-        
-        comb_instance = [item for item in final_set if item.symbol == strike][0]
-        
-        cummulative_percent  =  previous_instance.avg + current_percent
-        comb_instance.avg = cummulative_percent
-        comb_instance.save()
-        # except Exception as E: 
-        #     print('Exception', E)
+        try:
+            comb_instance = [item for item in final_set if item.symbol == strike][0]
+            cummulative_percent  =  previous_instance.avg + current_percent
+            comb_instance.avg = cummulative_percent
+            comb_instance.save()
+        except:
+            cummulative_percent  =  previous_instance.avg + current_percent
+            Combination.objects.create(
+                symbol=strike,
+                avg=cummulative_percent,
+                stdev=0,
+                strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                date_time=timestamp,
+                z_score=0,
+            ) 
+            print('saved Exception')
             
         
         
@@ -656,6 +664,45 @@ def clean_avgs(current_datetime):
     print('updating')
     Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)
     print('updated')
+
+def Dji_migrator():
+    
+    ## ths block reverses the effect 
+    # initial_timestamp = datetime(2024, 4,  24, 10, 58)
+    # clean_avgs(initial_timestamp)
+    # 
+    # return
+    
+    error_count = 0
+    my_time = str(datetime.now())
+    con.set("initiated", my_time)
+    print('Initiated')   
+    
+    count = 0 
+    initial_timestamp = datetime(2024, 4,  23, 10, 2)
+    # datetime(2024, 4,  23, 10, 2)
+    current_timestamp = datetime(2024, 4,  25, 16)  #datetime(2024, 4,  25, 16)
+    
+    # Ensure initial_timestamp is before current_timestamp
+    if initial_timestamp > current_timestamp:
+        initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
+    while initial_timestamp < current_timestamp:
+        
+        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
+            
+            
+            timestamp = initial_timestamp
+            
+            generate_flow_combinations(timestamp)
+            Cronny.objects.create(symbol=f"{timestamp}")    
+            print(timestamp)
+            # count += 1
+            # if count == 15:
+            #     break
+            
+        initial_timestamp += timedelta(minutes=1)
+        
+        
 
 def new_flow_migrator():
     
