@@ -689,7 +689,7 @@ def new_flow_migrator():
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
             count += 1
-            if count == 10:
+            if count == 15:
                 break
             
         initial_timestamp += timedelta(minutes=1)
