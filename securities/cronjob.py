@@ -645,11 +645,9 @@ def generate_flows_combinations(current_datetime):
         comb_instance.save()
         
 def generate_flow_combinations(current_datetime):
-    for item in Combination.objects.filter(date_time__gte=current_datetime).all():
-        print(item.date_time)
-        item.avg = 0
-        item.save()
-        
+    print('updating')
+    Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)
+    print('updated')
 
 def new_flow_migrator():
     initial_timestamp = datetime(2024, 4,  24)
