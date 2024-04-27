@@ -632,9 +632,9 @@ def generate_flow_combinations(current_datetime):
         print(stocks[0])
         print(str(timestamp))
         
-        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'] == str(timestamp)][0]
-        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'] == str(timestamp)][0]
-        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'] == str(timestamp)][0]
+        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
         
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
         print(current_percent, 'current_percent', strike)
@@ -669,7 +669,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime(2024, 4,  24, 9, 31)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 9, 33)
+    current_timestamp = datetime(2024, 4,  24, 9, 32)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
