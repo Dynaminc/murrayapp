@@ -670,10 +670,10 @@ def new_flow_migrator():
     con.set("initiated", my_time)
     print('Initiated')   
     
-    # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime(2024, 4,  24, 11,59)
+    count = 0 
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  25, 16)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -681,11 +681,16 @@ def new_flow_migrator():
     while initial_timestamp < current_timestamp:
         
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
+            
+            
             timestamp = initial_timestamp
             
             generate_flow_combinations(timestamp)
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
+            count += 1
+            if count == 10:
+                break
             
         initial_timestamp += timedelta(minutes=1)
         
