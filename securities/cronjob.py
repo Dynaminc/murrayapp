@@ -628,7 +628,7 @@ def generate_flow_combinations(current_datetime):
     for comb in combs:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        print(strike)
+        
         try:
             stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
             stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
@@ -647,6 +647,7 @@ def generate_flow_combinations(current_datetime):
             comb_instance.avg = cummulative_percent
             comb_instance.save()
         except Exception as E: 
+            print(strike)
             print('Exception', E)
             
         
