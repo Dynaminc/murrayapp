@@ -653,8 +653,8 @@ def clean_avgs(current_datetime):
 def new_flow_migrator():
     
     ## ths block reverses the effect 
-    initial_timestamp = datetime(2024, 4,  24, 10, 58)
-    clean_avgs(initial_timestamp)
+    # initial_timestamp = datetime(2024, 4,  24, 10, 58)
+    # clean_avgs(initial_timestamp)
     # 
     # return
     
