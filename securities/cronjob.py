@@ -489,20 +489,20 @@ def new_calc_migratorb():
                 
 def new_calc_migrator():
     error_count = 0
-    print('Cleaning')
-    clean_comb()
-    print('Initiating Calcs')
-    # begin_calcs() 
-    process_calcs()
+    # print('Cleaning')
+    # clean_comb()
+    # print('Initiating Calcs')
+    # # begin_calcs() 
+    # process_calcs()
     
     my_time = str(datetime.now())
     con.set("initiated", my_time)
     print('Initiated')   
     
-    # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
+    initial_timestamp = datetime(2024, 4,  24, 11, 58)
+    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  24, 11, 59)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -527,6 +527,8 @@ def new_calc_migrator():
             stocks = res["stocks"]
             
             stock_time = create_stocks(stocks, timestamp)
+            print('done')
+            return 
             timestamp += timedelta(minutes=1)
             
             combinations_list = generate_combinations(stock_time) 
@@ -658,7 +660,7 @@ def clean_avgs(current_datetime):
     print('updated')
 
 def new_flow_migrator():
-    
+    new_calc_migrator()
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -671,7 +673,7 @@ def new_flow_migrator():
     print('Initiated')   
     
     # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime(2024, 4,  24, 11,54)
+    initial_timestamp = datetime(2024, 4,  24, 11,57)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  25, 16)
     
