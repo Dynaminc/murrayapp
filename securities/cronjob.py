@@ -674,7 +674,8 @@ def new_flow_migrator():
             timestamp = initial_timestamp
             print(timestamp)
             generate_flow_combinations(timestamp)
-
+            Cronny.objects.create(symbol=f"{timestamp}")    
+            
         initial_timestamp += timedelta(minutes=1)
         
         
