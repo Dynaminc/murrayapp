@@ -14,62 +14,62 @@ from django.db.models import Min, Max
 from django.db import models
 
 # fetched all the needed data and saved it in a json
-def get_test_data(timestamp):
+def get_test_data():#timestamp
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
-    SYMBOLS = (
-        "AXP:NYSE",
-        "AMGN",
-        "AAPL:NASDAQ",
-        "BA:NYSE",
-        "CAT:NYSE",
-        "CSCO:NASDAQ",
-        "CVX:NYSE",
-        "GS:NYSE",
-        "HD:NYSE",
-        "HON",
-        "IBM:NYSE",
-        "INTC:NASDAQ",
-        "JNJ:NYSE",
-        "KO:NYSE",
-        "JPM:NYSE",
-        "MCD:NYSE",
-        "MMM:NYSE",
-        "MRK:NYSE",
-        "MSFT:NASDAQ",
-        "NKE:NYSE",
-        "PG:NYSE",
-        "TRV:NYSE",
-        "UNH:NYSE",
-        "CRM:NYSE",
-        "VZ:NYSE",
-        "V:NYSE",
-        "AMZN:NASDAQ",
-        "WMT:NYSE",
-        "DIS:NYSE",
-        "DOW:NYSE",
-    )
-
+    # SYMBOLS = (
+    #     ""AXP:NYSE",
+    #     "AMGN",
+    #     "AAPL:NASDAQ",
+    #     "BA:NYSE",
+    #     "CAT:NYSE",
+    #     "CSCO:NASDAQ",
+    #     "CVX:NYSE",
+    #     "GS:NYSE",
+    #     "HD:NYSE",
+    #     "HON",
+    #     "IBM:NYSE",
+    #     "INTC:NASDAQ",
+    #     "JNJ:NYSE",
+    #     "KO:NYSE",
+    #     "JPM:NYSE",
+    #     "MCD:NYSE",
+    #     "MMM:NYSE",
+    #     "MRK:NYSE",
+    #     "MSFT:NASDAQ",
+    #     "NKE:NYSE",
+    #     "PG:NYSE",
+    #     "TRV:NYSE",
+    #     "UNH:NYSE",
+    #     "CRM:NYSE",
+    #     "VZ:NYSE",
+    #     "V:NYSE",
+    #     "AMZN:NASDAQ",
+    #     "WMT:NYSE",
+    #     "DIS:NYSE",
+    #     "DOW:NYSE","
+    # )
+    SYMBOLS = ("DJI")
     # all_symbols = "AXP:NYSE"
     all_symbols = ",".join(SYMBOLS)
     try:
         
         start_date = "2024-04-24"
-        end_date = "2024-04-24"
+        end_date = "2024-04-26"
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
-        specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
         # Construct the URL with the specific minute
         # url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
 
-        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
+        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol=DJI&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
         res = requests.get(url)
 
-        # if res.status_code == 200:
-        #     data = res.json()
-        #     with open('tmp.json','w') as json_file:
-        #         json.dump(data, json_file)            
+        if res.status_code == 200:
+            data = res.json()
+            with open('djitmp.json','w') as json_file:
+                json.dump(data, json_file)            
         return {"status_code": res.status_code, "stocks": res.json()}
     
     
@@ -85,35 +85,39 @@ def get_test_data(timestamp):
 def json_migrator():
     stocks_list = []
     intital_time = datetime.now()
-    with open('tmp.json', 'r') as json_file:
-        data = json.load(json_file)
-        for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
-            if 'values' not in data.keys():
-                print(pre_stock_name)
-                return 'Failed'
-            stock_name = pre_stock_name.split(':')[0]
-            for stock in data['values']:
-                # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
-                stock_dict = {
-                    "symbol": stock_name,
-                    "close": float(stock["close"]),
-                    "low": stock["low"],
-                    "high": stock["high"],
-                    "previous_close": float(stock["previous_close"]),
-                    "date_time": stock["datetime"],
-                }
-                stock_obj = Stock(open=stock["open"], **stock_dict)
+    # with open('djitmp.json', 'r') as json_file:
+    #     data = json.load(json_file)
+    #     # for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
+    #     #     if 'values' not in data.keys():
+    #     #         print(pre_stock_name)
+    #     #         return 'Failed'
+    #     #     stock_name = pre_stock_name.split(':')[0]
+    #     for stock in data['values']:
+    #         # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
+    #         stock_dict = {
+    #             "symbol": "DJI",
+    #             "close": float(stock["close"]),
+    #             "low": stock["low"],
+    #             "high": stock["high"],
+    #             "previous_close": float(stock["previous_close"]),
+    #             "date_time": stock["datetime"],
+    #         }
+    #         stock_obj = Stock(open=stock["open"], **stock_dict)
 
-                stocks_list.append(stock_obj)
-    timestamp = datetime(2024, 4, 22)
-    filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
-    print(len(filtered_stock_data), 'filtered')
-    if filtered_stock_data:
-        Stock.objects.bulk_create(filtered_stock_data)
+    #         stocks_list.append(stock_obj)
+    # timestamp = datetime(2024, 4, 24)
+    # filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
+    # print(len(filtered_stock_data), 'filtered')
+    # if filtered_stock_data:
+    #     Stock.objects.bulk_create(filtered_stock_data)
+    # print('created')
+    
+    
     
     timestamp = datetime(2024, 4, 22)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
-    distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
+    # distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
+    distinct_stocks = ["DJI"]
     distinct_timestamps = Stock.objects.filter(date_time__gte=timestamp).values_list('date_time', flat=True).distinct()
     distinct_timestamps_list = list(distinct_timestamps)
     errors = []
@@ -224,7 +228,7 @@ def all_strikes():
     return "Cmmbinatoins computed"
 
 
-def top_flow():
+def top_glow():
     for timestamp in [datetime(2024, 4, 24, 11, 1), datetime(2024, 4, 24, 11, 2), datetime(2024, 4, 24, 11, 3)]:
         print(timestamp)
         distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
@@ -246,10 +250,51 @@ def top_flow():
         print(len(combs))
         # return len(combs)
 
+def top_flow():
+    
+    # Define the start and end timestamps
+    start_timestamp = datetime(2024, 4, 24, 11)
+    end_timestamp = datetime(2024, 4, 24, 11, 15)
+
+    # Generate the range of minutes
+    minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
+
+    # Convert the DatetimeIndex to an array
+    minutes_array = minutes_range.to_numpy()
+
+    # Convert the array elements to datetime objects
+    timestamps = pd.to_datetime(minutes_array)
+
+    # Initialize a dictionary to store the data
+    data_dict = {}
+
+    # Process each timestamp
+    for timestamp in timestamps:
+        print(timestamp)
+        # Get combinations for the current timestamp
+        current_combinations = Combination.objects.filter(date_time=timestamp)
+
+        # Get the symbols and averages for the current timestamp
+        for combination in current_combinations:
+            symbol = combination.symbol
+            avg = combination.avg
+
+            # If the symbol is not in the dictionary, add it
+            if symbol not in data_dict:
+                data_dict[symbol] = {timestamp: avg}
+            else:
+                data_dict[symbol][timestamp] = avg
+
+    # Create a DataFrame from the dictionary
+    df = pd.DataFrame.from_dict(data_dict, orient='index')
+
+    # Export the DataFrame to an Excel file
+    filename = 'combination_avgs.xlsx'
+    df.to_excel(filename)
+    print(f'Exported data to {filename}')
+        
 def top_low():
     
-    
-
     target_time = datetime(2024, 4, 24, 15, 0)
 
     # Specify the target time

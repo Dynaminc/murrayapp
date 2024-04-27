@@ -469,8 +469,8 @@ def trigger_store(request):
     # data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
-    # print("Migrating")
-    # json_migrator()
+    print("Migrating")
+    json_migrator()
     # print("Getting all strikes ")
     # data = all_strikes()
     # print("Completed strikes")
@@ -484,10 +484,10 @@ def trigger_store(request):
     
     # data = new_calc()
     
-    data = top_flow()
+    # data = top_flow()
     
     print("Exported") 
-    return JsonResponse({'message':"Loaded Succesfully", 'data': data})  
+    return JsonResponse({'message':"Loaded Succesfully",})  
 
             
 
