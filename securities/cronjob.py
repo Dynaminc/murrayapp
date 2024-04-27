@@ -652,7 +652,7 @@ def generate_flow_combinations(current_datetime):
         
 
 def new_flow_migrator():
-    initial_timestamp = datetime(2024, 4,  24, 9, 31)
+    initial_timestamp = datetime(2024, 4,  24)
     generate_flow_combinations(initial_timestamp)
     
     return
