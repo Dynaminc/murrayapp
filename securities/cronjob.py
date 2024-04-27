@@ -659,10 +659,10 @@ def clean_avgs(current_datetime):
 
 def new_flow_migrator():
     
-    ### ths block reverses the effect 
-    # initial_timestamp = datetime(2024, 4,  24, 9, 30)
-    # clean_avgs(initial_timestamp)
-    ## 
+    ## ths block reverses the effect 
+    initial_timestamp = datetime(2024, 4,  24, 10, 58)
+    clean_avgs(initial_timestamp)
+    # 
     # return
     
     error_count = 0
@@ -673,7 +673,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime(2024, 4,  24, 11)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 11, 1 )
+    current_timestamp = datetime(2024, 4,  24, 11, 3 )
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
