@@ -616,7 +616,6 @@ def generate_flow_combinations(current_datetime):
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
     stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time=new_distinct_timestamps[final]).all()]
     
-    print(len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
         Q(date_time=new_distinct_timestamps[final])
@@ -628,19 +627,14 @@ def generate_flow_combinations(current_datetime):
     combs = combinations(Company.SYMBOLS, 3)
     for comb in combs:
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        print(strike)
-        print(stocks[0])
-        print(str(timestamp))
-        
         stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
         stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
         
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        print(current_percent, 'current_percent', strike)
+        
         
         previous_instance = [item for item in previous_set if item.symbol == strike][0]
-        print(previous_instance.avg, 'previous_instance', strike)
         
         comb_instance = [item for item in final_set if item.symbol == strike][0]
         
@@ -669,7 +663,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime(2024, 4,  24, 9, 31)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 9, 32)
+    current_timestamp = datetime(2024, 4,  25, 16 )
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
