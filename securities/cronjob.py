@@ -725,7 +725,7 @@ def dji_migrator():
     
     tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
     count = 0 
-    initial_timestamp = datetime(2024, 4,  25, 59)
+    initial_timestamp = datetime(2024, 4,  25, 15, 59)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  26, 16)  #datetime(2024, 4,  25, 16)
     
