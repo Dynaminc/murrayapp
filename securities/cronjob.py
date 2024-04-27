@@ -607,32 +607,55 @@ def clean_comb():
     
     return 'cleaned'
 
-def generate_flow_combinations(current_datetime):
+
+def generate_flows_combinations(current_datetime):
     timestamp = current_datetime
-    distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
+    distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time=new_distinct_timestamps[final]).all()]
+    
+    print(len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
         Q(date_time=new_distinct_timestamps[final])
     ).all()
     
-    
-    
     previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
     final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
     
-    
-    for comb_instance in final_set:
-        previous_instance = [ instance for instance in previous_set if instance.symbol == comb_instance.symbol][0]
-        current_percent = (comb_instance.strike - previous_instance.strike) / previous_instance.strike * 100
+    combs = combinations(Company.SYMBOLS, 3)
+    for comb in combs:
+        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'] == str(timestamp)][0]
+        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'] == str(timestamp)][0]
+        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'] == str(timestamp)][0]
+        
+        current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+        print(current_percent, 'current_percent')
+        
+        previous_instance = [item for item in previous_set if item.symbol == strike][0]
+        print(previous_instance.avg, 'previous_instance')
+        
+        comb_instance = [item for item in final_set if item.symbol == strike][0]
+        
         cummulative_percent  =  previous_instance.avg + current_percent
         comb_instance.avg = cummulative_percent
         comb_instance.save()
         
+def generate_flow_combinations(current_datetime):
+    for item in Combination.objects.filter(date_time__gte=current_datetime).all():
+        print(item.date_time)
+        item.avg = 0
+        item.save()
+        
 
 def new_flow_migrator():
+    initial_timestamp = datetime(2024, 4,  24, 9, 31)
+    generate_flow_combinations(initial_timestamp)
+    
+    return
     error_count = 0
     my_time = str(datetime.now())
     con.set("initiated", my_time)

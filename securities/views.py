@@ -16,7 +16,7 @@ import pprint, random
 from .utils import quick_run
 # from .cronjob import new_calc, clean_comb
 from .serializer import *   
-from .assess import get_test_data, json_migrator, all_strikes, export_file, top_low
+from .assess import get_test_data, json_migrator, all_strikes, export_file, top_flow
 
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
@@ -484,7 +484,7 @@ def trigger_store(request):
     
     # data = new_calc()
     
-    data = top_low()
+    data = top_flow()
     
     print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully", 'data': data})  
