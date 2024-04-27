@@ -620,7 +620,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     stock = StockSerializer(item).data
     print('fetched')
     
-    previous_instance = Combination.objects.filter(date_time=new_distinct_timestamps[previous]).first()
+    previous_instance = Combination.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[previous]).first()
     
     if not previous_instance:
         previous_instance = Combination.objects.create(
@@ -628,10 +628,10 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
                 avg = 0,
                 stdev=0,
                 strike=stock['previous_close'],
-                date_time=timestamp,
+                date_time=new_distinct_timestamps[previous],
                 z_score=0,
             ) 
-
+        
     current_percent = (stock['close'] - stock['previous_close']) / stock['previous_close'] * 100
     cummulative_percent  =  previous_instance.avg + current_percent
     
@@ -641,10 +641,14 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
             avg=cummulative_percent,
             stdev=0,
             strike=stock['close'],
-            date_time=timestamp,
+            date_time=new_distinct_timestamps[final],
             z_score=0,
         ) 
     except:
+        current_instance = Combination.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[final]).first()
+        print(cummulative_percent)
+        current_instance.avg = cummulative_percent
+        current_instance.save()
         pass
 
     
