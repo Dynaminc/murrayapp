@@ -672,9 +672,10 @@ def new_flow_migrator():
         
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             timestamp = initial_timestamp
-            print(timestamp)
+            
             generate_flow_combinations(timestamp)
             Cronny.objects.create(symbol=f"{timestamp}")    
+            print(timestamp)
             
         initial_timestamp += timedelta(minutes=1)
         
