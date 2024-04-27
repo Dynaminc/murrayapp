@@ -489,20 +489,20 @@ def new_calc_migratorb():
                 
 def new_calc_migrator():
     error_count = 0
-    # print('Cleaning')
-    # clean_comb()
-    # print('Initiating Calcs')
-    # # begin_calcs() 
-    # process_calcs()
+    print('Cleaning')
+    clean_comb()
+    print('Initiating Calcs')
+    # begin_calcs() 
+    process_calcs()
     
     my_time = str(datetime.now())
     con.set("initiated", my_time)
     print('Initiated')   
     
-    initial_timestamp = datetime(2024, 4,  24, 11, 58)
-    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
+    # initial_timestamp = datetime(2024, 4,  25, 9)
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  24, 12)
+    current_timestamp = datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -527,52 +527,50 @@ def new_calc_migrator():
             stocks = res["stocks"]
             
             stock_time = create_stocks(stocks, timestamp)
-            print('done')
+            timestamp += timedelta(minutes=1)
             
-            # timestamp += timedelta(minutes=1)
+            combinations_list = generate_combinations(stock_time) 
+            # begin_calcs()
             
-            # combinations_list = generate_combinations(stock_time) 
-            # # begin_calcs()
-            
-            # combs = json.loads(con.get("combinations_data"))
-            # if not combs:
-            #     break
-            # else:
-            #     combinations_df = pd.DataFrame(
-            #         data=list(combs) + combinations_list
-            #     )
-            #     combinations_df["date_time"] = pd.to_datetime(
-            #         combinations_df["date_time"],  format='mixed'
-            #     )
+            combs = json.loads(con.get("combinations_data"))
+            if not combs:
+                break
+            else:
+                combinations_df = pd.DataFrame(
+                    data=list(combs) + combinations_list
+                )
+                combinations_df["date_time"] = pd.to_datetime(
+                    combinations_df["date_time"],  format='mixed'
+                )
 
-            #     calculated_combs = []
-            #     calculated_combs = calc_stats_b(combinations_df, stock_time)
-            #     strikes_list = [
-            #         Combination(
-            #             symbol=comb['symbol'],
-            #             avg=comb['avg'],
-            #             stdev=comb['stdev'],
-            #             strike=comb['strike'],
-            #             date_time=comb['date_time'],
-            #             z_score=comb['z_score'],
-            #         ) for comb in calculated_combs ]
+                calculated_combs = []
+                calculated_combs = calc_stats_b(combinations_df, stock_time)
+                strikes_list = [
+                    Combination(
+                        symbol=comb['symbol'],
+                        avg=comb['avg'],
+                        stdev=comb['stdev'],
+                        strike=comb['strike'],
+                        date_time=comb['date_time'],
+                        z_score=comb['z_score'],
+                    ) for comb in calculated_combs ]
 
-            #     try:
-            #         Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
-            #     except IntegrityError:
-            #         error_count += 1
-            #         pass
-            #     existing_data = json.loads(con.get("combinations_data") or "[]")
-            #     existing_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in existing_data}
-            #     combined_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in json.loads(json.dumps(calculated_combs, cls=DjangoJSONEncoder))}
-            #     existing_data_dict.update(combined_data_dict)
-            #     updated_data = json.dumps(list(existing_data_dict.values()))
-            #     con.set("combinations_data", updated_data)
+                try:
+                    Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
+                except IntegrityError:
+                    error_count += 1
+                    pass
+                existing_data = json.loads(con.get("combinations_data") or "[]")
+                existing_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in existing_data}
+                combined_data_dict = {f"{d['symbol']}_{d['date_time']}": d for d in json.loads(json.dumps(calculated_combs, cls=DjangoJSONEncoder))}
+                existing_data_dict.update(combined_data_dict)
+                updated_data = json.dumps(list(existing_data_dict.values()))
+                con.set("combinations_data", updated_data)
                 
-            #     end_time = datetime.now()
-            #     time_difference = end_time - start_time
-            #     print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
-            #     Cronny.objects.create(symbol=f"{timestamp}")    
+                end_time = datetime.now()
+                time_difference = end_time - start_time
+                print(timestamp, f"{timestamp} created in {time_difference.total_seconds()} seconds")
+                Cronny.objects.create(symbol=f"{timestamp}")    
 
         initial_timestamp += timedelta(minutes=1)
 def clean_redis():
@@ -617,7 +615,7 @@ def generate_flow_combinations(current_datetime):
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
     stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time=new_distinct_timestamps[final]).all()]
-    
+    print('Stocks', len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
         Q(date_time=new_distinct_timestamps[final])
@@ -631,26 +629,25 @@ def generate_flow_combinations(current_datetime):
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         
-        try:
-            stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
-            stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
-            stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
-            
-            
-            current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-            
-            
-            
-            previous_instance = [item for item in previous_set if item.symbol == strike][0]
-            
-            comb_instance = [item for item in final_set if item.symbol == strike][0]
-            
-            cummulative_percent  =  previous_instance.avg + current_percent
-            comb_instance.avg = cummulative_percent
-            comb_instance.save()
-        except Exception as E: 
-            print(strike)
-            print('Exception', E)
+        # try:
+        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        
+        
+        current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+        
+        
+        
+        previous_instance = [item for item in previous_set if item.symbol == strike][0]
+        
+        comb_instance = [item for item in final_set if item.symbol == strike][0]
+        
+        cummulative_percent  =  previous_instance.avg + current_percent
+        comb_instance.avg = cummulative_percent
+        comb_instance.save()
+        # except Exception as E: 
+        #     print('Exception', E)
             
         
         
@@ -660,7 +657,7 @@ def clean_avgs(current_datetime):
     print('updated')
 
 def new_flow_migrator():
-    new_calc_migrator()
+    
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -673,7 +670,7 @@ def new_flow_migrator():
     print('Initiated')   
     
     # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime(2024, 4,  24, 11,57)
+    initial_timestamp = datetime(2024, 4,  24, 11,54)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  25, 16)
     
