@@ -608,6 +608,47 @@ def clean_comb():
     return 'cleaned'
 
 
+
+
+def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
+    timestamp = current_datetime
+    distinct_timestamps = tmp_distinct_timestamps
+    distinct_timestamps.append(timestamp)
+    new_distinct_timestamps = sorted(distinct_timestamps)
+    previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+    item = Stock.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[final]).first()
+    stock = StockSerializer(item).data
+    
+    
+    previous_instance = Combination.objects.filter(date_time=new_distinct_timestamps[previous]).first()
+    
+    if not previous_instance:
+        previous_instance = Combination.objects.create(
+                symbol="DJI",
+                avg = 0,
+                stdev=0,
+                strike=stock['previous_close'],
+                date_time=timestamp,
+                z_score=0,
+            ) 
+
+    current_percent = (stock['close'] - stock['previous_close']) / stock['previous_close'] * 100
+    cummulative_percent  =  previous_instance.avg + current_percent
+    
+    try:
+        Combination.objects.create(
+            symbol="DJI",
+            avg=cummulative_percent,
+            stdev=0,
+            strike=stock['close'],
+            date_time=timestamp,
+            z_score=0,
+        ) 
+    except:
+        pass
+
+    
+    
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
@@ -667,21 +708,16 @@ def clean_avgs(current_datetime):
     Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)
     print('updated')
 
-def Dji_migrator():
-    
-    ## ths block reverses the effect 
-    # initial_timestamp = datetime(2024, 4,  24, 10, 58)
-    # clean_avgs(initial_timestamp)
-    # 
-    # return
+def dji_migrator():
     
     error_count = 0
     my_time = str(datetime.now())
     con.set("initiated", my_time)
     print('Initiated')   
     
+    tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
     count = 0 
-    initial_timestamp = datetime(2024, 4,  23, 10, 2)
+    initial_timestamp = datetime(2024, 4,  24, 11)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  25, 16)  #datetime(2024, 4,  25, 16)
     
@@ -691,16 +727,10 @@ def Dji_migrator():
     while initial_timestamp < current_timestamp:
         
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
-            
-            
             timestamp = initial_timestamp
-            
-            generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, tmp_distinct_timestamps)
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
-            # count += 1
-            # if count == 15:
-            #     break
             
         initial_timestamp += timedelta(minutes=1)
         
