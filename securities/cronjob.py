@@ -628,22 +628,28 @@ def generate_flow_combinations(current_datetime):
     for comb in combs:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
-        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
-        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+        print(strike)
+        try:
+            stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+            stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+            stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'].replace('T', ' ') == str(timestamp)][0]
+            
+            
+            current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+            
+            
+            
+            previous_instance = [item for item in previous_set if item.symbol == strike][0]
+            
+            comb_instance = [item for item in final_set if item.symbol == strike][0]
+            
+            cummulative_percent  =  previous_instance.avg + current_percent
+            comb_instance.avg = cummulative_percent
+            comb_instance.save()
+        except Exception as E: 
+            print('Exception', E)
+            
         
-        
-        current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        
-        
-        
-        previous_instance = [item for item in previous_set if item.symbol == strike][0]
-        
-        comb_instance = [item for item in final_set if item.symbol == strike][0]
-        
-        cummulative_percent  =  previous_instance.avg + current_percent
-        comb_instance.avg = cummulative_percent
-        comb_instance.save()
         
 def clean_avgs(current_datetime):
     print('updating')
@@ -664,7 +670,7 @@ def new_flow_migrator():
     print('Initiated')   
     
     # initial_timestamp = datetime(2024, 4,  25, 9)
-    initial_timestamp = datetime(2024, 4,  24, 11)
+    initial_timestamp = datetime(2024, 4,  24, 11,54)
     # datetime(2024, 4,  23, 10, 2)
     current_timestamp = datetime(2024, 4,  25, 16)
     
