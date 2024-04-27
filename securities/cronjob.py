@@ -618,7 +618,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
     item = Stock.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[final]).first()
     stock = StockSerializer(item).data
-    
+    print('fetched')
     
     previous_instance = Combination.objects.filter(date_time=new_distinct_timestamps[previous]).first()
     
