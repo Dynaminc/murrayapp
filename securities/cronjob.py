@@ -608,7 +608,7 @@ def clean_comb():
     return 'cleaned'
 
 
-def generate_flows_combinations(current_datetime):
+def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
     distinct_timestamps.append(timestamp)
@@ -633,10 +633,10 @@ def generate_flows_combinations(current_datetime):
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] and stock['date_time'] == str(timestamp)][0]
         
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        print(current_percent, 'current_percent')
+        print(current_percent, 'current_percent', strike)
         
         previous_instance = [item for item in previous_set if item.symbol == strike][0]
-        print(previous_instance.avg, 'previous_instance')
+        print(previous_instance.avg, 'previous_instance', strike)
         
         comb_instance = [item for item in final_set if item.symbol == strike][0]
         
@@ -644,16 +644,19 @@ def generate_flows_combinations(current_datetime):
         comb_instance.avg = cummulative_percent
         comb_instance.save()
         
-def generate_flow_combinations(current_datetime):
+def clean_avgs(current_datetime):
     print('updating')
     Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)
     print('updated')
 
 def new_flow_migrator():
-    initial_timestamp = datetime(2024, 4,  24)
-    generate_flow_combinations(initial_timestamp)
     
-    return
+    #### ths block reverses the effect 
+    # initial_timestamp = datetime(2024, 4,  24)
+    # clean_avgs(initial_timestamp)
+    ### 
+    
+    
     error_count = 0
     my_time = str(datetime.now())
     con.set("initiated", my_time)
@@ -662,7 +665,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime(2024, 4,  25, 9)
     initial_timestamp = datetime(2024, 4,  24, 9, 31)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  24, 9, 33)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
