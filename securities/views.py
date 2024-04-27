@@ -159,6 +159,9 @@ def update_striker(request):
     else:
         return JsonResponse({ 'message':"Trade closed", "data":StrikeSerializer(strike_instance).data})
 
+
+
+
 def update_strike(id):
     
     strike_instance = Strike.objects.filter(id=id).first() 
@@ -590,7 +593,7 @@ def test_end(request):
             print(latest_time, current_time)
             filtered_combinations = Combination.objects.filter(date_time = latest_time )
             print(len(filtered_combinations))
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.z_score,'date':str(latest_time)} for item in filtered_combinations ]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             print(len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})

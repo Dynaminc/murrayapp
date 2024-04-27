@@ -712,6 +712,10 @@ def clean_avgs(current_datetime):
     Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)
     print('updated')
 
+
+
+
+
 def dji_migrator():
     
     error_count = 0
@@ -721,9 +725,9 @@ def dji_migrator():
     
     tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
     count = 0 
-    initial_timestamp = datetime(2024, 4,  24, 11)
+    initial_timestamp = datetime(2024, 4,  25, 59)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  25, 16)  #datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  26, 16)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
