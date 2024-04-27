@@ -648,15 +648,17 @@ def generate_flow_combinations(current_datetime):
             comb_instance.save()
         except:
             cummulative_percent  =  previous_instance.avg + current_percent
-            Combination.objects.create(
-                symbol=strike,
-                avg=cummulative_percent,
-                stdev=0,
-                strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
-                date_time=timestamp,
-                z_score=0,
-            ) 
-            print('saved Exception')
+            try:
+                Combination.objects.create(
+                    symbol=strike,
+                    avg=cummulative_percent,
+                    stdev=0,
+                    strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                    date_time=timestamp,
+                    z_score=0,
+                ) 
+            except:
+                pass
             
         
         
