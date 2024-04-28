@@ -91,6 +91,7 @@ def get_data(timestamp):
         )
         
         return "Failed"
+    
 def get_minute_data():
     SYMBOLS = (
         "AXP:NYSE",
@@ -123,6 +124,7 @@ def get_minute_data():
         "WMT:NYSE",
         "DIS:NYSE",
         "DOW:NYSE",
+        "DJI"
     )
     all_symbols = ",".join(SYMBOLS)
     try:
@@ -141,7 +143,7 @@ def get_minute_data():
 
 
 
-def create_stocks(stocks, tmp_time):
+def create_stocks(stocks):
     stocks_list = []    
     json_stocks_list = []    
     dow_stocks = []
@@ -178,6 +180,7 @@ def create_stocks(stocks, tmp_time):
         "DOW:NYSE",
         "WMT",
         "DIS:NYSE",
+        "DJI",
     )
     
     
@@ -214,18 +217,14 @@ def create_stocks(stocks, tmp_time):
 
             latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
             latest_datetime = latest_stock.date_time 
-            # new_current = latest_datetime + timedelta(minutes=1)
-            current_datetime = datetime.strptime(str(tmp_time), "%Y-%m-%d %H:%M:%S")
+            
+            current_datetime = max(sorted(list(set(current_time))))
+            
             current_time.append(current_datetime)
             f = open('missing_data.txt', 'a')
             f.write(f'\n {company} : {current_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
             f.close()
         
-            # time_diff = (current_datetime - latest_datetime)
-            
-            # if time_diff > timedelta(minutes=1) and time_diff < timedelta(minutes=2): 
-            #     while (current_datetime - latest_datetime) > timedelta(minutes=1):
-            #         latest_datetime += timedelta(minutes=1)
             new_stock_dict = {
                 "symbol": company,
                 "close": float(latest_stock.close),
@@ -244,45 +243,20 @@ def create_stocks(stocks, tmp_time):
                 "previous_close": float(latest_stock.previous_close),
                 "date_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             }
-            print('stock dict', stock_dict_json)
+            
             stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
-            try:
-                stock_obj.save()
-            except:
-                print("Except")
-            # stocks_list.append(stock_obj)
-            print('saved')
+            stocks_list.append(stock_obj)
             json_stocks_list.append(stock_dict_json)
             
-        # except:
-        #     pass            
-        # stock_dict = {
-        #     "symbol": company,
-        #     "close": float(stock["close"]),
-        #     "low": stock["low"],
-        #     "high": stock["high"],
-        #     "previous_close": float(stock["previous_close"]),
-        #     "date_time": stock["datetime"],
-        # }
-        # stock_dict_json = {
-        #     "open": stock['open'],
-        #     "symbol": company,
-        #     "close": float(stock["close"]),
-        #     "low": stock["low"],
-        #     "high": stock["high"],
-        #     "previous_close": float(stock["previous_close"]),
-        #     "date_time": stock["datetime"],
-        # }
-        
-
+            
         stock_to_redis(json_stocks_list)                        
     
     
     try:
         Stock.objects.bulk_create(stocks_list, ignore_conflicts=True)
-        # Combination.objects.bulk_create(strikes_list, ignore_conflicts=True)
     except IntegrityError:
         pass
+    
     val = max(sorted(list(set(current_time))))
     print(val)
     return val
@@ -418,7 +392,7 @@ def new_calc():
     print('Gotten minute data')
     stocks = res["stocks"]
     print('GCrateing stocks')
-    stock_time = create_stocks(stocks, start_time)
+    stock_time = create_stocks(stocks)
     print(stock_time)
     
     combinations_list = generate_combinations(stock_time) 
@@ -526,7 +500,7 @@ def new_calc_migrator():
             
             stocks = res["stocks"]
             
-            stock_time = create_stocks(stocks, timestamp)
+            stock_time = create_stocks(stocks)
             timestamp += timedelta(minutes=1)
             
             combinations_list = generate_combinations(stock_time) 
@@ -634,23 +608,28 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
         
     current_percent = (stock['close'] - stock['previous_close']) / stock['previous_close'] * 100
     cummulative_percent  =  previous_instance.avg + current_percent
-    
+    final_time = None
+    try:
+        final_time = new_distinct_timestamps[final]
+    except:
+        final_time = new_distinct_timestamps[current]
+        
     try:
         Combination.objects.create(
             symbol="DJI",
             avg=cummulative_percent,
             stdev=0,
             strike=stock['close'],
-            date_time=new_distinct_timestamps[final],
+            date_time=final_time,
             z_score=0,
         ) 
     except:
-        current_instance = Combination.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[final]).first()
+        current_instance = Combination.objects.filter(symbol="DJI").filter(date_time=final_time).first()
         print(cummulative_percent)
         current_instance.avg = cummulative_percent
         current_instance.save()
         pass
-
+    
     
     
 def generate_flow_combinations(current_datetime):
@@ -666,9 +645,18 @@ def generate_flow_combinations(current_datetime):
         Q(date_time=new_distinct_timestamps[final])
     ).all()
     
+    
+    final_time = None
+    try:
+        final_time = new_distinct_timestamps[final]
+    except:
+        final_time = new_distinct_timestamps[current]
+        
     previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
-    final_set = [item for item in dataset if item.date_time == new_distinct_timestamps[final]]
-    print(timestamp, new_distinct_timestamps[previous], new_distinct_timestamps[final])
+    final_set = [item for item in dataset if item.date_time == final_time]
+    print(timestamp, new_distinct_timestamps[previous], final_time)
+    
+    
     combs = combinations(Company.SYMBOLS, 3)
     for comb in combs:
         
@@ -773,7 +761,7 @@ def new_flow_migrator():
             timestamp = initial_timestamp
             res = get_data(timestamp)
             stocks = res["stocks"]
-            stock_time = create_stocks(stocks, timestamp)
+            stock_time = create_stocks(stocks)
             generate_flow_combinations(timestamp)
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
@@ -782,5 +770,19 @@ def new_flow_migrator():
             #     break
             
         initial_timestamp += timedelta(minutes=1)
+        
+        
+def real_time_data():
+    start_time = datetime.now()
+    res = get_minute_data()
+    stocks = res["stocks"]
+    stock_time = create_stocks(stocks)
+    generate_flow_combinations(stock_time)
+    generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+    Cronny.objects.create(symbol=f"{stock_time}")    
+    print('completed')
+    end_time = datetime.now()
+    time_difference = end_time - start_time
+    print(f"data created in {time_difference.total_seconds()} seconds" 'Saved')
         
         
