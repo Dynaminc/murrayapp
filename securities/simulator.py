@@ -34,7 +34,7 @@ def simulate_compute():
     df.set_index('open_time', inplace=True)
 
     # Export DataFrame to Excel
-    filename = f'{start_timestamp}_{end_timestamp}_percentages.xlsx'
+    filename = f'simulation_percentages_{start_timestamp}_{end_timestamp}.xlsx'
     df.to_excel(filename)
 
     print(f'Exported data to {filename}')    

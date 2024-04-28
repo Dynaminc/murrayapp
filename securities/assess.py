@@ -287,8 +287,8 @@ def get_all_stocks():
 def top_flow():
     
     # Define the start and end timestamps
-    start_timestamp = datetime(2024, 4, 24, 11)
-    end_timestamp = datetime(2024, 4, 24, 11, 15)
+    start_timestamp = datetime(2024, 4, 26, 15, 55)
+    end_timestamp = datetime(2024, 4, 26, 15, 59)
 
     # Generate the range of minutes
     minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
@@ -306,7 +306,12 @@ def top_flow():
     for timestamp in timestamps:
         print(timestamp)
         # Get combinations for the current timestamp
-        current_combinations = Combination.objects.filter(date_time=timestamp)
+         
+        current_combinations = Combination.objects.filter(
+            Q(symbol = 'IBM-INTC-JNJ')|
+         Q(symbol = 'MMM-MRK-MSFT')|
+         Q(symbol = 'V-AMZN-DOW')
+         ).filter(date_time=timestamp)
 
         # Get the symbols and averages for the current timestamp
         for combination in current_combinations:
@@ -323,7 +328,7 @@ def top_flow():
     df = pd.DataFrame.from_dict(data_dict, orient='index')
 
     # Export the DataFrame to an Excel file
-    filename = 'combination_avgs.xlsx'
+    filename = 'combination_avgs_mini.xlsx'
     df.to_excel(filename)
     print(f'Exported data to {filename}')
         

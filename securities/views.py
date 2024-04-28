@@ -486,7 +486,7 @@ def trigger_store(request):
     
     # data = new_calc()
     
-    # data = top_flow()
+    data = top_flow()
     
     print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully",})  
