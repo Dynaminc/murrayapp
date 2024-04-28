@@ -5,8 +5,8 @@ from django.db.models import Q
 
 
 def simulate_compute():
-    start_timestamp = datetime(2024, 4, 24, 11)
-    end_timestamp = datetime(2024, 4, 24, 15,59)
+    start_timestamp = datetime(2024, 4, 25)
+    end_timestamp = datetime(2024, 4, 26, 15,59)
 
     # Generate the range of minutes
     minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
