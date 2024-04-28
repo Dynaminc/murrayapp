@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         
-        dji_migrator()
+        # dji_migrator()
         simulate_compute()
         
         # new_flow_migrator()
