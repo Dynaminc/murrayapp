@@ -48,30 +48,31 @@ def get_correct_close(array, title):
 
 @api_view(['GET','POST'])
 def get_chart(request):
-    try:
-        id = request.GET.get('id', "")
-        strike_instance = Strike.objects.filter(id=id).first() 
-        short = strike_instance.short_symbol
-        long = strike_instance.long_symbol
-        print(short, long)
+    # try:
+    id = request.GET.get('id', "")
+    strike_instance = Strike.objects.filter(id=id).first() 
+    short = strike_instance.short_symbol
+    long = strike_instance.long_symbol
+    print(short, long)
         # shorts = Combination.objects.filter(symbol=short, date_time__gt=strike_instance.open_time)
         # longs = Combination.objects.filter(symbol=long, date_time__gt=strike_instance.open_time)
         # dji = Combination.objects.filter(symbol=long, )
-        all_combs = Combination.objects.filter(
-                         Q(symbol=short) | 
-                         Q(symbol=long) | 
-                         Q(symbol='DJI') ).filter(date_time__gt=strike_instance.open_time).all()
-        shorts = [item for item in all_combs if item.symbol == short]
-        
-        data = [
-            {
-                'time': comb.date_time,
-                'svalue': comb.avg,
-                'lvalue': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
-                'dji': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
-            }
-            for comb in shorts
-        ]   
+    all_combs = Combination.objects.filter(
+                        Q(symbol=short) | 
+                        Q(symbol=long) | 
+                        Q(symbol='DJI') ).filter(date_time__gt=strike_instance.open_time).all()
+    print('fetched all combs', len(all_combs))
+    shorts = [item for item in all_combs if item.symbol == short]
+    
+    data = [
+        {
+            'time': comb.date_time,
+            'svalue': comb.avg,
+            'lvalue': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+            'dji': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
+        }
+        for comb in shorts
+    ]   
         
         # strike_instance = Strike.objects.filter(id=id).first() 
         # short = strike_instance.short_symbol
@@ -110,9 +111,9 @@ def get_chart(request):
 
         # for item in new_data:
         #     print(item)  
-        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
-    except:
-        return JsonResponse({ 'message':"Load Failed", "data":[]})
+    #     return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
+    # except:
+    #     return JsonResponse({ 'message':"Load Failed", "data":[]})
 
 @api_view(['GET'])
 def load_strikes(request):
