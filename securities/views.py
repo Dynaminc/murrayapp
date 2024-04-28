@@ -62,72 +62,30 @@ def get_long_dji_value(all_combs, isLong, long, timestamp):
     
 @api_view(['GET','POST'])
 def get_chart(request):
-    # try:
-    id = request.GET.get('id', "")
-    strike_instance = Strike.objects.filter(id=id).first() 
-    short = strike_instance.short_symbol
-    long = strike_instance.long_symbol
-    print(short, long)
-        # shorts = Combination.objects.filter(symbol=short, date_time__gt=strike_instance.open_time)
-        # longs = Combination.objects.filter(symbol=long, date_time__gt=strike_instance.open_time)
-        # dji = Combination.objects.filter(symbol=long, )
-    all_combs = Combination.objects.filter(
-                        Q(symbol=short) | 
-                        Q(symbol=long) | 
-                        Q(symbol='DJI') ).filter(date_time__gt=strike_instance.open_time).all()
-    print('fetched all combs', len(all_combs))
-    shorts = [item for item in all_combs if item.symbol == short]
-    
-    data = [
-        {
-            'time': comb.date_time,
-            'svalue': comb.avg,
-            'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
-            'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
-        }
-        for comb in shorts
-    ]   
+    try:
+        id = request.GET.get('id', "")
+        strike_instance = Strike.objects.filter(id=id).first() 
+        short = strike_instance.short_symbol
+        long = strike_instance.long_symbol
+        all_combs = Combination.objects.filter(
+                            Q(symbol=short) | 
+                            Q(symbol=long) | 
+                            Q(symbol='DJI') ).filter(date_time__gt=strike_instance.open_time).all()
+        print('fetched all combs', len(all_combs))
+        shorts = [item for item in all_combs if item.symbol == short]
         
-        # strike_instance = Strike.objects.filter(id=id).first() 
-        # short = strike_instance.short_symbol
-        # long = strike_instance.long_symbol
-
-        # data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
-        
-        # for item in data:
-        #     item["time"] = datetime.fromisoformat(str(item["time"]))
-
-        # # Get the start and current time
-        # if len(data) < 1:
-        #     return JsonResponse({ 'message':"Chart loaded Succesfully", "data":[]})
-            
-        # start_time = data[0]["time"]
-        # current_time = datetime.now()
-        # # Fill in missing data points
-        # new_data = []
-        # prev_item = None
-        # for i in range((current_time - start_time).seconds // 60):
-        #     new_time = start_time + timedelta(minutes=i)
-        #     eastern = pytz.timezone('US/Eastern')
-        #     dt = eastern.localize(new_time)
-        #     if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
-        #         for item in data:
-        #             if item["time"] <= new_time:
-        #                 prev_item = item
-        #         new_data.append({
-        #             "time": new_time,
-        #             "svalue": prev_item["svalue"],
-        #             "lvalue": prev_item["lvalue"] 
-        #         })        
-            
-        # for item in new_data:
-        #     item["time"] = item["time"].isoformat()
-
-        # for item in new_data:
-        #     print(item)  
-    return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
-    # except:
-    #     return JsonResponse({ 'message':"Load Failed", "data":[]})
+        data = [
+            {
+                'time': comb.date_time,
+                'svalue': comb.avg,
+                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+                'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
+            }
+            for comb in shorts
+        ]   
+        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
+    except:
+        return JsonResponse({ 'message':"Load Failed", "data":[]})
 
 @api_view(['GET'])
 def load_strikes(request):
