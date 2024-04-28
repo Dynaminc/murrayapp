@@ -6,7 +6,7 @@ from django.db.models import Q
 
 def simulate_compute():
     start_timestamp = datetime(2024, 4, 24, 11)
-    end_timestamp = datetime(2024, 4, 24, 14)
+    end_timestamp = datetime(2024, 4, 24, 15,59)
 
     # Generate the range of minutes
     minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
@@ -24,7 +24,9 @@ def simulate_compute():
     
     for timestamp in timestamps:
         print(timestamp)
-        data.append(run_simulation(str(timestamp)))
+        val = run_simulation(str(timestamp))
+        if val:
+            data.append(val)
     
     
     # Convert data to DataFrame
@@ -108,6 +110,7 @@ def run_simulation(timestamp):
                 
             initial_timestamp += timedelta(minutes=1)
         info['close_time'] = str(initial_timestamp)
-        return(info)
+        return info
     except:
         print('Error', timestamp)
+        return False
