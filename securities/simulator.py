@@ -48,7 +48,7 @@ def simulate_compute():
             distinct_timestamps = tmp_distinct_timestamps
             distinct_timestamps.append(start_timestamp)
             new_distinct_timestamps = sorted(distinct_timestamps)
-            previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+            previous, current, final = new_distinct_timestamps.index(start_timestamp) - 1,  new_distinct_timestamps.index(start_timestamp), new_distinct_timestamps.index(start_timestamp) + 1 
             current_time = new_distinct_timestamps[final]
             current_strike_price = sum([ item.close for item in stocks if item.date_time == current_time])
             
