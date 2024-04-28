@@ -46,6 +46,20 @@ def get_correct_close(array, title):
     data = [item for item in array if item['title'] == title][0]
     return data
 
+def get_long_dji_value(all_combs, isLong, long, timestamp):
+    if isLong:
+        data = [item for item in all_combs if item.date_time == timestamp and item.symbol == long]
+        if len(data) > 0:
+            return data[0].avg
+        else:
+            return None
+    else:
+        data = [item for item in all_combs if item.date_time == timestamp and item.symbol == "DJI"]
+        if len(data) > 0:
+            return data[0].avg
+        else:
+            return None
+    
 @api_view(['GET','POST'])
 def get_chart(request):
     # try:
@@ -68,8 +82,8 @@ def get_chart(request):
         {
             'time': comb.date_time,
             'svalue': comb.avg,
-            'lvalue': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
-            'dji': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
+            'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+            'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
         }
         for comb in shorts
     ]   
@@ -111,7 +125,7 @@ def get_chart(request):
 
         # for item in new_data:
         #     print(item)  
-    #     return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
+    return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
     # except:
     #     return JsonResponse({ 'message':"Load Failed", "data":[]})
 
