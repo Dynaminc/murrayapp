@@ -6,7 +6,7 @@ from django.db.models import Q
 
 def simulate_compute():
     start_timestamp = datetime(2024, 4, 24, 11)
-    end_timestamp = datetime(2024, 4, 24, 11, 15)
+    end_timestamp = datetime(2024, 4, 26)
 
     # Generate the range of minutes
     minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
@@ -53,7 +53,7 @@ def run_simulation(timestamp):
     # print({"top_5": combs[:5], "low_5":combs[-5:]})
     short = combs[0]['symbol']
     long = combs[-1]['symbol']
-    info = {'current_price': 0,'long': long, 'short':short, 'open_price':0, 'open_time':timestamp, 'max_close_price': 0, 'max_percent': 0, 'max_percent_time': None, 'min_percent':0, 'current_percent': 0,'min_percent_time': None, 'close_time': None}
+    info = {'short':short,'long': long, 'open_price':0, 'open_time':timestamp, 'max_close_price': 0,'min_close_price':0, 'max_percent': 0, 'min_percent':0, 'current_percent': 0, 'current_price': 0, 'min_percent_time': None, 'max_percent_time':None, 'close_time': None}
     
     # fetch all stocks
     symbol =f"{long}-{short}"
@@ -103,6 +103,7 @@ def run_simulation(timestamp):
             if info['current_percent'] < info['min_percent']:
                 info['min_percent'] = info['current_percent']
                 info['min_percent_time'] = str(current_time)
+                info['min_close_price'] = info['current_price']
                 
             
         initial_timestamp += timedelta(minutes=1)

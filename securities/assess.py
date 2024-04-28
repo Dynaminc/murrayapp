@@ -250,6 +250,40 @@ def top_glow():
         print(len(combs))
         # return len(combs)
 
+def get_all_stocks():
+    # Define the start time
+    start_time = datetime(2024, 4, 24)
+
+    # Fetch all Stock objects with date_time greater than or equal to start_time
+    queryset = Stock.objects.filter(date_time__gte=start_time).order_by('-date_time')
+    print('fetching data')
+    # Create a dictionary to store the data
+    data_dict = {}
+    print(len(queryset))
+    n = len(queryset)
+    # Iterate over the queryset and populate the dictionary
+    count = 0
+    for stock in queryset:
+        count  += 1
+        symbol = stock.symbol
+        timestamp = stock.date_time
+        if timestamp not in data_dict:
+            data_dict[timestamp] = {}
+        data_dict[timestamp][symbol] = stock.close  # Assuming 'close' is the value to be stored
+        print(f"{count} of {n}")
+    print('Converted')
+    # Create a DataFrame from the dictionary
+    df = pd.DataFrame.from_dict(data_dict, orient='index')
+
+    # Sort the index in descending order
+    df = df.sort_index(ascending=False)
+
+    # Export the DataFrame to an Excel file
+    filename = 'all_stocks_data.xlsx'
+    df.to_excel(filename)
+
+    print(f'Exported data to {filename}')
+    
 def top_flow():
     
     # Define the start and end timestamps
