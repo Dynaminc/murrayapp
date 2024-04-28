@@ -32,6 +32,7 @@ import json
 from django.core.paginator import Paginator
 from datetime import datetime
 from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator
+from securities.simulator import simulate_compute
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -42,6 +43,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         
         dji_migrator()
+        simulate_compute()
+        
         # new_flow_migrator()
         
         # new_calc_migrator()

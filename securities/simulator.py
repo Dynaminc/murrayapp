@@ -70,3 +70,4 @@ def simulate_compute():
             
         initial_timestamp += timedelta(minutes=1)
 
+    print(info)

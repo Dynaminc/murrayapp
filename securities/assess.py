@@ -54,8 +54,8 @@ def get_test_data():#timestamp
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-04-24"
-        end_date = "2024-04-26"
+        start_date = "2024-04-26"
+        end_date = "2024-04-27"
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
@@ -85,36 +85,36 @@ def get_test_data():#timestamp
 def json_migrator():
     stocks_list = []
     intital_time = datetime.now()
-    # with open('djitmp.json', 'r') as json_file:
-    #     data = json.load(json_file)
-    #     # for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
-    #     #     if 'values' not in data.keys():
-    #     #         print(pre_stock_name)
-    #     #         return 'Failed'
-    #     #     stock_name = pre_stock_name.split(':')[0]
-    #     for stock in data['values']:
-    #         # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
-    #         stock_dict = {
-    #             "symbol": "DJI",
-    #             "close": float(stock["close"]),
-    #             "low": stock["low"],
-    #             "high": stock["high"],
-    #             "previous_close": float(stock["previous_close"]),
-    #             "date_time": stock["datetime"],
-    #         }
-    #         stock_obj = Stock(open=stock["open"], **stock_dict)
+    with open('djitmp.json', 'r') as json_file:
+        data = json.load(json_file)
+        # for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
+        #     if 'values' not in data.keys():
+        #         print(pre_stock_name)
+        #         return 'Failed'
+        #     stock_name = pre_stock_name.split(':')[0]
+        for stock in data['values']:
+            # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
+            stock_dict = {
+                "symbol": "DJI",
+                "close": float(stock["close"]),
+                "low": stock["low"],
+                "high": stock["high"],
+                "previous_close": float(stock["previous_close"]),
+                "date_time": stock["datetime"],
+            }
+            stock_obj = Stock(open=stock["open"], **stock_dict)
 
-    #         stocks_list.append(stock_obj)
-    # timestamp = datetime(2024, 4, 24)
-    # filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
-    # print(len(filtered_stock_data), 'filtered')
-    # if filtered_stock_data:
-    #     Stock.objects.bulk_create(filtered_stock_data)
-    # print('created')
+            stocks_list.append(stock_obj)
+    timestamp = datetime(2024, 4, 24)
+    filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
+    print(len(filtered_stock_data), 'filtered')
+    if filtered_stock_data:
+        Stock.objects.bulk_create(filtered_stock_data)
+    print('created')
     
     
     
-    timestamp = datetime(2024, 4, 22)
+    timestamp = datetime(2024, 4, 25)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     # distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
     distinct_stocks = ["DJI"]
