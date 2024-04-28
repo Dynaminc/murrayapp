@@ -53,57 +53,64 @@ def get_chart(request):
         strike_instance = Strike.objects.filter(id=id).first() 
         short = strike_instance.short_symbol
         long = strike_instance.long_symbol
+        print(short, long)
+        # shorts = Combination.objects.filter(symbol=short, date_time__gt=strike_instance.open_time)
+        # longs = Combination.objects.filter(symbol=long, date_time__gt=strike_instance.open_time)
+        # dji = Combination.objects.filter(symbol=long, )
+        all_combs = Combination.objects.filter(
+                         Q(symbol=short) | 
+                         Q(symbol=long) | 
+                         Q(symbol='DJI') ).filter(date_time__gt=strike_instance.open_time).all()
+        shorts = [item for item in all_combs if item.symbol == short]
         
-        shorts = Combination.objects.filter(symbol=short, date_time__gt=strike_instance.open_time)
-        longs = Combination.objects.filter(symbol=long, date_time__gt=strike_instance.open_time)
-
-    
         data = [
             {
                 'time': comb.date_time,
-                'svalue': comb.z_score,
-                'lvalue': [item for item in longs if item.date_time == comb.date_time][0].z_score
+                'svalue': comb.avg,
+                'lvalue': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+                'dji': [item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
             }
             for comb in shorts
         ]   
-        strike_instance = Strike.objects.filter(id=id).first() 
-        short = strike_instance.short_symbol
-        long = strike_instance.long_symbol
-
-        data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
         
-        for item in data:
-            item["time"] = datetime.fromisoformat(str(item["time"]))
+        # strike_instance = Strike.objects.filter(id=id).first() 
+        # short = strike_instance.short_symbol
+        # long = strike_instance.long_symbol
 
-        # Get the start and current time
-        if len(data) < 1:
-            return JsonResponse({ 'message':"Chart loaded Succesfully", "data":[]})
-            
-        start_time = data[0]["time"]
-        current_time = datetime.now()
-        # Fill in missing data points
-        new_data = []
-        prev_item = None
-        for i in range((current_time - start_time).seconds // 60):
-            new_time = start_time + timedelta(minutes=i)
-            eastern = pytz.timezone('US/Eastern')
-            dt = eastern.localize(new_time)
-            if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
-                for item in data:
-                    if item["time"] <= new_time:
-                        prev_item = item
-                new_data.append({
-                    "time": new_time,
-                    "svalue": prev_item["svalue"],
-                    "lvalue": prev_item["lvalue"] 
-                })        
-            
-        for item in new_data:
-            item["time"] = item["time"].isoformat()
+        # data = [{'time':comb.date_time, 'svalue': comb.z_score, 'lvalue': Combination.objects.filter(symbol=long).filter(date_time=comb.date_time).first().z_score } for comb in Combination.objects.filter(symbol=short) if comb.date_time > strike_instance.open_time]
+        
+        # for item in data:
+        #     item["time"] = datetime.fromisoformat(str(item["time"]))
 
-        for item in new_data:
-            print(item)  
-        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":new_data})
+        # # Get the start and current time
+        # if len(data) < 1:
+        #     return JsonResponse({ 'message':"Chart loaded Succesfully", "data":[]})
+            
+        # start_time = data[0]["time"]
+        # current_time = datetime.now()
+        # # Fill in missing data points
+        # new_data = []
+        # prev_item = None
+        # for i in range((current_time - start_time).seconds // 60):
+        #     new_time = start_time + timedelta(minutes=i)
+        #     eastern = pytz.timezone('US/Eastern')
+        #     dt = eastern.localize(new_time)
+        #     if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
+        #         for item in data:
+        #             if item["time"] <= new_time:
+        #                 prev_item = item
+        #         new_data.append({
+        #             "time": new_time,
+        #             "svalue": prev_item["svalue"],
+        #             "lvalue": prev_item["lvalue"] 
+        #         })        
+            
+        # for item in new_data:
+        #     item["time"] = item["time"].isoformat()
+
+        # for item in new_data:
+        #     print(item)  
+        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
     except:
         return JsonResponse({ 'message':"Load Failed", "data":[]})
 
@@ -465,6 +472,25 @@ def get_strike_breakdown(request):
     return JsonResponse({'data':data, 'message':"Loaded Succesfully"})  
 
 
+def clean_comb():
+    # clean_redis()
+    # return 'cleaned'
+
+    count = 0 
+    times = [datetime(2024, 4, 26, 15, 59)]
+    for item in times:
+        print('Running clean module ')
+        data = Combination.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned combinations')
+        data = Stock.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned stocks')
+        con.set("combinations_data", "[]")
+        con.set("comb_time", "[]")
+        con.set("stock_data", "[]")
+        print('cleaned redis')
+
 
 @api_view(['GET', 'POST'])
 def trigger_store(request):
@@ -473,7 +499,7 @@ def trigger_store(request):
     # print("Fetching")
     # data = get_test_data()
     print("Migrating")
-    json_migrator()
+    # json_migrator()
     # print("Getting all strikes ")
     # data = all_strikes()
     # print("Completed strikes")

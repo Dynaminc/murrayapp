@@ -30,8 +30,6 @@ def cronny():
     data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
     
 
-
-
 def get_data(timestamp):
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
@@ -564,7 +562,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 25, 16)]
+    times = [datetime(2024, 4, 26, 15, 59)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -779,10 +777,8 @@ def real_time_data():
     stock_time = create_stocks(stocks)
     generate_flow_combinations(stock_time)
     generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-    Cronny.objects.create(symbol=f"{stock_time}")    
-    print('completed')
     end_time = datetime.now()
     time_difference = end_time - start_time
-    print(f"data created in {time_difference.total_seconds()} seconds" 'Saved')
+    Cronny.objects.create(symbol=f"{stock_time}-{time_difference.total_seconds()}")    
         
         
