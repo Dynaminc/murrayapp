@@ -183,7 +183,7 @@ def create_stocks(stocks, timestamp):
         "DIS:NYSE",
         "DJI",
     )
-    
+    errors = []
     
     current_time = []
     print(len(stocks), 'all stocks')
@@ -194,7 +194,6 @@ def create_stocks(stocks, timestamp):
 
         try:
             stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
-            print('herem done')
             stock = stock_data["values"][0]
             stock_dict = {
             "symbol": company,
@@ -219,13 +218,11 @@ def create_stocks(stocks, timestamp):
             stocks_list.append(stock_obj)
             json_stocks_list.append(stock_dict_json)
         except Exception as E:
-            print(E, 'Error', company )
             try:
+                errors.append(f"{stock}: {timestamp}")
                 latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
                 latest_datetime = latest_stock.date_time 
-                print(E, 'Error', 'latest datetime', latest_datetime , timestamp)
                 current_datetime = timestamp
-                
                 current_time.append(current_datetime)
                 f = open('missing_data.txt', 'a')
                 f.write(f'\n {company} : {current_datetime.strftime("%Y-%m-%d %H:%M:%S")}')
@@ -254,17 +251,23 @@ def create_stocks(stocks, timestamp):
                 stocks_list.append(stock_obj)
                 print('appenddd', company, current_datetime)
                 json_stocks_list.append(stock_dict_json)
-            
+
             except Exception as E:
                 print('Print Errr', E)
         stock_to_redis(json_stocks_list)                        
     
     print(len(stocks_list))
-    # try:
-    Stock.objects.bulk_create(stocks_list, ignore_conflicts=True)
-    # except IntegrityError:
-    #     pass
     
+    try:
+        Stock.objects.bulk_create(stocks_list, ignore_conflicts=True)
+    except IntegrityError:
+        pass
+    
+    error_data = '\n'.join(sorted(list(set(errors))))
+    f = open('missing_data.txt', 'w')
+    f.write(error_data)
+    f.close()
+    print('migration complete')    
     val = max(sorted(list(set(current_time))))
     print(val)
     return val
@@ -792,26 +795,27 @@ def new_flow_migrator():
         
 def real_time_data():
     done = False
+    count = 0 
     while not done:
+        count += 1
+        print('count', count)
         try:
-            start_time = datetime(2024, 4,  29, 15, 59)
-            # datetime.now()
+            
+            start_time = datetime.now()
             print('start time', start_time)
             res = get_minute_data()
             stocks = res["stocks"]
-            print('in here ere')
             stock_time = create_stocks(stocks, start_time)
-            print(stock_time)
             generate_flow_combinations(stock_time)
-            print('start time flow')
             generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
             end_time = datetime.now()
             time_difference = end_time - start_time
-            print(f"{stock_time}-{time_difference.total_seconds()}")
-            Cronny.objects.create(symbol=f"{stock_time}m{time_difference.total_seconds()}")    
+            Cronny.objects.create(symbol=f"{stock_time}m{str(time_difference.total_seconds()).split('.')}a{count}")    
             done = True
+            break
         except:
-            pass
+            import time
+            time.sleep(2)
             
             
         
