@@ -218,7 +218,7 @@ def create_stocks(stocks, timestamp):
             try:
                 latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
                 latest_datetime = latest_stock.date_time 
-                print(E, 'Error', 'latest datetime', latest_datetime )
+                print(E, 'Error', 'latest datetime', latest_datetime , timestamp)
                 current_datetime = timestamp
                 
                 current_time.append(current_datetime)
@@ -757,8 +757,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 14, 30)
-    current_timestamp = datetime(2024, 4,  29, 15, 30)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 9, 30)
+    current_timestamp = datetime(2024, 4,  29, 10, 36)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
