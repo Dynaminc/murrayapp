@@ -252,7 +252,7 @@ def top_glow():
 
 def get_all_stocks():
     # Define the start time
-    start_time = datetime(2024, 4, 24)
+    start_time = datetime(2024, 4, 29)
 
     # Fetch all Stock objects with date_time greater than or equal to start_time
     queryset = Stock.objects.filter(date_time__gte=start_time).order_by('-date_time')
@@ -279,7 +279,7 @@ def get_all_stocks():
     df = df.sort_index(ascending=False)
 
     # Export the DataFrame to an Excel file
-    filename = 'all_stocks_data.xlsx'
+    filename = f'all_stocks_data_{str(datetime.now())}.xlsx'
     df.to_excel(filename)
 
     print(f'Exported data to {filename}')

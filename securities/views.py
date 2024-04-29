@@ -450,7 +450,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 26, 15, 59)]
+    times = [datetime(2024, 4, 29, 11, 40)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -468,7 +468,7 @@ def clean_comb():
 @api_view(['GET', 'POST'])
 def trigger_store(request):
     print("initiated")    
-    # data = clean_comb()
+    data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
     print("Migrating")
@@ -486,7 +486,7 @@ def trigger_store(request):
     
     # data = new_calc()
     
-    data = top_flow()
+    # data = top_flow()
     
     print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully",})  
