@@ -211,11 +211,12 @@ def create_stocks(stocks, timestamp):
             stock_obj = Stock(open=stock["open"], **stock_dict)
             stocks_list.append(stock_obj)
             json_stocks_list.append(stock_dict_json)
-        except:
+        except Exception as E:
+            print(E, 'Error', company )
             try:
                 latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
                 latest_datetime = latest_stock.date_time 
-                
+                print(E, 'Error', 'latest datetime', latest_datetime )
                 current_datetime = timestamp
                 
                 current_time.append(current_datetime)
@@ -246,8 +247,8 @@ def create_stocks(stocks, timestamp):
                 stocks_list.append(stock_obj)
                 json_stocks_list.append(stock_dict_json)
             
-            except:
-                print('rrr')
+            except Exception as E:
+                print('Print Errr', E)
         stock_to_redis(json_stocks_list)                        
     
     
