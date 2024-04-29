@@ -744,7 +744,7 @@ def clean_comb():
        
 
 def new_flow_migrator():
-    clean_comb()
+    # clean_comb()
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -759,8 +759,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 11, 52)
-    current_timestamp = datetime(2024, 4,  29, 12, 5)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 11, 51)
+    current_timestamp = datetime(2024, 4,  29, 12, 6)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
