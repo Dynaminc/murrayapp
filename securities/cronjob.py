@@ -81,6 +81,7 @@ def get_data(timestamp):
         # Construct the URL with the specific minute
         url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
         res = requests.get(url)         
+        
         return {"status_code": res.status_code, "stocks": res.json()}
     
     
@@ -189,9 +190,10 @@ def create_stocks(stocks, timestamp):
     for item in SYMBOLS:
         company = item.split(':')[0]
         print(company,'copmany', len(stocks))
-        stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
+        
 
         try:
+            stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
             print('herem done')
             stock = stock_data["values"][0]
             stock_dict = {
@@ -761,7 +763,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
     initial_timestamp = datetime(2024, 4,  29, 11, 50)
-    current_timestamp = datetime(2024, 4,  29, 12, 30)  #datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  29, 12, 40)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
