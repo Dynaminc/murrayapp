@@ -188,6 +188,7 @@ def create_stocks(stocks, timestamp):
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
 
         try:
+            print('herem done')
             stock = stock_data["values"][0]
             stock_dict = {
             "symbol": company,
@@ -245,13 +246,14 @@ def create_stocks(stocks, timestamp):
                 print('except',)
                 stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
                 stocks_list.append(stock_obj)
+                print('appenddd', company, current_datetime)
                 json_stocks_list.append(stock_dict_json)
             
             except Exception as E:
                 print('Print Errr', E)
         stock_to_redis(json_stocks_list)                        
     
-    
+    print(len(stocks_list))
     # try:
     Stock.objects.bulk_create(stocks_list, ignore_conflicts=True)
     # except IntegrityError:
@@ -781,7 +783,9 @@ def real_time_data():
     start_time = datetime.now()
     res = get_minute_data()
     stocks = res["stocks"]
+    print('in here')
     stock_time = create_stocks(stocks, start_time)
+    print(stock_time)
     generate_flow_combinations(stock_time)
     generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
     end_time = datetime.now()
