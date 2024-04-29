@@ -22,7 +22,7 @@ print(cache.get("last_datetime"))
 from accounts.models import Strike, Profile
 from .views import update_strike
 from django.core.serializers.json import DjangoJSONEncoder
- from django.db.models import OrderBy
+from django.db.models import OrderBy
  
 info = {}
 info['main_count'] = 0
