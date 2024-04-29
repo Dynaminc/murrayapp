@@ -48,8 +48,8 @@ class Command(BaseCommand):
         # dji_migrator()
         # simulate_compute()
         
-        # new_flow_migrator()
-        real_time_data()
+        new_flow_migrator()
+        # real_time_data()
         # new_calc_migrator()
         
         # clean_comb()

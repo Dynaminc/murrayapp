@@ -564,27 +564,6 @@ def clean_redis():
     
     return 'cleaned'            
 
-def clean_comb():
-    # clean_redis()
-    # return 'cleaned'
-
-    count = 0 
-    times = [datetime(2024, 4, 29, 11, 00)]
-    for item in times:
-        print('Running clean module ')
-        data = Combination.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned combinations')
-        data = Stock.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned stocks')
-        con.set("combinations_data", "[]")
-        con.set("comb_time", "[]")
-        con.set("stock_data", "[]")
-        print('cleaned redis')
-        
-    
-    return 'cleaned'
 
 
 
@@ -741,10 +720,31 @@ def dji_migrator():
             
         initial_timestamp += timedelta(minutes=1)
         
+def clean_comb():
+    # clean_redis()
+    # return 'cleaned'
+
+    count = 0 
+    times = [datetime(2024, 4, 29, 11, 52)]
+    for item in times:
+        print('Running clean module ')
+        data = Combination.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned combinations')
+        data = Stock.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned stocks')
+        con.set("combinations_data", "[]")
+        con.set("comb_time", "[]")
+        con.set("stock_data", "[]")
+        print('cleaned redis')
         
+    
+    return 'cleaned'
+       
 
 def new_flow_migrator():
-    
+    clean_comb()
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -759,8 +759,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 11, 40)
-    current_timestamp = datetime(2024, 4,  29, 11, 52)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 11, 52)
+    current_timestamp = datetime(2024, 4,  29, 12, 5)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
