@@ -569,7 +569,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 26, 15, 59)]
+    times = [datetime(2024, 4, 29, 11, 00)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -760,7 +760,7 @@ def new_flow_migrator():
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
     initial_timestamp = datetime(2024, 4,  29, 10, 59)
-    current_timestamp = datetime(2024, 4,  29, 11, 25)  #datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  29, 11, 40)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
