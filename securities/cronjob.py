@@ -757,17 +757,18 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 9)
-    current_timestamp = datetime(2024, 4,  29, 9, 25)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 14, 30)
+    current_timestamp = datetime(2024, 4,  29, 15, 30)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
+        print('here')
         
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             
-            print('in neer')
+            print('in neer', initial_timestamp)
             timestamp = initial_timestamp
             res = get_data(timestamp)
             stocks = res["stocks"]
