@@ -186,6 +186,7 @@ def create_stocks(stocks, timestamp):
     current_time = []
     for item in SYMBOLS:
         company = item.split(':')[0]
+        print(company,'copmany')
         stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
 
         try:
