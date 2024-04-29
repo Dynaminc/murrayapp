@@ -810,7 +810,7 @@ def real_time_data():
             end_time = datetime.now()
             time_difference = end_time - start_time
             print('all created')
-            Cronny.objects.create(symbol=f"{stock_time}m{str(time_difference.total_seconds()).split('.')}a{count}")    
+            Cronny.objects.create(symbol=f"{stock_time}m{str(time_difference.total_seconds()).split('.')[0]}a{count}")    
             done = True
             print('Finally Done', count)
             break
