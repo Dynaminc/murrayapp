@@ -637,7 +637,12 @@ def generate_flow_combinations(current_datetime):
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time__gte=new_distinct_timestamps[final]).all()]
+    print(previous, current, final)
+    
+    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
+                                            date_time__gte=new_distinct_timestamps[final],
+                                            date_time__lt=(new_distinct_timestamps[final] + timedelta(minutes=1))).all()]
+    
     print('Stocks', len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
