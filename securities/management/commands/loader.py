@@ -42,14 +42,14 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        # real_time_data()
+        
         # get_all_stocks()
         
         # dji_migrator()
         # simulate_compute()
         
         new_flow_migrator()
-        
+        real_time_data()
         # new_calc_migrator()
         
         # clean_comb()
