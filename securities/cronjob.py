@@ -246,7 +246,8 @@ def create_stocks(stocks, timestamp):
                 stocks_list.append(stock_obj)
                 json_stocks_list.append(stock_dict_json)
             
-            
+            except:
+                print('rrr')
         stock_to_redis(json_stocks_list)                        
     
     
