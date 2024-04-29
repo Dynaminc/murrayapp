@@ -647,7 +647,7 @@ def generate_flow_combinations(current_datetime):
     #                                         date_time__gte=new_distinct_timestamps[final],
     #                                         date_time__lt=(new_distinct_timestamps[final] + timedelta(minutes=1))).all()]
     
-    stocks = Stock.objects.order_by('-date_time')[:31] 
+    stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
     print('Stocks', len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
@@ -755,9 +755,10 @@ def new_flow_migrator():
     print('Initiated')   
     
     count = 0 
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
+    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    current_timestamp = datetime(2024, 4,  26, 16)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 9)
+    current_timestamp = datetime(2024, 4,  29, 9, 25)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -772,6 +773,7 @@ def new_flow_migrator():
             stocks = res["stocks"]
             stock_time = create_stocks(stocks, timestamp)
             generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
             # count += 1
