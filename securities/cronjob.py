@@ -65,6 +65,7 @@ def get_data(timestamp):
         "DOW:NYSE",
         "WMT",
         "DIS:NYSE",
+        "DJI"
     )
     
     # all_symbols = "AXP:NYSE"
