@@ -747,7 +747,7 @@ def clean_comb():
        
 
 def new_flow_migrator():
-    clean_comb()
+    # clean_comb()
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -794,7 +794,8 @@ def real_time_data():
     done = False
     while not done:
         try:
-            start_time = datetime.now()
+            start_time = datetime(2024, 4,  29, 15, 59)
+            # datetime.now()
             print('start time', start_time)
             res = get_minute_data()
             stocks = res["stocks"]
@@ -807,7 +808,7 @@ def real_time_data():
             end_time = datetime.now()
             time_difference = end_time - start_time
             print(f"{stock_time}-{time_difference.total_seconds()}")
-            Cronny.objects.create(symbol=f"{stock_time}-{time_difference.total_seconds()}")    
+            Cronny.objects.create(symbol=f"{stock_time}m{time_difference.total_seconds()}")    
             done = True
         except:
             pass
