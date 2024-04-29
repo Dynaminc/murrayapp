@@ -22,7 +22,8 @@ print(cache.get("last_datetime"))
 from accounts.models import Strike, Profile
 from .views import update_strike
 from django.core.serializers.json import DjangoJSONEncoder
-
+ from django.db.models import OrderBy
+ 
 info = {}
 info['main_count'] = 0
 ## Contains the most recent build for data retrieval, processing and storage, skips redis for now
@@ -640,12 +641,13 @@ def generate_flow_combinations(current_datetime):
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    print(previous, current, final)
+    print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
     
-    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
-                                            date_time__gte=new_distinct_timestamps[final],
-                                            date_time__lt=(new_distinct_timestamps[final] + timedelta(minutes=1))).all()]
+    # stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
+    #                                         date_time__gte=new_distinct_timestamps[final],
+    #                                         date_time__lt=(new_distinct_timestamps[final] + timedelta(minutes=1))).all()]
     
+    stocks = Stock.objects.order_by('-date_time')[:31] 
     print('Stocks', len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
