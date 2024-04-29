@@ -450,7 +450,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 29, 11, 0)]
+    times = [datetime(2024, 4, 29, 11, 40)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
