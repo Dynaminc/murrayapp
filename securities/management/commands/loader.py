@@ -49,7 +49,7 @@ class Command(BaseCommand):
         # simulate_compute()
         
         new_flow_migrator()
-        real_time_data()
+        # real_time_data()
         # new_calc_migrator()
         
         # clean_comb()
