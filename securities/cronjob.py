@@ -767,7 +767,7 @@ def new_flow_migrator():
         
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             
-            
+            print('in neer')
             timestamp = initial_timestamp
             res = get_data(timestamp)
             stocks = res["stocks"]
