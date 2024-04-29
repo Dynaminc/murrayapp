@@ -762,8 +762,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 11, 13)
-    current_timestamp = datetime(2024, 4,  29, 13, 00)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 12, 29)
+    current_timestamp = datetime(2024, 4,  29, 15, 30)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
