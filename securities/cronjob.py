@@ -787,19 +787,26 @@ def new_flow_migrator():
         
         
 def real_time_data():
-    start_time = datetime.now()
-    print('start time', start_time)
-    res = get_minute_data()
-    stocks = res["stocks"]
-    print('in here ere')
-    stock_time = create_stocks(stocks, start_time)
-    print(stock_time)
-    generate_flow_combinations(stock_time)
-    print('start time flow')
-    generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-    end_time = datetime.now()
-    time_difference = end_time - start_time
-    print(f"{stock_time}-{time_difference.total_seconds()}")
-    Cronny.objects.create(symbol=f"{stock_time}-{time_difference.total_seconds()}")    
-        
+    done = False
+    while not done:
+        try:
+            start_time = datetime.now()
+            print('start time', start_time)
+            res = get_minute_data()
+            stocks = res["stocks"]
+            print('in here ere')
+            stock_time = create_stocks(stocks, start_time)
+            print(stock_time)
+            generate_flow_combinations(stock_time)
+            print('start time flow')
+            generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            end_time = datetime.now()
+            time_difference = end_time - start_time
+            print(f"{stock_time}-{time_difference.total_seconds()}")
+            Cronny.objects.create(symbol=f"{stock_time}-{time_difference.total_seconds()}")    
+            done = True
+        except:
+            pass
+            
+            
         
