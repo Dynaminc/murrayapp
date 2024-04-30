@@ -673,7 +673,7 @@ def generate_flow_combinations(current_datetime):
         try:
             previous_instance = [item for item in previous_set if item.symbol == strike][0]
         except:
-            print('No previous instance ')
+            pass
         try:
             comb_instance = [item for item in final_set if item.symbol == strike][0]
             cummulative_percent = 0
@@ -781,7 +781,7 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 11, 59)
+    initial_timestamp = datetime(2024, 4,  29, 11, 14)
     clean_comb(initial_timestamp)
     current_timestamp = (datetime.now())
     # datetime(2024, 4,  30, 11, 15)  #datetime(2024, 4,  25, 16)
