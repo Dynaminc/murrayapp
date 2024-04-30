@@ -623,10 +623,17 @@ def generate_flow_combinations(current_datetime):
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
     print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
-    
+
+
+    final_time = None
+    try:
+        final_time = new_distinct_timestamps[final]
+    except:
+        final_time = new_distinct_timestamps[current]
+            
     stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
-                                            date_time__gte=new_distinct_timestamps[final],
-                                            date_time__lt=(new_distinct_timestamps[final] + timedelta(minutes=1))).all()]
+                                            date_time__gte=final_time,
+                                            date_time__lt=(final_time + timedelta(minutes=1))).all()]
     
     # stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
     print('Stocks', len(stocks))
@@ -636,11 +643,7 @@ def generate_flow_combinations(current_datetime):
     ).all()
     
     
-    final_time = None
-    try:
-        final_time = new_distinct_timestamps[final]
-    except:
-        final_time = new_distinct_timestamps[current]
+
         
     previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
     final_set = [item for item in dataset if item.date_time == final_time]
