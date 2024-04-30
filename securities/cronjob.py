@@ -686,7 +686,6 @@ def generate_flow_combinations(current_datetime):
             comb_instance.save()
                 
         except Exception as E:
-            print('Excepton ', E)
             cummulative_percent = 0
             if previous_instance:
                 cummulative_percent  =  previous_instance.avg + current_percent
