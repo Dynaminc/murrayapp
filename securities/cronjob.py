@@ -809,25 +809,25 @@ def real_time_data():
     while not done:
         count += 1
         print('count', count)
-        try:
-            start_time = datetime.now() - timedelta(minutes = 1)
-            print('start time', start_time)
-            res = get_minute_data()
-            stocks = res["stocks"]
-            stock_time = create_stocks(stocks, start_time)
-            generate_flow_combinations(stock_time)
-            generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-            end_time = datetime.now()
-            time_difference = end_time - start_time
-            print('all created')
-            Cronny.objects.create(symbol=f"{stock_time}a{count}")    
-            done = True
-            print('Finally Done', count)
-            break
-        except Exception as E:
-            print('Excecptio', E)
-            import time
-            time.sleep(2)
+        # try:
+        start_time = datetime.now() - timedelta(minutes = 1)
+        print('start time', start_time)
+        res = get_minute_data()
+        stocks = res["stocks"]
+        stock_time = create_stocks(stocks, start_time)
+        generate_flow_combinations(stock_time)
+        generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+        end_time = datetime.now()
+        time_difference = end_time - start_time
+        print('all created')
+        Cronny.objects.create(symbol=f"{stock_time}a{count}")    
+        done = True
+        print('Finally Done', count)
+            # break
+        # except Exception as E:
+        #     print('Excecptio', E)
+        #     import time
+        #     time.sleep(2)
             
             
         
