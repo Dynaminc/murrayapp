@@ -190,8 +190,6 @@ def create_stocks(stocks, timestamp):
     for item in SYMBOLS:
         company = item.split(':')[0]
         print(company,'copmany', len(stocks))
-        
-
         try:
             stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
             stock = stock_data["values"][0]
@@ -675,7 +673,8 @@ def generate_flow_combinations(current_datetime):
             cummulative_percent  =  previous_instance.avg + current_percent
             comb_instance.avg = cummulative_percent
             comb_instance.save()
-        except:
+        except Exception as E:
+            print('Excepton ', E)
             cummulative_percent  =  previous_instance.avg + current_percent
             try:
                 Combination.objects.create(
@@ -686,7 +685,8 @@ def generate_flow_combinations(current_datetime):
                     date_time=timestamp,
                     z_score=0,
                 ) 
-            except:
+            except Exception as E:
+                print('Another ', E)
                 pass
             
         
