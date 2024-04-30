@@ -147,6 +147,7 @@ def update_strike(id):
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
         return False
+    print('strike instance', StrikeSerializer(strike_instance).data)
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
@@ -196,7 +197,7 @@ def update_strike(id):
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                     
         strike_instance.save()
         
-                
+    print(StrikeSerializer(strike_instance).data) 
     return True
 
 @api_view(['GET'])
@@ -468,7 +469,7 @@ def clean_comb():
 @api_view(['GET', 'POST'])
 def trigger_store(request):
     print("initiated")    
-    data = clean_comb()
+    # data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
     print("Migrating")
