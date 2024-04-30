@@ -574,7 +574,11 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    item = Stock.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[final]).first()
+    try:
+        final_time = new_distinct_timestamps[final]
+    except:
+        final_time = new_distinct_timestamps[current]
+    item = Stock.objects.filter(symbol="DJI").filter(date_time=final_time).first()
     stock = StockSerializer(item).data
     print('fetched')
     
@@ -639,7 +643,7 @@ def generate_flow_combinations(current_datetime):
     print('Stocks', len(stocks))
     dataset = Combination.objects.filter(
         Q(date_time=new_distinct_timestamps[previous]) |
-        Q(date_time=new_distinct_timestamps[final])
+        Q(date_time=final_time)
     ).all()
     
     
