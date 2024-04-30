@@ -186,10 +186,8 @@ def create_stocks(stocks, timestamp):
     errors = []
     
     current_time = []
-    print(len(stocks), 'all stocks')
     for item in SYMBOLS:
         company = item.split(':')[0]
-        print(company,'copmany', len(stocks))
         try:
             stock_data  = [stock_item[1] for stock_item in stocks.items() if stock_item[0].split(':')[0] == company][0]
             stock = stock_data["values"][0]
@@ -244,10 +242,8 @@ def create_stocks(stocks, timestamp):
                     "previous_close": float(latest_stock.previous_close),
                     "date_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
                 }
-                print('except',)
                 stock_obj = Stock(open=float(latest_stock.open), **new_stock_dict)
                 stocks_list.append(stock_obj)
-                print('appenddd', company, current_datetime)
                 json_stocks_list.append(stock_dict_json)
 
             except Exception as E:
@@ -666,16 +662,30 @@ def generate_flow_combinations(current_datetime):
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
         
         
-        
-        previous_instance = [item for item in previous_set if item.symbol == strike][0]
+        previous_instance = None 
+        try:
+            previous_instance = [item for item in previous_set if item.symbol == strike][0]
+        except:
+            print('No previous instance ')
         try:
             comb_instance = [item for item in final_set if item.symbol == strike][0]
-            cummulative_percent  =  previous_instance.avg + current_percent
+            cummulative_percent = 0
+            if previous_instance:
+                cummulative_percent  =  previous_instance.avg + current_percent
+            else: 
+                cummulative_percent  =  current_percent
+                
             comb_instance.avg = cummulative_percent
             comb_instance.save()
+                
         except Exception as E:
             print('Excepton ', E)
-            cummulative_percent  =  previous_instance.avg + current_percent
+            cummulative_percent = 0
+            if previous_instance:
+                cummulative_percent  =  previous_instance.avg + current_percent
+            else:
+                cummulative_percent  =  current_percent
+                
             try:
                 Combination.objects.create(
                     symbol=strike,
@@ -688,7 +698,7 @@ def generate_flow_combinations(current_datetime):
             except Exception as E:
                 print('Another ', E)
                 pass
-            
+                
         
         
 def clean_avgs(current_datetime):
@@ -731,7 +741,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 29, 16)]
+    times = [datetime(2024, 4, 30, 9)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -765,8 +775,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 10)
-    current_timestamp = datetime(2024, 4,  30, 11, 00)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  30, 9)
+    current_timestamp = datetime(2024, 4,  30, 11, 50)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
