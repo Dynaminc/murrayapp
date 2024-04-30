@@ -818,7 +818,7 @@ def real_time_data():
         count += 1
         print('count', count)
         try:
-            start_time = datetime.now() - timedelta(minutes = 1)
+            start_time = datetime.now() - timedelta(minutes = 2)
             print('start time', start_time)
             res = get_minute_data()
             stocks = res["stocks"]
