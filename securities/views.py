@@ -40,6 +40,8 @@ def process_strike_symbol(symbol):
         # price = Stock.objects.filter(symbol=item).first().close
         portfolio_data = quantify_strike(portfolio, price)
         data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final']})
+    print("Long", symbol)
+    print(data)
     return data
 
 def get_correct_close(array, title):
