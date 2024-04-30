@@ -593,7 +593,7 @@ def test_end(request):
         if latest_data:
             latest_time = latest_data
             print(latest_time, current_time)
-            filtered_combinations = Combination.objects.filter(date_time = latest_time )
+            filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
             print(len(filtered_combinations))
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             print(len(combs))
