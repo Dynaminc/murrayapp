@@ -219,7 +219,7 @@ def create_stocks(stocks, timestamp):
             json_stocks_list.append(stock_dict_json)
         except Exception as E:
             try:
-                errors.append(f"{stock}: {timestamp}")
+                errors.append(f"{company}: {timestamp}")
                 latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
                 latest_datetime = latest_stock.date_time 
                 current_datetime = timestamp
@@ -731,7 +731,7 @@ def clean_comb():
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 29, 15, 29)]
+    times = [datetime(2024, 4, 29, 16)]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -750,7 +750,7 @@ def clean_comb():
        
 
 def new_flow_migrator():
-    # clean_comb()
+    clean_comb()
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -765,8 +765,8 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 15, 29)
-    current_timestamp = datetime(2024, 4,  29, 16)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 16)
+    current_timestamp = datetime(2024, 4,  29, 10, 15)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
@@ -800,7 +800,7 @@ def real_time_data():
         count += 1
         print('count', count)
         try:
-            start_time = datetime.now()
+            start_time = datetime.now() - timedelta(minutes = 1)
             print('start time', start_time)
             res = get_minute_data()
             stocks = res["stocks"]
