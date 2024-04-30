@@ -779,9 +779,9 @@ def new_flow_migrator():
     print('Initiated')   
     
     count = 0 
-    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  29, 11, 14)
+    # initial_timestamp = datetime(2024, 4,  29, 11, 14)
     clean_comb(initial_timestamp)
     current_timestamp = (datetime.now())
     # datetime(2024, 4,  30, 11, 15)  #datetime(2024, 4,  25, 16)
@@ -817,25 +817,25 @@ def real_time_data():
     while not done:
         count += 1
         print('count', count)
-        # try:
-        start_time = datetime.now() - timedelta(minutes = 1)
-        print('start time', start_time)
-        res = get_minute_data()
-        stocks = res["stocks"]
-        stock_time = create_stocks(stocks, start_time)
-        generate_flow_combinations(stock_time)
-        generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-        end_time = datetime.now()
-        time_difference = end_time - start_time
-        print('all created')
-        Cronny.objects.create(symbol=f"{stock_time}a{count}")    
-        done = True
-        print('Finally Done', count)
-            # break
-        # except Exception as E:
-        #     print('Excecptio', E)
-        #     import time
-        #     time.sleep(2)
+        try:
+            start_time = datetime.now() - timedelta(minutes = 1)
+            print('start time', start_time)
+            res = get_minute_data()
+            stocks = res["stocks"]
+            stock_time = create_stocks(stocks, start_time)
+            generate_flow_combinations(stock_time)
+            generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            end_time = datetime.now()
+            time_difference = end_time - start_time
+            print('all created')
+            Cronny.objects.create(symbol=f"{stock_time}")    
+            done = True
+            print('Finally Done', count)
+            break
+        except Exception as E:
+            print('Excecptio', E)
+            import time
+            time.sleep(2)
             
             
         

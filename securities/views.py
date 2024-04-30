@@ -555,28 +555,31 @@ def test_end(request):
     market_state = "off"
     try:
         market_state = check_market_hours(datetime.now())
-        if not info['previous_time']:
-            ad = Combination.objects.latest('date_time')
-            info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
-            info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
-            display_time = ad.date_time
-            # market_state = "slate"
+        ad = Combination.objects.latest('date_time')
+        info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+        # if not info['previous_time']:
+        #     ad = Combination.objects.latest('date_time')
+        #     info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
+        #     
+        #     display_time = ad.date_time
+        #     # market_state = "slate"
             
-        else:
-            ad = Combination.objects.latest('date_time')
-            info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+        # else:
+        #     ad = Combination.objects.latest('date_time')
+        #     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
             
             
-            if info['latest_time'] == info['previous_time']:
-                display_time = ad.date_time
-                # market_state = "slate"
+        #     if info['latest_time'] == info['previous_time']:
+        #         display_time = ad.date_time
+        #         # market_state = "slate"
                 
-            else:
-                display_time = datetime.now()
-                info['previous_time'] = info['latest_time']
+        #     else:
+        #         display_time = datetime.now()
+        #         info['previous_time'] = info['latest_time']
         
         # print(market_state)
         # display_time = datetime.now()
+        display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
         eastern = pytz.timezone('US/Eastern')
