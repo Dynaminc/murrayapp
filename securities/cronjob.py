@@ -28,7 +28,8 @@ info = {}
 info['main_count'] = 0
 ## Contains the most recent build for data retrieval, processing and storage, skips redis for now
 def cronny():
-    data = [ update_strike(item.id) for item in Strike.objects.filter(closed=False)]
+    for item in Strike.objects.filter(closed=False):
+        update_strike(item.id)
     
 
 def get_data(timestamp):
