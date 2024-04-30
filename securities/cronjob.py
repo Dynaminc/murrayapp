@@ -784,7 +784,7 @@ def new_flow_migrator():
     # datetime(2024, 4,  23, 10, 2)
     initial_timestamp = datetime(2024, 4,  29, 15, 59)
     clean_comb(initial_timestamp)
-    current_timestamp = datetime(2024, 4,  30, 11, 10)  #datetime(2024, 4,  25, 16)
+    current_timestamp = datetime(2024, 4,  30, 11, 15)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
