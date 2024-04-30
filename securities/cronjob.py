@@ -818,10 +818,11 @@ def real_time_data():
         count += 1
         print('count', count)
         try:
-            start_time = datetime.now() - timedelta(minutes = 3)
+            start_time = datetime.now() - timedelta(minutes = 1)
             print('start time', start_time)
-            res = get_minute_data()
+            res = get_data(start_time)
             stocks = res["stocks"]
+            print(len(stocks), 'stokcs')
             stock_time = create_stocks(stocks, start_time)
             generate_flow_combinations(stock_time)
             generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
