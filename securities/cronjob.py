@@ -469,7 +469,7 @@ def new_calc_migratorb():
 def new_calc_migrator():
     error_count = 0
     print('Cleaning')
-    clean_comb()
+    # clean_comb()
     print('Initiating Calcs')
     # begin_calcs() 
     process_calcs()
@@ -743,12 +743,12 @@ def dji_migrator():
             
         initial_timestamp += timedelta(minutes=1)
         
-def clean_comb():
+def clean_comb(initial):
     # clean_redis()
     # return 'cleaned'
 
     count = 0 
-    times = [datetime(2024, 4, 30, 9)]
+    times = [initial]
     for item in times:
         print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
@@ -767,7 +767,7 @@ def clean_comb():
        
 
 def new_flow_migrator():
-    clean_comb()
+    
     ## ths block reverses the effect 
     # initial_timestamp = datetime(2024, 4,  24, 10, 58)
     # clean_avgs(initial_timestamp)
@@ -782,8 +782,9 @@ def new_flow_migrator():
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") #datetime(2024, 4,  24, 11,59)
     # datetime(2024, 4,  23, 10, 2)
-    initial_timestamp = datetime(2024, 4,  30, 9)
-    current_timestamp = datetime(2024, 4,  30, 11, 50)  #datetime(2024, 4,  25, 16)
+    initial_timestamp = datetime(2024, 4,  29, 15, 59)
+    clean_comb(initial_timestamp)
+    current_timestamp = datetime(2024, 4,  30, 11, 10)  #datetime(2024, 4,  25, 16)
     
     # Ensure initial_timestamp is before current_timestamp
     if initial_timestamp > current_timestamp:
