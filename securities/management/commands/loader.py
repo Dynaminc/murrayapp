@@ -43,9 +43,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # cronny()
-        # real_time_data()
+        real_time_data()
         
-        top_glow()
+        # top_glow()
         
         # get_all_stocks()
         # dji_migrator()
