@@ -36,10 +36,13 @@ def process_strike_symbol(symbol):
     portfolio = Profile.objects.first().porfolio
     data = []
     for item in split_symbol:
-        price = Stock.objects.filter(symbol=item).latest('date_time').close
+        stk = Stock.objects.filter(symbol=item).latest('date_time')
+        price = stk.close
         # price = Stock.objects.filter(symbol=item).first().close
         portfolio_data = quantify_strike(portfolio, price)
-        data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final']})
+        data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final'], 'date_time': stk.date_time})
+    print("Long", symbol)
+    print(data)
     return data
 
 def get_correct_close(array, title):
@@ -147,6 +150,7 @@ def update_strike(id):
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
         return False
+    print('strike instance', StrikeSerializer(strike_instance).data)
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
@@ -196,7 +200,7 @@ def update_strike(id):
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                     
         strike_instance.save()
         
-                
+    print(StrikeSerializer(strike_instance).data) 
     return True
 
 @api_view(['GET'])
@@ -468,7 +472,7 @@ def clean_comb():
 @api_view(['GET', 'POST'])
 def trigger_store(request):
     print("initiated")    
-    data = clean_comb()
+    # data = clean_comb()
     # print("Fetching")
     # data = get_test_data()
     print("Migrating")
@@ -555,28 +559,31 @@ def test_end(request):
     market_state = "off"
     try:
         market_state = check_market_hours(datetime.now())
-        if not info['previous_time']:
-            ad = Combination.objects.latest('date_time')
-            info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
-            info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
-            display_time = ad.date_time
-            # market_state = "slate"
+        ad = Combination.objects.latest('date_time')
+        info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+        # if not info['previous_time']:
+        #     ad = Combination.objects.latest('date_time')
+        #     info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
+        #     
+        #     display_time = ad.date_time
+        #     # market_state = "slate"
             
-        else:
-            ad = Combination.objects.latest('date_time')
-            info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+        # else:
+        #     ad = Combination.objects.latest('date_time')
+        #     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
             
             
-            if info['latest_time'] == info['previous_time']:
-                display_time = ad.date_time
-                # market_state = "slate"
+        #     if info['latest_time'] == info['previous_time']:
+        #         display_time = ad.date_time
+        #         # market_state = "slate"
                 
-            else:
-                display_time = datetime.now()
-                info['previous_time'] = info['latest_time']
+        #     else:
+        #         display_time = datetime.now()
+        #         info['previous_time'] = info['latest_time']
         
         # print(market_state)
         # display_time = datetime.now()
+        display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
         eastern = pytz.timezone('US/Eastern')
@@ -590,7 +597,7 @@ def test_end(request):
         if latest_data:
             latest_time = latest_data
             print(latest_time, current_time)
-            filtered_combinations = Combination.objects.filter(date_time = latest_time )
+            filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
             print(len(filtered_combinations))
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             print(len(combs))
