@@ -229,7 +229,7 @@ def all_strikes():
 
 
 def top_glow():
-    for timestamp in [datetime(2024, 4, 30, 15, 30), datetime(2024, 4, 30, 15, 45)]:
+    for timestamp in [datetime(2024, 4, 30, 15, 58)]:#, datetime(2024, 4, 30, 15, 45)
         print(timestamp)
         distinct_timestamps = [item['date_time'] for item in Combination.objects.values("date_time").order_by("date_time").distinct()]
         distinct_timestamps.append(timestamp)
