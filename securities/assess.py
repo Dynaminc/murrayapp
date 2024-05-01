@@ -252,7 +252,7 @@ def top_glow():
 
 def get_all_stocks():
     # Define the start time
-    start_time = datetime(2024, 4, 29, 10, 59)
+    start_time = datetime(2024, 4, 24, 11)
 
     # Fetch all Stock objects with date_time greater than or equal to start_time
     queryset = Stock.objects.filter(date_time__gte=start_time).order_by('-date_time')
