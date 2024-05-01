@@ -82,7 +82,7 @@ CRONJOBS = [
     ('* 9-16 * * 1-5', 'securities.cronjob.real_time_data'),
     # ('*/5 * * * *', 'securities.cronjob.new_flow_migrator'),
     # ('* 9-16 * * 1-5', 'securities.cronjob.store_new'),
-    ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
+    # ('* 9-16 * * 1-5', 'securities.cronjob.cronny'),
     # ('* * * * *', 'securities.cronjob.clean_comb'),
     # ('30 01 */15 * *', 'securities.cronjob.remove_data'),
 ]
