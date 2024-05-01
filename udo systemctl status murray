@@ -1,0 +1,24 @@
+[0;1;32m●[0m murray.service - Gunicorn instance for the Murray app
+     Loaded: loaded (]8;;file://ubuntu-main/etc/systemd/system/murray.service/etc/systemd/system/murray.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Tue 2024-04-30 14:15:06 EDT; 12min ago
+   Main PID: 500673 (gunicorn)
+      Tasks: 30 (limit: 9476)
+     Memory: 543.6M
+        CPU: 29.392s
+     CGroup: /system.slice/murray.service
+             ├─[0;38;5;245m500673 /home/venv/bin/python3 /home/venv/bin/gunicorn -c gunicorn_config.py -b localhost:8000 app.asgi:application -w 4 -k uvicorn.workers.UvicornWorker[0m
+             ├─[0;38;5;245m500678 /home/venv/bin/python3 /home/venv/bin/gunicorn -c gunicorn_config.py -b localhost:8000 app.asgi:application -w 4 -k uvicorn.workers.UvicornWorker[0m
+             ├─[0;38;5;245m500679 /home/venv/bin/python3 /home/venv/bin/gunicorn -c gunicorn_config.py -b localhost:8000 app.asgi:application -w 4 -k uvicorn.workers.UvicornWorker[0m
+             ├─[0;38;5;245m500680 /home/venv/bin/python3 /home/venv/bin/gunicorn -c gunicorn_config.py -b localhost:8000 app.asgi:application -w 4 -k uvicorn.workers.UvicornWorker[0m
+             └─[0;38;5;245m500681 /home/venv/bin/python3 /home/venv/bin/gunicorn -c gunicorn_config.py -b localhost:8000 app.asgi:application -w 4 -k uvicorn.workers.UvicornWorker[0m
+
+Apr 30 14:27:15 ubuntu-main gunicorn[500681]: 2024-04-30 14:26:00 2024-04-30 14:27:09
+Apr 30 14:27:15 ubuntu-main gunicorn[500681]: 0
+Apr 30 14:27:15 ubuntu-main gunicorn[500681]: 0
+Apr 30 14:27:15 ubuntu-main gunicorn[500681]: 105.119.1.28:0 - "GET /api/test HTTP/1.0" 200
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 2024-04-30 14:27:21.158628-04:00
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 2024-04-30 14:26:00 latest
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 2024-04-30 14:26:00 2024-04-30 14:27:22
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 0
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 0
+Apr 30 14:27:28 ubuntu-main gunicorn[500680]: 105.119.1.28:0 - "GET /api/test HTTP/1.0" 200
