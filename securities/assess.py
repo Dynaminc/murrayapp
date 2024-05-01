@@ -252,7 +252,7 @@ def top_glow():
 
 def get_all_stocks():
     # Define the start time
-    start_time = datetime(2024, 4, 29)
+    start_time = datetime(2024, 4, 29, 10, 59)
 
     # Fetch all Stock objects with date_time greater than or equal to start_time
     queryset = Stock.objects.filter(date_time__gte=start_time).order_by('-date_time')
@@ -306,12 +306,12 @@ def top_flow():
     for timestamp in timestamps:
         print(timestamp)
         # Get combinations for the current timestamp
-         
-        current_combinations = Combination.objects.filter(
-            Q(symbol = 'IBM-INTC-JNJ')|
-         Q(symbol = 'MMM-MRK-MSFT')|
-         Q(symbol = 'V-AMZN-DOW')
-         ).filter(date_time=timestamp)
+        #  (
+        #     Q(symbol = 'IBM-INTC-JNJ')|
+        #  Q(symbol = 'MMM-MRK-MSFT')|
+        #  Q(symbol = 'V-AMZN-DOW')
+        #  )
+        current_combinations = Combination.objects.filter(date_time=timestamp)
 
         # Get the symbols and averages for the current timestamp
         for combination in current_combinations:
@@ -328,7 +328,7 @@ def top_flow():
     df = pd.DataFrame.from_dict(data_dict, orient='index')
 
     # Export the DataFrame to an Excel file
-    filename = 'combination_avgs_mini.xlsx'
+    filename = 'combination_avgs_new.xlsx'
     df.to_excel(filename)
     print(f'Exported data to {filename}')
         

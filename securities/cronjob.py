@@ -819,18 +819,18 @@ def real_time_data():
         count += 1
         print('count', count)
         try:
-            start_time = (datetime.now() - timedelta(minutes = 1)).replace(microsecond=0)
-            start_time  = datetime.strptime(str(start_time), "%Y-%m-%d %H:%M:%S")
-            print('start time', start_time)
-            res = get_data(start_time)
+            timestamp = (datetime.now() - timedelta(minutes = 1)).replace(second=0, microsecond=0)
+            timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
+            print('start time', timestamp)
+            res = get_data(timestamp)
             stocks = res["stocks"]
             print(len(stocks), 'stokcs')
-            stock_time = create_stocks(stocks, start_time)
-            generate_flow_combinations(stock_time)
-            generate_dji_combinations(stock_time, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            stock_time = create_stocks(stocks, timestamp)
+            generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
             end_time = datetime.now()
-            time_difference = end_time - start_time
-            print('all created')
+            # time_difference = end_time - start_time
+            # print('all created')
             Cronny.objects.create(symbol=f"{stock_time}")    
             done = True
             print('Finally Done', count)
