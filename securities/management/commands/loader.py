@@ -33,7 +33,7 @@ from django.core.paginator import Paginator
 from datetime import datetime
 from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator, real_time_data, cronny
 from securities.simulator import simulate_compute
-from securities.assess import get_all_stocks
+from securities.assess import get_all_stocks, top_glow
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -45,8 +45,9 @@ class Command(BaseCommand):
         # cronny()
         # real_time_data()
         
+        top_glow()
         
-        get_all_stocks()
+        # get_all_stocks()
         # dji_migrator()
         # simulate_compute()
         
