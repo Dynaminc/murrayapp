@@ -6,7 +6,7 @@ from django.db.models import Q
 
 def simulate_compute():
     start_timestamp = datetime(2024, 4, 25)
-    end_timestamp = datetime(2024, 4, 26, 15,59)
+    end_timestamp = datetime.now()
 
     # Generate the range of minutes
     minutes_range = pd.date_range(start=start_timestamp, end=end_timestamp, freq='T')
@@ -70,7 +70,7 @@ def run_simulation(timestamp):
         # print(len(stocks), len(stocks)/31)
         
         initial_timestamp = start_timestamp #datetime(2024, 4,  24, 00)
-        current_timestamp = datetime(2024, 4,  26, 16)  #datetime(2024, 4,  25, 16)
+        current_timestamp = datetime.now()  #datetime(2024, 4,  25, 16)
         
         # print([ item.close for item in stocks if item.date_time == start_timestamp])
         
