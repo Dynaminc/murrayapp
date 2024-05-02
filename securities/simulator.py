@@ -23,11 +23,12 @@ def simulate_compute():
     # Process each timestamp
     
     for timestamp in timestamps:
-        print(timestamp)
-        val = run_simulation(str(timestamp))
-        if val:
-            data.append(val)
-    
+        if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
+            print(timestamp)
+            val = run_simulation(str(timestamp))
+            if val:
+                data.append(val)
+        
     
     # Convert data to DataFrame
     df = pd.DataFrame(data)
