@@ -797,10 +797,10 @@ def new_flow_migrator():
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
-            res = get_data(timestamp)
-            stocks = res["stocks"]
-            print(len(stocks), 'stokcs')
-            stock_time = create_stocks(stocks, timestamp)
+            # res = get_data(timestamp)
+            # stocks = res["stocks"]
+            # print(len(stocks), 'stokcs')
+            # stock_time = create_stocks(stocks, timestamp)
             generate_flow_combinations(timestamp)
             generate_dji_combinations(timestamp, djis)
             Cronny.objects.create(symbol=f"{timestamp}")    
