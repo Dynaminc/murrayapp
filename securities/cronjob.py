@@ -781,7 +781,7 @@ def new_flow_migrator():
     
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    initial_timestamp = datetime(2024, 4, 2, 15, 59)
+    initial_timestamp = datetime(2024, 4, 2, 15, 58)
     # datetime(2024, 4,  23, 10, 2)
     # initial_timestamp = datetime(2024, 4,  29, 11, 14)
     clean_comb(initial_timestamp)
@@ -792,7 +792,7 @@ def new_flow_migrator():
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
-        if initial_timestamp.time() >= time(9, 31) and initial_timestamp.time() <= time(15, 59): 
+        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
@@ -817,7 +817,7 @@ def real_time_data():
     count = 0 
     timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
     timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    if timestamp.time() >= time(9, 31) and timestamp.time() <= time(15, 59): 
+    if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
         print('start time', timestamp)
         res = get_data(timestamp)
         stocks = res["stocks"]
