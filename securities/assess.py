@@ -90,24 +90,22 @@ def json_migrator():
         data = json.load(json_file)
         for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
             if 'values' not in data.keys():
-                print(pre_stock_name)
+                print(pre_stock_name, 'failing')
                 return 'Failed'
-            
-            
-        for stock in data['values']:
-            # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
-            stock_name = pre_stock_name.split(':')[0]
-            stock_dict = {
-                "symbol": stock_name,
-                "close": float(stock["close"]),
-                "low": stock["low"],
-                "high": stock["high"],
-                "previous_close": float(stock["previous_close"]),
-                "date_time": stock["datetime"],
-            }
-            stock_obj = Stock(open=stock["open"], **stock_dict)
+            for stock in data['values']:
+                # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
+                stock_name = pre_stock_name.split(':')[0]
+                stock_dict = {
+                    "symbol": stock_name,
+                    "close": float(stock["close"]),
+                    "low": stock["low"],
+                    "high": stock["high"],
+                    "previous_close": float(stock["previous_close"]),
+                    "date_time": stock["datetime"],
+                }
+                stock_obj = Stock(open=stock["open"], **stock_dict)
 
-            stocks_list.append(stock_obj)
+                stocks_list.append(stock_obj)
             
             
     timestamp = datetime(2024, 4, 24)
@@ -122,6 +120,7 @@ def json_migrator():
     timestamp = datetime(2024, 4, 24)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
+    print(len(distinct_stocks))
     # distinct_stocks = ["DJI"]
     distinct_timestamps = Stock.objects.filter(date_time__gte=timestamp).values_list('date_time', flat=True).distinct()
     distinct_timestamps_list = sorted(list(distinct_timestamps))
@@ -133,7 +132,6 @@ def json_migrator():
         if len(data) > 0:
             previous_stock = data[0]
         for timestamp in distinct_timestamps_list:
-            print(stock, timestamp)
             try:
                 stock_instance = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == timestamp][0]
                 previous_stock = stock_instance
