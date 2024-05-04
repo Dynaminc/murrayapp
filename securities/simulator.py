@@ -43,30 +43,84 @@ def simulate_compute():
     
     
 def export_min_max():
+    # Define the timestamp
     timestamp = datetime(2024, 4, 25, 9, 45)
-    start_timestamp = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(date_time__gte=timestamp).values("date_time").order_by("date_time").distinct()]
+
+    # Fetch all combinations grouped by timestamp
+    combinations = Combination.objects.filter(date_time__gte=timestamp)\
+        .values('date_time', 'symbol', 'avg')\
+        .order_by('date_time', '-avg')  # Order by timestamp and score in descending order
+
+    # Process data
     data = []
-    for timepoint in sorted(tmp_distinct_timestamps):
-        print(timepoint)
-        filtered_combinations = Combination.objects.filter(date_time=timepoint)
-        combs = [{'symbol':item.symbol,'score':item.avg,'date':timepoint} for item in filtered_combinations]
-        combs.sort(key=lambda x: x['score'], reverse=True)
-        try:
-            short = combs[0]['symbol']
-            long = combs[-1]['symbol']
-            info = {'timestamp':timepoint, 'short':short, 'max':combs[0]['score'],  'long': long, 'min': combs[-1]['score'] }        
-            data.append(info)
-        except Exception as E:
-            print(E)
-        
+    previous_timepoint = None
+    for combination in combinations:
+        current_timepoint = combination['date_time']
+        if current_timepoint != previous_timepoint:
+            if previous_timepoint is not None:
+                data.append({
+                    'timestamp': previous_timepoint,
+                    'short': short,
+                    'max': max_score,
+                    'long': long,
+                    'min': min_score
+                })
+            short = combination['symbol']
+            long = combination['symbol']
+            max_score = combination['avg']
+            min_score = combination['avg']
+            previous_timepoint = current_timepoint
+        else:
+            if combination['avg'] > max_score:
+                short = combination['symbol']
+                max_score = combination['avg']
+            elif combination['avg'] < min_score:
+                long = combination['symbol']
+                min_score = combination['avg']
+
+    # Append the last data point
+    if previous_timepoint is not None:
+        data.append({
+            'timestamp': previous_timepoint,
+            'short': short,
+            'max': max_score,
+            'long': long,
+            'min': min_score
+        })
+
+    # Convert to DataFrame
     df = pd.DataFrame(data)
-    # Set open_time as index
     df.set_index('timestamp', inplace=True)
+
     # Export DataFrame to Excel
     filename = f'min_max_{datetime.now()}.xlsx'
     df.to_excel(filename)
-    print(f'Exported data to {filename}')    
+    print(f'Exported data to {filename}')  
+      
+    # timestamp = datetime(2024, 4, 25, 9, 45)
+    # start_timestamp = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
+    # tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(date_time__gte=timestamp).values("date_time").order_by("date_time").distinct()]
+    # data = []
+    # for timepoint in sorted(tmp_distinct_timestamps):
+    #     print(timepoint)
+    #     filtered_combinations = Combination.objects.filter(date_time=timepoint)
+    #     combs = [{'symbol':item.symbol,'score':item.avg,'date':timepoint} for item in filtered_combinations]
+    #     combs.sort(key=lambda x: x['score'], reverse=True)
+    #     try:
+    #         short = combs[0]['symbol']
+    #         long = combs[-1]['symbol']
+    #         info = {'timestamp':timepoint, 'short':short, 'max':combs[0]['score'],  'long': long, 'min': combs[-1]['score'] }        
+    #         data.append(info)
+    #     except Exception as E:
+    #         print(E)
+        
+    # df = pd.DataFrame(data)
+    # # Set open_time as index
+    # df.set_index('timestamp', inplace=True)
+    # # Export DataFrame to Excel
+    # filename = f'min_max_{datetime.now()}.xlsx'
+    # df.to_excel(filename)
+    # print(f'Exported data to {filename}')    
     
 def run_simulation(timestamp):
     
