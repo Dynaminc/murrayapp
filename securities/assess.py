@@ -92,12 +92,13 @@ def json_migrator():
             if 'values' not in data.keys():
                 print(pre_stock_name)
                 return 'Failed'
-            stock_name = pre_stock_name.split(':')[0]
+            
             
         for stock in data['values']:
             # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
+            stock_name = pre_stock_name.split(':')[0]
             stock_dict = {
-                "symbol": "DJI",
+                "symbol": stock_name,
                 "close": float(stock["close"]),
                 "low": stock["low"],
                 "high": stock["high"],
