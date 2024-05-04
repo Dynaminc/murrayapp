@@ -48,9 +48,10 @@ def export_min_max():
     # Optimized filtering using Subquery and OuterRef
     tmp_distinct_timestamps = Stock.objects.filter(
         date_time__gte=timestamp
-    ).values("date_time").annotate(
-        min_score=Subquery(Combination.objects.filter(date_time=OuterRef("date_time")).values("avg").order_by("avg").first()),  # Use .first() instead of indexing
-        max_score=Subquery(Combination.objects.filter(date_time=OuterRef("date_time")).values("avg").order_by("-avg").first()),  # Use .first() instead of indexing
+    ).values(
+        "date_time",
+        min_score=Subquery(Combination.objects.filter(date_time=Q(**{"date_time": "date_time"})).values("avg").order_by("avg").first()),  # Use Q object
+        max_score=Subquery(Combination.objects.filter(date_time=Q(**{"date_time": "date_time"})).values("avg").order_by("-avg").first()),  # Use Q object
     ).distinct().order_by("date_time")
 
     data = []
