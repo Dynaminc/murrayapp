@@ -123,16 +123,16 @@ def json_migrator():
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
     # distinct_stocks = ["DJI"]
     distinct_timestamps = Stock.objects.filter(date_time__gte=timestamp).values_list('date_time', flat=True).distinct()
-    distinct_timestamps_list = list(distinct_timestamps)
+    distinct_timestamps_list = sorted(list(distinct_timestamps))
     errors = []
+    error_count = 0
     for stock in distinct_stocks:
         previous_stock = None
         data = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == distinct_timestamps_list[0]]
         if len(data) > 0:
             previous_stock = data[0]
-        
-        
         for timestamp in distinct_timestamps_list:
+            print(stock, timestamp)
             try:
                 stock_instance = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == timestamp][0]
                 previous_stock = stock_instance
@@ -144,6 +144,8 @@ def json_migrator():
                     data = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == distinct_timestamps_list[distinct_timestamps_list.index(timestamp) - 1]]
                     if len(data) > 0:
                         previous_stock = data[0]
+                error_count += 1
+                print('creating. ', error_count)
                 data = Stock.objects.create(symbol=stock,open=previous_stock.open,close=previous_stock.close,low=previous_stock.low,high=previous_stock.high,previous_close=previous_stock.previous_close,date_time = timestamp)
                 stock_instance.save()
                 
