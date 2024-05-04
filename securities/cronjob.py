@@ -807,8 +807,8 @@ def new_flow_migrator():
             # count += 1
             # if count == 15:
             #     break
-            for item in Strike.objects.filter(closed=False):
-                update_strike(item.id)
+            # for item in Strike.objects.filter(closed=False):
+            #     update_strike(item.id)
         initial_timestamp += timedelta(minutes=1)
         
         
