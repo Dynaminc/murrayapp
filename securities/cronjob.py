@@ -781,10 +781,10 @@ def new_flow_migrator():
     
     count = 0 
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    # initial_timestamp = datetime(2024, 4, 29, 10, 59)
+    djis = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
     # datetime(2024, 4,  23, 10, 2)
     # initial_timestamp = datetime(2024, 4,  29, 11, )
-    clean_comb(initial_timestamp)
+    
     current_timestamp = (datetime.now())
     # datetime(2024, 4,  30, 11, 15)  #datetime(2024, 4,  25, 16)
     
@@ -801,7 +801,7 @@ def new_flow_migrator():
             print(len(stocks), 'stokcs')
             stock_time = create_stocks(stocks, timestamp)
             generate_flow_combinations(timestamp)
-            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            generate_dji_combinations(timestamp, djis)
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
             # count += 1

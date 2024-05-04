@@ -17,45 +17,46 @@ from django.db import models
 def get_test_data():#timestamp
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
-    # SYMBOLS = (
-    #     ""AXP:NYSE",
-    #     "AMGN",
-    #     "AAPL:NASDAQ",
-    #     "BA:NYSE",
-    #     "CAT:NYSE",
-    #     "CSCO:NASDAQ",
-    #     "CVX:NYSE",
-    #     "GS:NYSE",
-    #     "HD:NYSE",
-    #     "HON",
-    #     "IBM:NYSE",
-    #     "INTC:NASDAQ",
-    #     "JNJ:NYSE",
-    #     "KO:NYSE",
-    #     "JPM:NYSE",
-    #     "MCD:NYSE",
-    #     "MMM:NYSE",
-    #     "MRK:NYSE",
-    #     "MSFT:NASDAQ",
-    #     "NKE:NYSE",
-    #     "PG:NYSE",
-    #     "TRV:NYSE",
-    #     "UNH:NYSE",
-    #     "CRM:NYSE",
-    #     "VZ:NYSE",
-    #     "V:NYSE",
-    #     "AMZN:NASDAQ",
-    #     "WMT:NYSE",
-    #     "DIS:NYSE",
-    #     "DOW:NYSE","
-    # )
+    SYMBOLS = (
+        "AXP:NYSE",
+        "AMGN",
+        "AAPL:NASDAQ",
+        "BA:NYSE",
+        "CAT:NYSE",
+        "CSCO:NASDAQ",
+        "CVX:NYSE",
+        "GS:NYSE",
+        "HD:NYSE",
+        "HON",
+        "IBM:NYSE",
+        "INTC:NASDAQ",
+        "JNJ:NYSE",
+        "KO:NYSE",
+        "JPM:NYSE",
+        "MCD:NYSE",
+        "MMM:NYSE",
+        "MRK:NYSE",
+        "MSFT:NASDAQ",
+        "NKE:NYSE",
+        "PG:NYSE",
+        "TRV:NYSE",
+        "UNH:NYSE",
+        "CRM:NYSE",
+        "VZ:NYSE",
+        "V:NYSE",
+        "AMZN:NASDAQ",
+        "DOW:NYSE",
+        "WMT",
+        "DIS:NYSE",
+        "DJI"
+    )
     SYMBOLS = ("DJI")
     # all_symbols = "AXP:NYSE"
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-04-26"
-        end_date = "2024-04-27"
+        start_date = "2024-04-24"
+        end_date = "2024-05-04"
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
@@ -63,7 +64,7 @@ def get_test_data():#timestamp
         # Construct the URL with the specific minute
         # url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}&end_date={specific_minute.strftime('%Y-%m-%d %H:%M:%S')}"
 
-        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol=DJI&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
+        url = f"https://api.twelvedata.com/time_series?apikey={twelve_key}&symbol={all_symbols}&dp=4&previous_close=true&interval=1min&start_date={start_date}&end_date={end_date}"
         res = requests.get(url)
 
         if res.status_code == 200:
@@ -87,11 +88,12 @@ def json_migrator():
     intital_time = datetime.now()
     with open('djitmp.json', 'r') as json_file:
         data = json.load(json_file)
-        # for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
-        #     if 'values' not in data.keys():
-        #         print(pre_stock_name)
-        #         return 'Failed'
-        #     stock_name = pre_stock_name.split(':')[0]
+        for pre_stock_name, data in data.items(): #VZ, WMT, WBA, bulk_create the needed stock object
+            if 'values' not in data.keys():
+                print(pre_stock_name)
+                return 'Failed'
+            stock_name = pre_stock_name.split(':')[0]
+            
         for stock in data['values']:
             # if not Stock.objects.filter(symbol=stock_name, date_time=stock["datetime"]).first():
             stock_dict = {
@@ -105,19 +107,21 @@ def json_migrator():
             stock_obj = Stock(open=stock["open"], **stock_dict)
 
             stocks_list.append(stock_obj)
+            
+            
     timestamp = datetime(2024, 4, 24)
     filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
     print(len(filtered_stock_data), 'filtered')
     if filtered_stock_data:
         Stock.objects.bulk_create(filtered_stock_data)
-    print('created')
+    print('created, filling up data')
     
     
     
-    timestamp = datetime(2024, 4, 25)
+    timestamp = datetime(2024, 4, 24)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
-    # distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
-    distinct_stocks = ["DJI"]
+    distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
+    # distinct_stocks = ["DJI"]
     distinct_timestamps = Stock.objects.filter(date_time__gte=timestamp).values_list('date_time', flat=True).distinct()
     distinct_timestamps_list = list(distinct_timestamps)
     errors = []
