@@ -794,7 +794,7 @@ def new_flow_migrator():
     while initial_timestamp < current_timestamp:
         print('here')
         
-        if initial_timestamp.time() >= time(9, 31) and initial_timestamp.time() <= time(15, 59): 
+        if initial_timestamp.time() >= time(9, 32) and initial_timestamp.time() <= time(15, 59): 
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
@@ -819,7 +819,7 @@ def real_time_data():
     count = 0 
     timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
     timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    if timestamp.time() >= time(9, 31) and timestamp.time() <= time(15, 59): 
+    if timestamp.time() >= time(9, 32) and timestamp.time() <= time(15, 59): 
         print('start time', timestamp)
         res = get_data(timestamp)
         stocks = res["stocks"]
