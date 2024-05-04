@@ -44,7 +44,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # cronny()
-        final_time = datetime(2024, 4,  2, 9, 30)
+        final_time = datetime(2024, 4,  3, 9, 30)
         print(final_time)
         data = Combination.objects.filter(
                         date_time__gte=final_time,
