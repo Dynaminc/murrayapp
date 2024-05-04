@@ -50,7 +50,7 @@ def get_test_data():#timestamp
         "DIS:NYSE",
         "DJI"
     )
-    SYMBOLS = ("DJI")
+    # SYMBOLS = ("DJI")
     # all_symbols = "AXP:NYSE"
     all_symbols = ",".join(SYMBOLS)
     try:
