@@ -781,7 +781,7 @@ def new_flow_migrator():
     
     count = 0 
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    initial_timestamp = datetime(2024, 4, 29, 9, 30)
+    initial_timestamp = datetime(2024, 4, 29, 10, 59)
     # datetime(2024, 4,  23, 10, 2)
     # initial_timestamp = datetime(2024, 4,  29, 11, )
     clean_comb(initial_timestamp)
@@ -792,7 +792,7 @@ def new_flow_migrator():
     if initial_timestamp > current_timestamp:
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
-        if initial_timestamp.time() >= time(9, 31) and initial_timestamp.time() <= time(15, 59): 
+        if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
