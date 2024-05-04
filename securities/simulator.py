@@ -43,10 +43,7 @@ def simulate_compute():
     
     
 def export_min_max():
-    timestamp = datetime(2024, 4, 24, 11)
-
-    print(data)
-    timestamp = datetime(2024, 4, 24, 11)
+    timestamp = datetime(2024, 4, 25, 9, 45)
     start_timestamp = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
     tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(date_time__gte=timestamp).values("date_time").order_by("date_time").distinct()]
     data = []
