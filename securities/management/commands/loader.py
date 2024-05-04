@@ -50,6 +50,10 @@ class Command(BaseCommand):
                         date_time__gte=final_time,
                         date_time__lt=(final_time + timedelta(minutes=1))).all()
         print(len(data))
+        data = Stock.objects.filter(
+                        date_time__gte=final_time,
+                        date_time__lt=(final_time + timedelta(minutes=1))).all()
+        print(len(data))
         data.delete()
         
         # top_glow()
