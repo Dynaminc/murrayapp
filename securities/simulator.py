@@ -46,16 +46,20 @@ def simulate_compute():
 def export_min_max():
     timestamp = datetime(2024, 4, 24, 11)
     start_timestamp = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
+    tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.filter(date_time__gte=timestamp).values("date_time").order_by("date_time").distinct()]
     data = []
     for timepoint in sorted(tmp_distinct_timestamps):
+        print(timepoint)
         filtered_combinations = Combination.objects.filter(date_time=timepoint)
         combs = [{'symbol':item.symbol,'score':item.avg,'date':timepoint} for item in filtered_combinations]
         combs.sort(key=lambda x: x['score'], reverse=True)
-        short = combs[0]['symbol']
-        long = combs[-1]['symbol']
-        info = {'timestamp':timepoint, 'short':short, 'max':combs[0]['score'],  'long': long, 'min': combs[-1]['score'] }        
-        data.append(info)
+        try:
+            short = combs[0]['symbol']
+            long = combs[-1]['symbol']
+            info = {'timestamp':timepoint, 'short':short, 'max':combs[0]['score'],  'long': long, 'min': combs[-1]['score'] }        
+            data.append(info)
+        except Exception as E:
+            print(E)
         
     df = pd.DataFrame(data)
     # Set open_time as index
