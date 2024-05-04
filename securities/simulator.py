@@ -42,6 +42,29 @@ def simulate_compute():
 
     print(f'Exported data to {filename}')    
     
+    
+def export_min_max():
+    timestamp = datetime(2024, 4, 24, 11)
+    start_timestamp = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
+    tmp_distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
+    data = []
+    for timepoint in sorted(tmp_distinct_timestamps):
+        filtered_combinations = Combination.objects.filter(date_time=timepoint)
+        combs = [{'symbol':item.symbol,'score':item.avg,'date':timepoint} for item in filtered_combinations]
+        combs.sort(key=lambda x: x['score'], reverse=True)
+        short = combs[0]['symbol']
+        long = combs[-1]['symbol']
+        info = {'timestamp':timepoint, 'short':short, 'max':combs[0]['score'],  'long': long, 'min': combs[-1]['score'] }        
+        data.append(info)
+        
+    df = pd.DataFrame(data)
+    # Set open_time as index
+    df.set_index('timestamp', inplace=True)
+    # Export DataFrame to Excel
+    filename = f'min_max_{datetime.now()}.xlsx'
+    df.to_excel(filename)
+    print(f'Exported data to {filename}')    
+    
 def run_simulation(timestamp):
     
     # fetches the max and min of that time stamp
