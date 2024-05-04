@@ -581,7 +581,6 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
         final_time = new_distinct_timestamps[current]
     item = Stock.objects.filter(symbol="DJI").filter(date_time=final_time).first()
     stock = StockSerializer(item).data
-    print('fetched')
     
     previous_instance = Combination.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[previous]).first()
     
@@ -627,7 +626,7 @@ def generate_flow_combinations(current_datetime):
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
-    print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
+    # print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
 
 
     final_time = None
@@ -794,6 +793,7 @@ def new_flow_migrator():
         initial_timestamp, current_timestamp = current_timestamp, initial_timestamp
     while initial_timestamp < current_timestamp:
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
+            intital_time = datetime.now()
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
@@ -805,6 +805,8 @@ def new_flow_migrator():
             generate_dji_combinations(timestamp, djis)
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
+            final_time = datetime.now() - intital_time            
+            print(f"Time difference: {final_time.total_seconds()} seconds", timestamp)
             # count += 1
             # if count == 15:
             #     break
