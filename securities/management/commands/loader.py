@@ -34,6 +34,7 @@ from datetime import datetime
 from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator, real_time_data, cronny
 from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, top_glow
+from datetime import timedelta
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -43,7 +44,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # cronny()
-        real_time_data()
+        final_time = datetime(2024, 4,  2, 9, 30)
+        print(final_time)
+        data = Combination.objects.filter(
+                        date_time__gte=final_time,
+                        date_time__lt=(final_time + timedelta(minutes=1))).all()
+        print(len(data))
+        data.delete()
         
         # top_glow()
         
