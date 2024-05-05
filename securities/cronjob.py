@@ -618,8 +618,65 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
         current_instance.save()
         pass
     
+
+def all_flow(initial_timestamp):
+    
+    stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+    # stocks = [StockSerializer(item) for item in stock_query]
+    distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
+    new_distinct_timestamps = sorted(distinct_timestamps)
+    
+    prev_dict = {}
+    dji_prev = 0
+    combs = combinations(Company.SYMBOLS, 3)
+    for comb in combs:
+        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        prev_dict[strike] = 0
+            
+            
+    count = 0
+    for timestamp in distinct_timestamps:
+        previous_set = [item for item in stocks if item.date_time == new_distinct_timestamps[count-1] and (count-1) > 0]
+        final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
+        combs = combinations(Company.SYMBOLS, 3)
+        for comb in combs:
+            
+            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+            
+            stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
+            stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
+            stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
+            
+            
+            current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+            cummulative_percent  =  prev_dict[strike] + current_percent
+            prev_dict[strike] = cummulative_percent 
+            
+            Combination.objects.create(
+                    symbol=strike,
+                    avg=cummulative_percent,
+                    stdev=current_percent,
+                    strike=(stock_1.close + stock_2.close + stock_3.close)/3,
+                    date_time=timestamp,
+                    z_score=0,
+                ) 
+        
     
     
+        dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
+        dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
+        dji_cummulative_percent  =  dji_prev + dji_current_percent
+        Combination.objects.create(
+            symbol="DJI",
+            avg=dji_cummulative_percent,
+            stdev=dji_current_percent,
+            strike=dji.close,
+            date_time=timestamp,
+            z_score=0,
+        ) 
+        count += 1
+        
+        
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
@@ -753,13 +810,13 @@ def clean_comb(initial):
         data = Combination.objects.filter(date_time__gte=item).all()
         data.delete()
         print('cleaned combinations')
-        data = Stock.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned stocks')
-        con.set("combinations_data", "[]")
-        con.set("comb_time", "[]")
-        con.set("stock_data", "[]")
-        print('cleaned redis')
+        # data = Stock.objects.filter(date_time__gte=item).all()
+        # data.delete()
+        # print('cleaned stocks')
+        # con.set("combinations_data", "[]")
+        # con.set("comb_time", "[]")
+        # con.set("stock_data", "[]")
+        # print('cleaned redis')
         
     
     return 'cleaned'
