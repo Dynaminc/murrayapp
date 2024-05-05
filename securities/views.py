@@ -86,9 +86,9 @@ def get_chart(request):
             }
             for comb in shorts
         ]   
-        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data, "dji_value": dji_value})
+        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data, "dji_value": dji_value.avg})
     except:
-        return JsonResponse({ 'message':"Load Failed", "data":[], "dji_value": dji_value})
+        return JsonResponse({ 'message':"Load Failed", "data":[], "dji_value": 0})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -589,12 +589,12 @@ def test_end(request):
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             print(len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg})
         else:
             
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg})
     except Exception as E:
-        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":dji_value})
+        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":dji_value.avg})
     
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')
