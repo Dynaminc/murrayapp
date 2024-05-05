@@ -636,7 +636,7 @@ def all_flow(initial_timestamp):
             
     count = 0
     for timestamp in distinct_timestamps:
-        previous_set = [item for item in stocks if item.date_time == new_distinct_timestamps[count-1] and (count-1) > 0]
+        print(timestamp)
         final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
         combs = combinations(Company.SYMBOLS, 3)
         for comb in combs:
