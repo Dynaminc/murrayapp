@@ -81,7 +81,7 @@ def get_chart(request):
             {
                 'time': comb.date_time,
                 'svalue': comb.avg,
-                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) - get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
                 'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
             }
             for comb in shorts
