@@ -823,21 +823,14 @@ def clean_comb(initial):
        
 
 def new_flow_migrator():
-    
-    ## ths block reverses the effect 
-    
-    # clean_avgs(initial_timestamp)
-    # 
-    # return
-    
     error_count = 0
     my_time = str(datetime.now())
     con.set("initiated", my_time)
     print('Initiated')   
     
     count = 0 
-    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    initial_timestamp = datetime(2024, 4, 24, 11)
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
+    # initial_timestamp = datetime(2024, 4, 24, 11)
     djis = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
     # datetime(2024, 4,  23, 10, 2)
     # initial_timestamp = datetime(2024, 4,  29, 11, )
@@ -854,10 +847,10 @@ def new_flow_migrator():
             
             print('in neer', initial_timestamp)
             timestamp = initial_timestamp
-            # res = get_data(timestamp)
-            # stocks = res["stocks"]
-            # print(len(stocks), 'stokcs')
-            # stock_time = create_stocks(stocks, timestamp)
+            res = get_data(timestamp)
+            stocks = res["stocks"]
+            print(len(stocks), 'stokcs')
+            stock_time = create_stocks(stocks, timestamp)
             generate_flow_combinations(timestamp)
             generate_dji_combinations(timestamp, djis)
             Cronny.objects.create(symbol=f"{timestamp}")    
@@ -867,8 +860,8 @@ def new_flow_migrator():
             # count += 1
             # if count == 15:
             #     break
-            # for item in Strike.objects.filter(closed=False):
-            #     update_strike(item.id)
+            for item in Strike.objects.filter(closed=False):
+                update_strike(item.id)
         initial_timestamp += timedelta(minutes=1)
         
         
@@ -877,7 +870,7 @@ def real_time_data():
     count = 0 
     timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
     timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
+    if timestamp.time() >= time(9, 31) and timestamp.time() <= time(15, 59): 
         print('start time', timestamp)
         res = get_data(timestamp)
         stocks = res["stocks"]

@@ -45,19 +45,19 @@ class Command(BaseCommand):
         # real_time_data()
         
         
-        
+        new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
         
-        initial_timestamp = datetime(2024, 4, 24, 11)
-        clean_comb(initial_timestamp)
+        # initial_timestamp = datetime(2024, 4, 24, 11)
+        # clean_comb(initial_timestamp)
         # print("cleaned data")
         # get_test_data()
         # print('test data obtained')
         # json_migrator()
         # print('json migration done')
-        all_flow(initial_timestamp)
-        print("Completed newflow migrations")
+        # all_flow(initial_timestamp)
+        # print("Completed newflow migrations")
         # real_time_data()
         # new_calc_migrator()
         

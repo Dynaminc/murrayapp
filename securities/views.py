@@ -65,6 +65,8 @@ def get_long_dji_value(all_combs, isLong, long, timestamp):
 def get_chart(request):
     try:
         id = request.GET.get('id', "")
+        dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+        
         strike_instance = Strike.objects.filter(id=id).first() 
         short = strike_instance.short_symbol
         long = strike_instance.long_symbol
@@ -84,9 +86,9 @@ def get_chart(request):
             }
             for comb in shorts
         ]   
-        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data})
+        return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data, "dji_value": dji_value})
     except:
-        return JsonResponse({ 'message':"Load Failed", "data":[]})
+        return JsonResponse({ 'message':"Load Failed", "data":[], "dji_value": dji_value})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -565,28 +567,9 @@ def test_end(request):
         market_state = check_market_hours(datetime.now())
         ad = Combination.objects.latest('date_time')
         info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
-        # if not info['previous_time']:
-        #     ad = Combination.objects.latest('date_time')
-        #     info['previous_time'] = ad.date_time.replace(second=0, microsecond=0)
-        #     
-        #     display_time = ad.date_time
-        #     # market_state = "slate"
-            
-        # else:
-        #     ad = Combination.objects.latest('date_time')
-        #     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
-            
-            
-        #     if info['latest_time'] == info['previous_time']:
-        #         display_time = ad.date_time
-        #         # market_state = "slate"
-                
-        #     else:
-        #         display_time = datetime.now()
-        #         info['previous_time'] = info['latest_time']
         
-        # print(market_state)
-        # display_time = datetime.now()
+        dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+        
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
@@ -606,12 +589,12 @@ def test_end(request):
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             print(len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value})
         else:
             
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value})
     except Exception as E:
-        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E)})
+        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":dji_value})
     
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')
