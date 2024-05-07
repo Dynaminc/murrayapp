@@ -95,6 +95,7 @@ def load_strikes(request):
     data = [StrikeSerializer(strike).data for strike in Strike.objects.all()]
     return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
 
+
 @api_view(['GET'])
 def update_striker(request):
     
@@ -114,8 +115,8 @@ def update_striker(request):
         sum_total += sum([item['final'] for item in long_data])
         sum_total += sum([item['final'] for item in short_data])
         
-        strike_instance.current_price = sum_total
-        strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        # strike_instance.current_price = sum_total
+        # strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
         
         # strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
         # strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
@@ -135,6 +136,18 @@ def update_striker(request):
         strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
         # process for exit signal             
         #signal_exit = models.BooleanField(default=False
+        strike_instance.current_price = get_current_value(strike_instance)
+        strike_instance.current_percentage = (strike_instance.current_price - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        if strike_instance.max_percentage:
+            strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
+        else:
+            strike_instance.max_percentage = strike_instance.current_percentage 
+            
+        if strike_instance.min_percentage:
+            strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
+        
+        else:
+            strike_instance.min_percentage = strike_instance.current_percentage        
                 
         strike_instance.save()
         
@@ -143,7 +156,16 @@ def update_striker(request):
         return JsonResponse({ 'message':"Trade closed", "data":StrikeSerializer(strike_instance).data})
 
 
+def get_current_value(data):
+    resp = (-((data.fss_close - data.fss_open) * data.fss_quantity)
+        -((data.sss_close - data.sss_open) * data.sss_quantity) 
+        -((data.tss_close - data.tss_open) * data.tss_quantity) +
 
+        ((data.fls_close - data.fls_open) * data.fls_quantity)+
+        ((data.sls_close - data.sls_open) * data.sls_quantity)+
+        ((data.tls_close - data.tls_open) * data.tls_quantity)
+        )
+    return resp
 
 def update_strike(id):
     
@@ -161,19 +183,6 @@ def update_strike(id):
         sum_total += sum([item['final'] for item in long_data])
         sum_total += sum([item['final'] for item in short_data])
         
-        strike_instance.current_price = sum_total
-        strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
-        
-        if strike_instance.max_percentage:
-            strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
-        else:
-            strike_instance.max_percentage = strike_instance.current_percentage 
-            
-        if strike_instance.min_percentage:
-            strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
-        
-        else:
-            strike_instance.min_percentage = strike_instance.current_percentage 
             
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
@@ -189,6 +198,22 @@ def update_strike(id):
         strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
         strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']             
         
+        
+        
+        strike_instance.current_price = get_current_value(strike_instance)
+        strike_instance.current_percentage = (strike_instance.current_price - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        
+        
+        if strike_instance.max_percentage:
+            strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
+        else:
+            strike_instance.max_percentage = strike_instance.current_percentage 
+            
+        if strike_instance.min_percentage:
+            strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
+        
+        else:
+            strike_instance.min_percentage = strike_instance.current_percentage 
         # process for exit signal             
         if strike_instance.current_percentage > 1.5 and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
@@ -237,11 +262,15 @@ def close_strike(request):
         stock_time = Stock.objects.latest('date_time').date_time
         
         sum_total = 0
-        sum_total += sum([item['final'] for item in long_data])
-        sum_total += sum([item['final'] for item in short_data])
+        # sum_total += sum([item['final'] for item in long_data])
+        # sum_total += sum([item['final'] for item in short_data])
         
         
+        # strike_instance.total_close_price = sum_total
+        sum_total = get_current_value(strike_instance) + strike_instance.total_open_price
         strike_instance.total_close_price = sum_total
+        
+            
         strike_instance.close_time = stock_time
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
