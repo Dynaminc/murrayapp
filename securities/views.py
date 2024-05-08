@@ -137,7 +137,7 @@ def update_striker(request):
         # process for exit signal             
         #signal_exit = models.BooleanField(default=False
         strike_instance.current_price = get_current_value(strike_instance)
-        strike_instance.current_percentage = (strike_instance.current_price - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        strike_instance.current_percentage = (strike_instance.current_price / strike_instance.total_open_price) * 100
         if strike_instance.max_percentage:
             strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
         else:
@@ -201,7 +201,7 @@ def update_strike(id):
         
         
         strike_instance.current_price = get_current_value(strike_instance)
-        strike_instance.current_percentage = (strike_instance.current_price - strike_instance.total_open_price)/strike_instance.total_open_price * 100
+        strike_instance.current_percentage = (strike_instance.current_price /strike_instance.total_open_price) * 100
         
         
         if strike_instance.max_percentage:
