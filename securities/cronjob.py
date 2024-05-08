@@ -810,9 +810,9 @@ def clean_comb(initial):
         data = Combination.objects.filter(date_time__gte=item).all()
         data.delete()
         print('cleaned combinations')
-        # data = Stock.objects.filter(date_time__gte=item).all()
-        # data.delete()
-        # print('cleaned stocks')
+        data = Stock.objects.filter(date_time__gte=item).all()
+        data.delete()
+        print('cleaned stocks')
         # con.set("combinations_data", "[]")
         # con.set("comb_time", "[]")
         # con.set("stock_data", "[]")
@@ -851,15 +851,14 @@ def new_flow_migrator():
             stocks = res["stocks"]
             print(len(stocks), 'stokcs')
             stock_time = create_stocks(stocks, timestamp)
-            generate_flow_combinations(timestamp)
-            generate_dji_combinations(timestamp, djis)
+            if initial_timestamp.time() >= time(9, 35): 
+                generate_flow_combinations(timestamp)
+                generate_dji_combinations(timestamp, djis)
+
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
             final_time = datetime.now() - intital_time            
             print(f"Time difference: {final_time.total_seconds()} seconds", timestamp)
-            # count += 1
-            # if count == 15:
-            #     break
             for item in Strike.objects.filter(closed=False):
                 update_strike(item.id)
         initial_timestamp += timedelta(minutes=1)
@@ -876,11 +875,11 @@ def real_time_data():
         stocks = res["stocks"]
         print(len(stocks), 'stokcs')
         stock_time = create_stocks(stocks, timestamp)
-        generate_flow_combinations(timestamp)
-        generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+        if timestamp.time() >= time(9, 35): 
+            generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            
         end_time = datetime.now()
-        # time_difference = end_time - start_time
-        # print('all created')
         Cronny.objects.create(symbol=f"{stock_time}")    
         done = True
         print('Finally Done', count)

@@ -55,8 +55,8 @@ def get_test_data():#timestamp
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-04-24"
-        end_date = "2024-05-04"
+        start_date = "2024-05-07"
+        end_date = "2024-05-08"
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
@@ -257,7 +257,7 @@ def top_glow():
 
 def get_all_stocks():
     # Define the start time
-    start_time = datetime(2024, 4, 24, 11)
+    start_time = datetime(2024, 5, 7, 11)
 
     # Fetch all Stock objects with date_time greater than or equal to start_time
     queryset = Stock.objects.filter(date_time__gte=start_time).order_by('-date_time')
