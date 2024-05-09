@@ -132,6 +132,7 @@ def json_migrator():
         if len(data) > 0:
             previous_stock = data[0]
         for timestamp in distinct_timestamps_list:
+            print(timestamp)
             try:
                 stock_instance = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == timestamp][0]
                 previous_stock = stock_instance
