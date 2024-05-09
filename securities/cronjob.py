@@ -636,46 +636,47 @@ def all_flow(initial_timestamp):
             
     count = 0
     for timestamp in distinct_timestamps:
-        print(timestamp)
-        final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
-        combs = combinations(Company.SYMBOLS, 3)
-        for comb in combs:
+        if timestamp.time() >= time(9, 35): 
+            print(timestamp)
+            final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
+            combs = combinations(Company.SYMBOLS, 3)
+            for comb in combs:
+                
+                strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+                
+                stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
+                stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
+                stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
+                
+                
+                current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                cummulative_percent  =  prev_dict[strike] + current_percent
+                prev_dict[strike] = cummulative_percent 
+                
+                Combination.objects.create(
+                        symbol=strike,
+                        avg=cummulative_percent,
+                        stdev=current_percent,
+                        strike=(stock_1.close + stock_2.close + stock_3.close)/3,
+                        date_time=timestamp,
+                        z_score=0,
+                    ) 
             
-            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-            
-            stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
-            stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
-            stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
-            
-            
-            current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-            cummulative_percent  =  prev_dict[strike] + current_percent
-            prev_dict[strike] = cummulative_percent 
-            
+        
+        
+            dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
+            dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
+            dji_cummulative_percent  =  dji_prev + dji_current_percent
             Combination.objects.create(
-                    symbol=strike,
-                    avg=cummulative_percent,
-                    stdev=current_percent,
-                    strike=(stock_1.close + stock_2.close + stock_3.close)/3,
-                    date_time=timestamp,
-                    z_score=0,
-                ) 
-        
-    
-    
-        dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
-        dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
-        dji_cummulative_percent  =  dji_prev + dji_current_percent
-        Combination.objects.create(
-            symbol="DJI",
-            avg=dji_cummulative_percent,
-            stdev=dji_current_percent,
-            strike=dji.close,
-            date_time=timestamp,
-            z_score=0,
-        ) 
-        count += 1
-        
+                symbol="DJI",
+                avg=dji_cummulative_percent,
+                stdev=dji_current_percent,
+                strike=dji.close,
+                date_time=timestamp,
+                z_score=0,
+            ) 
+            count += 1
+            
         
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
