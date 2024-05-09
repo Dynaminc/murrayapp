@@ -117,7 +117,7 @@ def json_migrator():
     
     
     
-    timestamp = datetime(2024, 4, 24)
+    timestamp = datetime(2024, 4, 7)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
     print(len(distinct_stocks))
