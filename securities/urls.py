@@ -19,6 +19,7 @@ urlpatterns = [
     
     path("api/testit", views.trigger_store),
     path("api/check", views.trigger_lens),
+    path("api/earnings", views.ManageEarning),
     
     
     
