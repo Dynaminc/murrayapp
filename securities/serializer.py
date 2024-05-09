@@ -7,7 +7,17 @@ class StrikeManagementSerializer(serializers.Serializer):
     
 class FundSerializer(serializers.Serializer):
     fund = serializers.CharField() 
+
+class EarningForm(serializers.Serializer):
+    symbol = serializers.CharField() 
+    datetime = serializers.CharField()
     
+class EarningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Earning
+        include = ['pk']
+        fields = '__all__'
+            
 class StockSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stock

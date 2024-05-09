@@ -17,6 +17,7 @@ from .utils import quick_run
 # from .cronjob import new_calc, clean_comb
 from .serializer import *   
 from .assess import get_test_data, json_migrator, all_strikes, export_file, top_flow
+import pandas as pd 
 
 con = get_redis_connection("default")
 info = {'previous_time': None, 'latest_time': None}
@@ -96,6 +97,47 @@ def load_strikes(request):
     return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
 
 
+
+### crud for earnings 
+
+@api_view(['POST','GET','PUT','DELETE'])
+def ManageEarning(request):
+    if request.method == "POST":
+        serializer = EarningForm(data=request.POST)
+        if not serializer.is_valid():
+            return JsonResponse({"data":[], 'errors': serializer.errors})    
+        serializer = serializer.data
+        
+        symbol = serializer['symbol']
+        datetime = serializer['datetime']
+        earning_instance = Earning.objects.filter(symbol=symbol).first()
+        if earning_instance:
+            earning_instance.date_time = datetime
+            earning_instance.save()
+        else:
+            earning_instance = Earning.objects.create(symbol=symbol, date_time=datetime)
+            
+        all_data = Earning.objects.all()
+        serialized_data = [ EarningSerializer(item).data for item in all_data ]             
+        return JsonResponse({"data":serialized_data})    
+    if request.method == "GET":
+        all_data = Earning.objects.all()
+        serialized_data = [ EarningSerializer(item).data for item in all_data ] 
+        return JsonResponse({"data":serialized_data})
+    
+    if request.method == "PUT":
+        return JsonResponse({ "data":Company.all_symbols})   
+        
+    if request.method =="DELETE":
+        data = request.POST
+        id = data['id'] 
+        earning_instance = Earning.objects.filter(id=id).first()
+        earning_instance.delete()
+        all_data = Earning.objects.all()
+        serialized_data = [ EarningSerializer(item).data for item in all_data ]             
+        return JsonResponse({"data":serialized_data}) 
+        
+    
 @api_view(['GET'])
 def update_striker(request):
     
@@ -215,19 +257,20 @@ def update_strike(id):
         else:
             strike_instance.min_percentage = strike_instance.current_percentage 
         # process for exit signal             
-        if strike_instance.current_percentage > 1.5 and not strike_instance.signal_exit:
+        if strike_instance.current_percentage > 2 and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
-            Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the {strike_instance.current_percentage}% mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
+            Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the 2% mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
         else:
-            detail = f"Strike has exceeded the {strike_instance.current_percentage}% mark"
             if strike_instance.current_percentage > 1: 
-                
+                detail = f"Strike has exceeded the 1% mark"   
                 if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)   
-            if strike_instance.current_percentage < - 1:
+            if strike_instance.current_percentage < -1:
+                detail = f"Strike has exceeded the -1% mark"
                 if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                       
-            if strike_instance.current_percentage < - 1.5:
+            if strike_instance.current_percentage < -1.5:
+                detail = f"Strike has exceeded the -1.5% mark"
                 if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                     
         strike_instance.save()
@@ -586,7 +629,13 @@ def check_market_hours(dat):
     else:
         return "red"
     
-      
+def check_strike_symbol(strike, earning_symbols):
+    for item in earning_symbols:
+        if item in strike:
+            return True
+    return False
+        
+    
 
 @api_view(['GET', 'POST'])
 def test_end(request):
@@ -612,11 +661,15 @@ def test_end(request):
         print(latest_data, 'latest')
         if latest_data:
             latest_time = latest_data
-            print(latest_time, current_time)
-            filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
-            print(len(filtered_combinations))
+            pre_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+            
+            earnings_data = Earning.objects.all()
+            current_date = datetime.now().date()
+            start_date = current_date - timedelta(days=2)
+            end_date = current_date + timedelta(days=2)
+            valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
+            filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data) ]
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
-            print(len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg})
         else:
