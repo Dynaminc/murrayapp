@@ -675,7 +675,7 @@ def all_flow(initial_timestamp):
                 date_time=timestamp,
                 z_score=0,
             ) 
-            count += 1
+        count += 1
             
         
 def generate_flow_combinations(current_datetime):
