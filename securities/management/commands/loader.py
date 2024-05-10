@@ -43,19 +43,20 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        return
+        new_flow_migrator()
+        
         # cronny()
-        final_time = datetime(2024, 4,  3, 9, 30)
-        print(final_time)
-        data = Combination.objects.filter(
-                        date_time__gte=final_time,
-                        date_time__lt=(final_time + timedelta(minutes=1))).all()
-        print(len(data))
-        data = Stock.objects.filter(
-                        date_time__gte=final_time,
-                        date_time__lt=(final_time + timedelta(minutes=1))).all()
-        print(len(data))
-        data.delete()
+        # final_time = datetime(2024, 4,  3, 9, 30)
+        # print(final_time)
+        # data = Combination.objects.filter(
+        #                 date_time__gte=final_time,
+        #                 date_time__lt=(final_time + timedelta(minutes=1))).all()
+        # print(len(data))
+        # data = Stock.objects.filter(
+        #                 date_time__gte=final_time,
+        #                 date_time__lt=(final_time + timedelta(minutes=1))).all()
+        # print(len(data))
+        # data.delete()
         
         # top_glow()
         
