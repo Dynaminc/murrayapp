@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, time
 from itertools import combinations
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.db.models import Max
 from django.db.models import Q
 from django.db import IntegrityError
 from django.utils import timezone as tz
@@ -704,11 +705,14 @@ def generate_flow_combinations(current_datetime):
         Q(date_time=final_time)
     ).all()
     
-    
+    latest_timestamp = Combination.objects.aggregate(Max('date_time'))['date_time__max']
+    start_time = latest_timestamp - timedelta(minutes=1)
+    recent_objects = Combination.objects.filter(date_time__gte=start_time)
+    recent_objects = recent_objects.distinct()
 
         
     previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
-    final_set = [item for item in dataset if item.date_time == final_time]
+    # final_set = [item for item in dataset if item.date_time == final_time]
     print(timestamp, new_distinct_timestamps[previous], final_time)
     
     
@@ -726,42 +730,43 @@ def generate_flow_combinations(current_datetime):
         
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
         
-        
+        cummulative_percent = 0
         previous_instance = None 
         try:
-            previous_instance = [item for item in previous_set if item.symbol == strike][0]
-        except:
-            pass
-        try:
-            comb_instance = [item for item in final_set if item.symbol == strike][0]
-            cummulative_percent = 0
-            if previous_instance:
-                cummulative_percent  =  previous_instance.avg + current_percent
-            else: 
-                cummulative_percent  =  current_percent
-                
-            comb_instance.avg = cummulative_percent
-            comb_instance.save()
-                
-        except Exception as E:
-            cummulative_percent = 0
+            previous_instance = [item for item in previous_set if item.symbol == strike][0]    
             if previous_instance:
                 cummulative_percent  =  previous_instance.avg + current_percent
             else:
                 cummulative_percent  =  current_percent
+            Combination.objects.create(
+                symbol=strike,
+                avg=cummulative_percent,
+                stdev=0,
+                strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                date_time=timestamp,
+                z_score=0,
+            )  
+        except Exception as E:
+            print(E)
+            pass
+        # try:
+        #     # comb_instance = [item for item in final_set if item.symbol == strike][0]
+        #     # cummulative_percent = 0
+        #     # if previous_instance:
+        #     #     cummulative_percent  =  previous_instance.avg + current_percent
+        #     # else: 
+        #     #     cummulative_percent  =  current_percent
                 
-            try:
-                Combination.objects.create(
-                    symbol=strike,
-                    avg=cummulative_percent,
-                    stdev=0,
-                    strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
-                    date_time=timestamp,
-                    z_score=0,
-                ) 
-            except Exception as E:
-                print('Another ', E)
-                pass
+        #     # comb_instance.avg = cummulative_percent
+        #     # comb_instance.save()
+                
+        # # except Exception as E:
+
+        #     try:
+    
+        #     except Exception as E:
+        #         print('Another ', E)
+        #         pass
                 
         
         

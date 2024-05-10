@@ -43,6 +43,10 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
+        
+        initial_timestamp = datetime(2024, 5, 10)
+        clean_comb(initial_timestamp)
+        print("cleaned data")
         new_flow_migrator()
         
         # cronny()
