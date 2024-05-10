@@ -583,7 +583,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     item = Stock.objects.filter(symbol="DJI").filter(date_time=final_time).first()
     stock = StockSerializer(item).data
     
-    previous_instance = Combination.objects.filter(symbol="DJI").filter(date_time=new_distinct_timestamps[previous]).first()
+    previous_instance = Combination.objects.filter(symbol="DJI").latest()
     
     if not previous_instance:
         previous_instance = Combination.objects.create(
@@ -700,10 +700,10 @@ def generate_flow_combinations(current_datetime):
     
     # stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
     print('Stocks', len(stocks))
-    dataset = Combination.objects.filter(
-        Q(date_time=new_distinct_timestamps[previous]) |
-        Q(date_time=final_time)
-    ).all()
+    # dataset = Combination.objects.filter(
+    #     Q(date_time=new_distinct_timestamps[previous]) |
+    #     Q(date_time=final_time)
+    # ).all()
     
     latest_timestamp = Combination.objects.aggregate(Max('date_time'))['date_time__max']
     start_time = latest_timestamp - timedelta(minutes=1)
@@ -711,7 +711,8 @@ def generate_flow_combinations(current_datetime):
     recent_objects = recent_objects.distinct()
 
         
-    previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
+    # previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
+    previous_set = list(recent_objects)
     # final_set = [item for item in dataset if item.date_time == final_time]
     print(timestamp, new_distinct_timestamps[previous], final_time)
     
