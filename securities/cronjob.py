@@ -583,7 +583,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     item = Stock.objects.filter(symbol="DJI").filter(date_time=final_time).first()
     stock = StockSerializer(item).data
     
-    previous_instance = Combination.objects.filter(symbol="DJI").latest()
+    previous_instance = Combination.objects.filter(symbol="DJI").latest('date_time')
     
     if not previous_instance:
         previous_instance = Combination.objects.create(
@@ -748,7 +748,6 @@ def generate_flow_combinations(current_datetime):
                 z_score=0,
             )  
         except Exception as E:
-            print(E)
             pass
         # try:
         #     # comb_instance = [item for item in final_set if item.symbol == strike][0]
