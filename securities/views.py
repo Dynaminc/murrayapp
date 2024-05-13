@@ -665,7 +665,7 @@ def test_end(request):
             
             earnings_data = Earning.objects.all()
             current_date = datetime.now().date()
-            start_date = current_date - timedelta(days=2)
+            start_date = current_date - timedelta(days=1)
             end_date = current_date + timedelta(days=2)
             valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
             filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data) ]
