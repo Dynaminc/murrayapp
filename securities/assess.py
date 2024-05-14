@@ -56,7 +56,7 @@ def get_test_data():#timestamp
     try:
         
         start_date = "2024-05-07"
-        end_date = "2024-05-10"
+        end_date = datetime.now().date()
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
@@ -115,8 +115,6 @@ def json_migrator():
         Stock.objects.bulk_create(filtered_stock_data)
     print('created, filling up data')
     
-    
-    
     timestamp = datetime(2024, 5, 7)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
@@ -137,10 +135,8 @@ def json_migrator():
                 stock_instance = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == timestamp][0]
                 previous_stock = stock_instance
             except:
-                print('Not found', stock, timestamp)
                 errors.append(f"{stock}: {timestamp}")
                 if not previous_stock:
-                    print('still Not found', stock, timestamp)
                     data = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == distinct_timestamps_list[distinct_timestamps_list.index(timestamp) - 1]]
                     if len(data) > 0:
                         previous_stock = data[0]

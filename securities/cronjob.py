@@ -607,7 +607,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
         Combination.objects.create(
             symbol="DJI",
             avg=cummulative_percent,
-            stdev=0,
+            stdev=current_percent,
             strike=stock['close'],
             date_time=final_time,
             z_score=0,
@@ -633,14 +633,30 @@ def all_flow(initial_timestamp):
     for comb in combs:
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         prev_dict[strike] = 0
-            
+        
+    combs = combinations(Company.SYMBOLS, 3)            
             
     count = 0
     for timestamp in distinct_timestamps:
-        if timestamp.time() >= time(9, 35): 
+        if timestamp.time() >= time(9, 30): 
             print(timestamp)
             final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
-            combs = combinations(Company.SYMBOLS, 3)
+            
+            current_date = timestamp.date()
+            start_datetime = current_date - timedelta(days=1)
+            start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+            end_date = current_date + timedelta(days=1)
+            earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+            valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
+            
+            set1 = set(valid_earnings_data)
+            set2 = set(Company.SYMBOLS)
+            
+            combines = list(set2 - set1)
+            
+            combs = combinations(combines, 3)            
+            print(len(combs), timestamp)
+            
             for comb in combs:
                 
                 strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -676,6 +692,7 @@ def all_flow(initial_timestamp):
                 date_time=timestamp,
                 z_score=0,
             ) 
+            Cronny.objects.create(symbol=f"{timestamp}")    
         count += 1
             
         
@@ -686,7 +703,6 @@ def generate_flow_combinations(current_datetime):
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
     # print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
-
 
     final_time = None
     try:
@@ -716,8 +732,20 @@ def generate_flow_combinations(current_datetime):
     # final_set = [item for item in dataset if item.date_time == final_time]
     print(timestamp, new_distinct_timestamps[previous], final_time)
     
-    
-    combs = combinations(Company.SYMBOLS, 3)
+    current_date = timestamp.date()
+    start_datetime = current_date - timedelta(days=1)
+    start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+    end_date = current_date + timedelta(days=1)
+    earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+    valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
+
+    set1 = set(valid_earnings_data)
+    set2 = set(Company.SYMBOLS)
+
+    combines = list(set2 - set1)
+
+    combs = combinations(combines, 3)     
+    # combs = combinations(Company.SYMBOLS, 3)
     for comb in combs:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -857,9 +885,10 @@ def new_flow_migrator():
             stocks = res["stocks"]
             print(len(stocks), 'stokcs')
             stock_time = create_stocks(stocks, timestamp)
-            if initial_timestamp.time() >= time(9, 35): 
-                generate_flow_combinations(timestamp)
-                generate_dji_combinations(timestamp, djis)
+            # if initial_timestamp.time() >= time(9, 30): 
+            
+            generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, djis)
 
             Cronny.objects.create(symbol=f"{timestamp}")    
             print(timestamp)
@@ -875,16 +904,12 @@ def real_time_data():
     count = 0 
     timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
     timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    if timestamp.time() >= time(9, 31) and timestamp.time() <= time(15, 59): 
-        print('start time', timestamp)
+    if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
         res = get_data(timestamp)
         stocks = res["stocks"]
-        print(len(stocks), 'stokcs')
         stock_time = create_stocks(stocks, timestamp)
-        if timestamp.time() >= time(9, 35): 
-            generate_flow_combinations(timestamp)
-            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-            
+        generate_flow_combinations(timestamp)
+        generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
         end_time = datetime.now()
         Cronny.objects.create(symbol=f"{stock_time}")    
         done = True

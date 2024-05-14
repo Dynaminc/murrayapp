@@ -81,8 +81,8 @@ def get_chart(request):
         data = [
             {
                 'time': comb.date_time,
-                'svalue': comb.avg - get_long_dji_value(all_combs, False, '', comb.date_time),
-                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) - get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg,
+                'svalue': comb.avg ,  #- get_long_dji_value(all_combs, False, '', comb.date_time),
+                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg, - get_long_dji_value(all_combs, False, '', comb.date_time)
                 'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
             }
             for comb in shorts
@@ -482,7 +482,7 @@ def load_stats(request):
     data['win_rate'] =  0
     
     if len(strikes) > 0:
-        data['win_rate'] = len(profit_trades) / len(strikes) * 10
+        data['win_rate'] = len(profit_trades) / len([strike for strike in strikes if strike.closed]) * 10
         
     
     data['total_loss'] = sum([(strike.total_open_price - strike.total_close_price  ) for strike in strikes if strike.closed and strike.total_close_price < strike.total_open_price])
@@ -663,17 +663,20 @@ def test_end(request):
             latest_time = latest_data
             pre_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
             
-            earnings_data = Earning.objects.all()
+            # Get earnings data for the relevant period
             current_date = datetime.now().date()
-            start_date = current_date - timedelta(days=1)
-            end_date = current_date + timedelta(days=2)
+            start_datetime = current_date - timedelta(days=1)
+            start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+            end_date = current_date + timedelta(days=1)
+            earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+            
             valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
-            filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data) ]
+            filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
+            
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg})
         else:
-            
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg})
     except Exception as E:
         return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":dji_value.avg})
