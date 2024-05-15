@@ -655,7 +655,7 @@ def all_flow(initial_timestamp):
             combines = list(set2 - set1)
             
             combs = combinations(combines, 3)            
-            print(len(combs), timestamp)
+            print(len(list(combs)), timestamp)
             
             for comb in combs:
                 
@@ -737,7 +737,7 @@ def generate_flow_combinations(current_datetime):
     start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
     end_date = current_date + timedelta(days=1)
     earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-    valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
+    valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
 
     set1 = set(valid_earnings_data)
     set2 = set(Company.SYMBOLS)

@@ -670,7 +670,7 @@ def test_end(request):
             end_date = current_date + timedelta(days=1)
             earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
             
-            valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time.date() <= end_date]
+            valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
             filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
             
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
