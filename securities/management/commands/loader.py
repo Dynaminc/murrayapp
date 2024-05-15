@@ -35,6 +35,7 @@ from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow
 from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, top_glow
 from datetime import timedelta
+from securities.assess import get_all_stocks, get_test_data, json_migrator
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -47,6 +48,9 @@ class Command(BaseCommand):
         # initial_timestamp = datetime(2024, 5, 10)
         # clean_comb(initial_timestamp)
         print("cleaned data")
+        get_test_data()
+        print('test data obtained')
+        json_migrator()
         # new_flow_migrator()
         mig_flow()
         
