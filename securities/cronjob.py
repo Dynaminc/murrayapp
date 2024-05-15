@@ -634,8 +634,8 @@ def all_flow(initial_timestamp):
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         prev_dict[strike] = 0
         
-    combs = combinations(Company.SYMBOLS, 3)            
-            
+    # combs = combinations(Company.SYMBOLS, 3)            
+    print(len(prev_dict.keys()))
     count = 0
     for timestamp in distinct_timestamps:
         if timestamp.time() >= time(9, 30): 
