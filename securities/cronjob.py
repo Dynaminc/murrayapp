@@ -655,7 +655,7 @@ def all_flow(initial_timestamp):
             combines = list(set2 - set1)
             
             combs = combinations(combines, 3)            
-            print(len(list(combs)), timestamp)
+            
             
             for comb in combs:
                 
