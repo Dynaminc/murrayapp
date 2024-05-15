@@ -24,6 +24,7 @@ from accounts.models import Strike, Profile
 from .views import update_strike
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import OrderBy
+from django.db.models import Max, Subquery, OuterRef
  
 info = {}
 info['main_count'] = 0
@@ -586,6 +587,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     previous_instance = Combination.objects.filter(symbol="DJI").latest('date_time')
     
     if not previous_instance:
+        print('no previous instance')
         previous_instance = Combination.objects.create(
                 symbol="DJI",
                 avg = 0,
@@ -736,14 +738,25 @@ def generate_flow_combinations(current_datetime):
     #     Q(date_time=final_time)
     # ).all()
     
-    latest_timestamp = Combination.objects.aggregate(Max('date_time'))['date_time__max']
-    start_time = latest_timestamp - timedelta(minutes=1)
-    recent_objects = Combination.objects.filter(date_time__gte=start_time)
-    recent_objects = recent_objects.distinct()
+    # latest_timestamp = Combination.objects.aggregate(Max('date_time'))['date_time__max']
+    # start_time = latest_timestamp - timedelta(seconds=20)
+    # recent_objects = Combination.objects.filter(date_time__gte=start_time)
+    # recent_objects = recent_objects.distinct()
+    # print(len(recent_objects))
+    
+    # Get the subquery to filter only the most recent objects for each unique combination symbol
+    subquery = Combination.objects.filter(symbol=OuterRef('symbol')).order_by('-date_time').values('date_time')[:1]
 
+    # Query to get the most recently created distinct combination objects by symbol
+    recent_objects = Combination.objects.annotate(
+        max_date_time=Subquery(subquery)
+    ).filter(
+        date_time=OuterRef('max_date_time')
+    )
         
     # previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
     previous_set = list(recent_objects)
+    print(len(previous_set))
     # final_set = [item for item in dataset if item.date_time == final_time]
     print(timestamp, new_distinct_timestamps[previous], final_time)
     
@@ -786,7 +799,7 @@ def generate_flow_combinations(current_datetime):
             Combination.objects.create(
                 symbol=strike,
                 avg=cummulative_percent,
-                stdev=0,
+                stdev=current_percent,
                 strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
                 date_time=timestamp,
                 z_score=0,
