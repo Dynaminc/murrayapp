@@ -680,7 +680,6 @@ def all_flow(initial_timestamp):
                 current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
-                print(strike)
                 try:
                     Combination.objects.create(
                             symbol=strike,
