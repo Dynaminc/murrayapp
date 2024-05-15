@@ -744,19 +744,39 @@ def generate_flow_combinations(current_datetime):
     # recent_objects = recent_objects.distinct()
     # print(len(recent_objects))
     
-    # Get the subquery to filter only the most recent objects for each unique combination symbol
-    subquery = Combination.objects.filter(symbol=OuterRef('symbol')).order_by('-date_time').values('date_time')[:1]
+    # # Get the subquery to filter only the most recent objects for each unique combination symbol
+    # subquery = Combination.objects.filter(symbol=OuterRef('symbol')).order_by('-date_time').values('date_time')[:1]
 
-    # Query to get the most recently created distinct combination objects by symbol
-    recent_objects = Combination.objects.annotate(
-        max_date_time=Subquery(subquery)
-    ).filter(
-        date_time=OuterRef('max_date_time')
-    )
+    # # Query to get the most recently created distinct combination objects by symbol
+    # recent_objects = Combination.objects.annotate(
+    #     max_date_time=Subquery(subquery)
+    # ).filter(
+    #     date_time=OuterRef('max_date_time')
+    # )
         
     # previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
+    
+    
+    
+    
+    # Get distinct symbols
+    distinct_symbols = Combination.objects.values('symbol').distinct()
+
+    # Initialize a list to store the most recent combination objects
+    recent_objects = []
+
+    # Iterate over distinct symbols
+    for symbol in distinct_symbols:
+        # Get the most recent combination object for each symbol
+        most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        # Add the most recent combination object to the list
+        recent_objects.append(most_recent_combination)
+
+    # Print the count of recent_objects
+    print(len(recent_objects))
     previous_set = list(recent_objects)
     print(len(previous_set))
+    
     # final_set = [item for item in dataset if item.date_time == final_time]
     print(timestamp, new_distinct_timestamps[previous], final_time)
     
