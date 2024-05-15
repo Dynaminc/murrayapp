@@ -663,11 +663,10 @@ def all_flow(initial_timestamp):
             # print(len(combines))
             # combs = combinations(combines, 3)            
             
-            print(len(prev_dict.keys()))
+            
             specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
-            print(len(specials))
             # print('sd', len(list()))
-            sk = 0
+            print(len(prev_dict.keys()), len(specials))
             for itm in specials:
                 comb = itm.split('-')
                 strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -691,10 +690,8 @@ def all_flow(initial_timestamp):
                             date_time=timestamp,
                             z_score=0,
                         ) 
-            
-                    sk += 1
-                    print(sk)
-                except:
+                except Exception as E:
+                    print(E)
                     pass
         
             dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
