@@ -55,7 +55,7 @@ class Command(BaseCommand):
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
-        # return        
+        return        
         initial_timestamp = datetime(2024, 5, 7, 11 )
         clean_comb(initial_timestamp)
         # print("cleaned data")
