@@ -633,6 +633,7 @@ def mig_flow():
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
     
     stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+    print(len(stocks))
     # stocks = [StockSerializer(item) for item in stock_query]
     distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
     new_distinct_timestamps = sorted(distinct_timestamps)
