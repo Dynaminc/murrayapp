@@ -619,6 +619,13 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
         current_instance.save()
         pass
     
+    
+def check_strike_symbol(strike, earning_symbols):
+    for item in earning_symbols:
+        if item in strike:
+            return True
+    return False
+    
 
 def all_flow(initial_timestamp):
     
@@ -636,6 +643,7 @@ def all_flow(initial_timestamp):
         
     # combs = combinations(Company.SYMBOLS, 3)            
     print(len(prev_dict.keys()))
+    
     count = 0
     for timestamp in distinct_timestamps:
         if timestamp.time() >= time(9, 30): 
@@ -650,15 +658,15 @@ def all_flow(initial_timestamp):
             valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
             print(valid_earnings_data)
             
-            set1 = set(valid_earnings_data)
-            set2 = set(Company.SYMBOLS)
+            # set1 = set(valid_earnings_data)
+            # set2 = set(Company.SYMBOLS)
             
-            combines = list(set2 - set1)
-            print(len(combines))
-            combs = combinations(combines, 3)            
+            # combines = list(set2 - set1)
+            # print(len(combines))
+            # combs = combinations(combines, 3)            
             
             
-            for comb in combs:
+            for comb in [cmb for cmb in combs if not check_strike_symbol(cmb, valid_earnings_data)]:
                 
                 strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
                 
@@ -740,14 +748,14 @@ def generate_flow_combinations(current_datetime):
     earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
     valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
 
-    set1 = set(valid_earnings_data)
-    set2 = set(Company.SYMBOLS)
+    # set1 = set(valid_earnings_data)
+    # set2 = set(Company.SYMBOLS)
 
-    combines = list(set2 - set1)
+    # combines = list(set2 - set1)
 
-    combs = combinations(combines, 3)     
-    # combs = combinations(Company.SYMBOLS, 3)
-    for comb in combs:
+    # combs = combinations(combines, 3)     
+    combs = combinations(Company.SYMBOLS, 3)
+    for comb in [cmb for cmb in combs if not check_strike_symbol(cmb, valid_earnings_data)]:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         
