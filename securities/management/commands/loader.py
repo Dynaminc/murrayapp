@@ -45,8 +45,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         
-        # initial_timestamp = datetime(2024, 5, 10)
-        # clean_comb(initial_timestamp)
+        initial_timestamp = datetime(2024, 5, 14)
+        clean_comb(initial_timestamp)
         print("cleaned data")
         get_test_data()
         print('test data obtained')
