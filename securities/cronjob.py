@@ -664,8 +664,9 @@ def all_flow(initial_timestamp):
             # combines = list(set2 - set1)
             # print(len(combines))
             # combs = combinations(combines, 3)            
-            
-            
+            print(len(list(combs)))
+            print('sd', len(list([cmb for cmb in list(combs) if not check_strike_symbol(cmb, valid_earnings_data)])))
+            sk = 0
             for comb in [cmb for cmb in combs if not check_strike_symbol(cmb, valid_earnings_data)]:
                 
                 strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -678,6 +679,7 @@ def all_flow(initial_timestamp):
                 current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
+                print(strike)
                 
                 Combination.objects.create(
                         symbol=strike,
@@ -688,19 +690,23 @@ def all_flow(initial_timestamp):
                         z_score=0,
                     ) 
             
-        
+                sk += 1
+                print(sk)
         
             dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
             dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
             dji_cummulative_percent  =  dji_prev + dji_current_percent
-            Combination.objects.create(
-                symbol="DJI",
-                avg=dji_cummulative_percent,
-                stdev=dji_current_percent,
-                strike=dji.close,
-                date_time=timestamp,
-                z_score=0,
-            ) 
+            try:
+                Combination.objects.create(
+                    symbol="DJI",
+                    avg=dji_cummulative_percent,
+                    stdev=dji_current_percent,
+                    strike=dji.close,
+                    date_time=timestamp,
+                    z_score=0,
+                ) 
+            except: 
+                pass
             Cronny.objects.create(symbol=f"{timestamp}")    
         count += 1
             
