@@ -648,12 +648,13 @@ def all_flow(initial_timestamp):
             end_date = current_date + timedelta(days=1)
             earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
             valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
+            print(valid_earnings_data)
             
             set1 = set(valid_earnings_data)
             set2 = set(Company.SYMBOLS)
             
             combines = list(set2 - set1)
-            
+            print(len(combines))
             combs = combinations(combines, 3)            
             
             
