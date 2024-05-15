@@ -45,14 +45,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         
-        # initial_timestamp = datetime(2024, 5, 14)
+        # initial_timestamp = datetime(2024, 5, 15)
         # clean_comb(initial_timestamp)
-        # print("cleaned data")
+        # # print("cleaned data")
         # get_test_data()
-        # print('test data obtained')
+        # # print('test data obtained')
         # json_migrator()
-        # new_flow_migrator()
-        mig_flow()
+        new_flow_migrator()
+        # mig_flow()
         
         # cronny()
         # final_time = datetime(2024, 4,  3, 9, 30)

@@ -31,7 +31,7 @@ from securities.models import Combination, Stock
 import json
 from django.core.paginator import Paginator
 from datetime import datetime
-from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator, real_time_data, all_flow
+from securities.cronjob import new_calc_migrator, clean_comb,mig_flow, new_calc, new_flow_migrator, dji_migrator, real_time_data, all_flow
 from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, get_test_data, json_migrator
 
@@ -44,11 +44,18 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         
-        
+        initial_timestamp = datetime(2024, 5, 15)
+        clean_comb(initial_timestamp)
+        # print("cleaned data")
+        get_test_data()
+        # print('test data obtained')
+        json_migrator()
+        # new_flow_migrator()
+        mig_flow()
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
-        return        
+        # return        
         initial_timestamp = datetime(2024, 5, 7, 11 )
         clean_comb(initial_timestamp)
         # print("cleaned data")
