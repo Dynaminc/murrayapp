@@ -640,9 +640,7 @@ def all_flow(initial_timestamp):
     for comb in combs:
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         prev_dict[strike] = 0
-        
-    # combs = combinations(Company.SYMBOLS, 3)            
-    print(len(prev_dict.keys()))
+                
     
     count = 0
     for timestamp in distinct_timestamps:
@@ -664,12 +662,16 @@ def all_flow(initial_timestamp):
             # combines = list(set2 - set1)
             # print(len(combines))
             # combs = combinations(combines, 3)            
-            print(len(list(combs)))
-            print('sd', len(list([cmb for cmb in list(combs) if not check_strike_symbol(cmb, valid_earnings_data)])))
+            
+            print(len(prev_dict.keys()))
+            specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
+            print(len(specials))
+            # print('sd', len(list()))
             sk = 0
-            for comb in [cmb for cmb in combs if not check_strike_symbol(cmb, valid_earnings_data)]:
-                
+            for itm in specials:
+                comb = itm.split('-')
                 strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+                
                 
                 stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
                 stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
@@ -680,18 +682,20 @@ def all_flow(initial_timestamp):
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
                 print(strike)
-                
-                Combination.objects.create(
-                        symbol=strike,
-                        avg=cummulative_percent,
-                        stdev=current_percent,
-                        strike=(stock_1.close + stock_2.close + stock_3.close)/3,
-                        date_time=timestamp,
-                        z_score=0,
-                    ) 
+                try:
+                    Combination.objects.create(
+                            symbol=strike,
+                            avg=cummulative_percent,
+                            stdev=current_percent,
+                            strike=(stock_1.close + stock_2.close + stock_3.close)/3,
+                            date_time=timestamp,
+                            z_score=0,
+                        ) 
             
-                sk += 1
-                print(sk)
+                    sk += 1
+                    print(sk)
+                except:
+                    pass
         
             dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
             dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
@@ -761,7 +765,8 @@ def generate_flow_combinations(current_datetime):
 
     # combs = combinations(combines, 3)     
     combs = combinations(Company.SYMBOLS, 3)
-    for comb in [cmb for cmb in combs if not check_strike_symbol(cmb, valid_earnings_data)]:
+    
+    for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         
@@ -859,9 +864,9 @@ def clean_comb(initial):
         data = Combination.objects.filter(date_time__gte=item).all()
         data.delete()
         print('cleaned combinations')
-        data = Stock.objects.filter(date_time__gte=item).all()
-        data.delete()
-        print('cleaned stocks')
+        # data = Stock.objects.filter(date_time__gte=item).all()
+        # data.delete()
+        # print('cleaned stocks')
         # con.set("combinations_data", "[]")
         # con.set("comb_time", "[]")
         # con.set("stock_data", "[]")

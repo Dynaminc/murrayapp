@@ -49,8 +49,8 @@ class Command(BaseCommand):
         # dji_migrator()
         # simulate_compute()
         # return        
-        # initial_timestamp = datetime(2024, 5, 7 )
-        # clean_comb(initial_timestamp)
+        initial_timestamp = datetime(2024, 5, 7, 11 )
+        clean_comb(initial_timestamp)
         # print("cleaned data")
         # get_test_data()
         # print('test data obtained')
