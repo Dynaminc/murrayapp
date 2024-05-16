@@ -83,6 +83,12 @@ class Cronny(models.Model):
         return f"{str(self.date_time)}: {self.symbol}"
         
         
+class Missing(models.Model):
+    data = models.CharField(max_length=100)
+    date_time = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.data}"        
+        
 class Combination(models.Model):
     symbol = models.CharField(max_length=30)
     strike = models.FloatField()

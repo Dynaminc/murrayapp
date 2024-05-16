@@ -1,7 +1,7 @@
 from django.conf import settings    
 from django.db.models import DateTimeField, ExpressionWrapper, F
 import pandas as pd
-from .models import Stock, Company, Combination, Cronny
+from .models import Stock, Company, Combination, Cronny, Missing
 import requests, json
 from datetime import datetime, timedelta
 from itertools import combinations
@@ -138,6 +138,7 @@ def json_migrator():
                 previous_stock = stock_instance
             except:
                 errors.append(f"{stock}: {timestamp}")
+                Missing.objects.create(data=f"{stock}: {timestamp}")
                 if not previous_stock:
                     data = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == distinct_timestamps_list[distinct_timestamps_list.index(timestamp) - 1]]
                     if len(data) > 0:

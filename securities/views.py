@@ -7,7 +7,7 @@ from django.db.models import F, Q
 from django_redis import get_redis_connection
 from django.utils import timezone as tz
 from securities.models import Stock
-from .models import Combination
+from .models import Combination, Missing
 from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
 from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
 from datetime import datetime, time, timedelta
@@ -24,7 +24,10 @@ info = {'previous_time': None, 'latest_time': None}
 def index(request):
     return render(request, "securities/ranks.html")
 
-
+def load_missing(request):
+    data = sorted(list(set([item.data for item in Missing.objects.all()])))
+    return JsonResponse({"data":data})
+    
 def quantify_strike(portfolio, price):
     unit_portfolio_size = 1000000 / 50
     quantity = unit_portfolio_size / price

@@ -219,6 +219,7 @@ def create_stocks(stocks, timestamp):
         except Exception as E:
             try:
                 errors.append(f"{company}: {timestamp}")
+                Missing.objects.create(data=f"{stock}: {timestamp}")
                 latest_stock = Stock.objects.filter(symbol=company).latest('date_time')
                 latest_datetime = latest_stock.date_time 
                 current_datetime = timestamp

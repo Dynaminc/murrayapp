@@ -8,3 +8,4 @@ from .mig import Command as MigCommand
 from .exporter import Command as ExportCommand
 from .simulate import Command as SimulateCommand
 from .min import Command as SimulateCommand
+from .miss import Command as MissCommand
