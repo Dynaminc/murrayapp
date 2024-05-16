@@ -86,7 +86,7 @@ def get_test_data(initial_timestamp):#timestamp
         return "Failed"
 
 # to get the json from the file and migrate into the database. for local and prod 
-def json_migrator():
+def json_migrator(initial_timestamp):
     stocks_list = []
     intital_time = datetime.now()
     with open('djitmp.json', 'r') as json_file:
@@ -111,14 +111,14 @@ def json_migrator():
                 stocks_list.append(stock_obj)
             
             
-    timestamp = datetime(2024, 5, 14, 15, 59)
+    timestamp = datetime(2024, 5, 13, 15, 59)
     filtered_stock_data = [stock_data for stock_data in stocks_list if datetime.strptime(stock_data.date_time, "%Y-%m-%d %H:%M:%S")  >= timestamp]
     print(len(filtered_stock_data), 'filtered')
     if filtered_stock_data:
         Stock.objects.bulk_create(filtered_stock_data)
     print('created, filling up data')
     
-    timestamp = datetime(2024, 5, 14, 15, 59)
+    timestamp = datetime(2024, 5, 13, 15, 59)
     stocks = Stock.objects.filter(date_time__gte=timestamp).all() # Q(symbol=comba[0]) |Q(symbol=comba[1]) |Q(symbol=comba[2]) , 
     distinct_stocks = Stock.objects.filter(date_time__gte=timestamp).values_list('symbol', flat=True).distinct()
     print(len(distinct_stocks))
