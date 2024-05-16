@@ -14,7 +14,7 @@ from django.db.models import Min, Max
 from django.db import models
 
 # fetched all the needed data and saved it in a json
-def get_test_data():#timestamp
+def get_test_data(initial_timestamp):#timestamp
     """Gets third-party API data"""
     twelve_key = settings.TWELVE_DATA_API_KEY
     SYMBOLS = (
@@ -55,11 +55,12 @@ def get_test_data():#timestamp
     all_symbols = ",".join(SYMBOLS)
     try:
         
-        start_date = "2024-05-15"
+        # start_date = "2024-05-15"
         # end_date = datetime.now().date()
 
         # Assuming you want to retrieve data for the minute 10:15 AM on 2024-04-22
         # specific_minute = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        start_date = initial_timestamp.strftime('%Y-%m-%d %H:%M:%S')
         specific_minute = datetime.now()
 
         # Construct the URL with the specific minute
