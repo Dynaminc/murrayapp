@@ -44,12 +44,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         
-        initial_timestamp = datetime(2024, 5, 14)
-        # clean_comb(initial_timestamp)
+        initial_timestamp = datetime(2024, 5, 16, 12, 11)
+        clean_comb(initial_timestamp)
         # print("cleaned data")
-        # get_test_data(initial_timestamp)
+        get_test_data(initial_timestamp)
         # print('test data obtained')
-        # json_migrator(initial_timestamp)
+        json_migrator(initial_timestamp)
         # new_flow_migrator()
         # all_flow(initial_timestamp)
         mig_flow()
