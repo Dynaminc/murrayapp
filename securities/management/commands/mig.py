@@ -45,7 +45,7 @@ class Command(BaseCommand):
         # real_time_data()
         
         initial_timestamp = datetime(2024, 5, 14)
-        clean_comb(initial_timestamp)
+        # clean_comb(initial_timestamp)
         # print("cleaned data")
         # get_test_data(initial_timestamp)
         # print('test data obtained')
