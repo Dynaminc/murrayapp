@@ -51,7 +51,7 @@ class Command(BaseCommand):
         # get_test_data()
         # # print('test data obtained')
         # json_migrator()
-        initial_timestamp = datetime(2024, 5, 16, 12, 58)
+        initial_timestamp = datetime(2024, 5, 16, 13, 5)
         clean_comb(initial_timestamp)
         new_flow_migrator(initial_timestamp)
         # mig_flow()
