@@ -665,18 +665,20 @@ def test_end(request):
         if latest_data:
             latest_time = latest_data
             pre_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+            # # Get earnings data for the relevant period
+            # current_date = datetime.now().date()
+            # start_datetime = current_date - timedelta(days=1)
+            # start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+            # end_date = current_date + timedelta(days=1)
+            # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
             
-            # Get earnings data for the relevant period
-            current_date = datetime.now().date()
-            start_datetime = current_date - timedelta(days=1)
-            start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
-            end_date = current_date + timedelta(days=1)
-            earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+            # valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
+            # filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
             
-            valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
-            filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
+            # combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
+            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
+            print('Combs gotten', len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg})
         else:

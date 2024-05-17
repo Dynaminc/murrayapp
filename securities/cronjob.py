@@ -845,31 +845,6 @@ def generate_flow_combinations(current_datetime):
     
     # stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
     print('Stocks', len(stocks))
-    # dataset = Combination.objects.filter(
-    #     Q(date_time=new_distinct_timestamps[previous]) |
-    #     Q(date_time=final_time)
-    # ).all()
-    
-    # latest_timestamp = Combination.objects.aggregate(Max('date_time'))['date_time__max']
-    # start_time = latest_timestamp - timedelta(seconds=20)
-    # recent_objects = Combination.objects.filter(date_time__gte=start_time)
-    # recent_objects = recent_objects.distinct()
-    # print(len(recent_objects))
-    
-    # # Get the subquery to filter only the most recent objects for each unique combination symbol
-    # subquery = Combination.objects.filter(symbol=OuterRef('symbol')).order_by('-date_time').values('date_time')[:1]
-
-    # # Query to get the most recently created distinct combination objects by symbol
-    # recent_objects = Combination.objects.annotate(
-    #     max_date_time=Subquery(subquery)
-    # ).filter(
-    #     date_time=OuterRef('max_date_time')
-    # )
-        
-    # previous_set = [item for item in dataset if item.date_time == new_distinct_timestamps[previous]]
-    
-    
-    
     
     # Get distinct symbols
     distinct_symbols = Combination.objects.values('symbol').distinct()
@@ -889,8 +864,6 @@ def generate_flow_combinations(current_datetime):
     previous_set = list(recent_objects)
     print(len(previous_set))
     
-    # final_set = [item for item in dataset if item.date_time == final_time]
-    print(timestamp, new_distinct_timestamps[previous], final_time)
     
     current_date = timestamp.date()
     start_datetime = current_date - timedelta(days=1)
@@ -899,24 +872,15 @@ def generate_flow_combinations(current_datetime):
     earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
     valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
 
-    # set1 = set(valid_earnings_data)
-    # set2 = set(Company.SYMBOLS)
-
-    # combines = list(set2 - set1)
-
-    # combs = combinations(combines, 3)     
     combs = combinations(Company.SYMBOLS, 3)
     
     for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         
-        # try:
         stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] ][0]
         stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
-        #and stock['date_time'].replace('T', ' ') == str(timestamp)
-        
         
         current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
         
@@ -938,26 +902,6 @@ def generate_flow_combinations(current_datetime):
             )  
         except Exception as E:
             pass
-        # try:
-        #     # comb_instance = [item for item in final_set if item.symbol == strike][0]
-        #     # cummulative_percent = 0
-        #     # if previous_instance:
-        #     #     cummulative_percent  =  previous_instance.avg + current_percent
-        #     # else: 
-        #     #     cummulative_percent  =  current_percent
-                
-        #     # comb_instance.avg = cummulative_percent
-        #     # comb_instance.save()
-                
-        # # except Exception as E:
-
-        #     try:
-    
-        #     except Exception as E:
-        #         print('Another ', E)
-        #         pass
-                
-        
         
 def clean_avgs(current_datetime):
     print('updating')
@@ -1017,16 +961,15 @@ def clean_comb(initial):
     return 'cleaned'
        
 
-def new_flow_migrator():
+def new_flow_migrator(initial):
     error_count = 0
     my_time = str(datetime.now())
     con.set("initiated", my_time)
     print('Initiated')   
     
     count = 0 
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    # initial_timestamp = datetime(2024, 4, 24, 11)
-    djis = [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()]
+    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
+    initial_timestamp = datetime.strptime(str(initial), "%Y-%m-%d %H:%M:%S")
     # datetime(2024, 4,  23, 10, 2)
     # initial_timestamp = datetime(2024, 4,  29, 11, )
     
@@ -1040,7 +983,7 @@ def new_flow_migrator():
         if initial_timestamp.time() >= time(9, 30) and initial_timestamp.time() <= time(15, 59): 
             intital_time = datetime.now()
             
-            print('in neer', initial_timestamp)
+            print('migration', initial_timestamp)
             timestamp = initial_timestamp
             res = get_data(timestamp)
             stocks = res["stocks"]
@@ -1049,10 +992,9 @@ def new_flow_migrator():
             # if initial_timestamp.time() >= time(9, 30): 
             
             generate_flow_combinations(timestamp)
-            generate_dji_combinations(timestamp, djis)
+            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
 
             Cronny.objects.create(symbol=f"{timestamp}")    
-            print(timestamp)
             final_time = datetime.now() - intital_time            
             print(f"Time difference: {final_time.total_seconds()} seconds", timestamp)
             for item in Strike.objects.filter(closed=False):

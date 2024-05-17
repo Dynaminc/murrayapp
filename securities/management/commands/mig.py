@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # real_time_data()
-        
+        return
         initial_timestamp = datetime(2024, 5, 16, 12, 11)
         clean_comb(initial_timestamp)
         # print("cleaned data")
