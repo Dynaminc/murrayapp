@@ -68,25 +68,6 @@ class Command(BaseCommand):
         all_flow(initial_timestamp)
         print("Completed newflow migrations")
         
-        # real_time_data()
-        # new_calc_migrator()
-        
-        # clean_comb()
-        # new_calc()
-####    CLEANER BLOCK     
-        # count = 0 
-        # times = [datetime(2024, 4, 22)]
-        # # strike = "VZ-WBA-WMT"
-        # for item in times:
-        #     print('fetcging ')
-        #     data = Combination.objects.filter(date_time__gte=item).all()
-        #     data.delete()
-        #     print('cleaned combinations')
-        #     data = Stock.objects.filter(date_time__gte=item).all()
-        #     data.delete()
-        #     print('cleaned stocks')
-            
-####
             
         try:
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))

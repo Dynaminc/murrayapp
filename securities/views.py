@@ -160,12 +160,6 @@ def update_striker(request):
         sum_total += sum([item['final'] for item in long_data])
         sum_total += sum([item['final'] for item in short_data])
         
-        # strike_instance.current_price = sum_total
-        # strike_instance.current_percentage = (sum_total - strike_instance.total_open_price)/strike_instance.total_open_price * 100
-        
-        # strike_instance.max_percentage = strike_instance.current_percentage if strike_instance.current_percentage > strike_instance.max_percentage else strike_instance.max_percentage
-        # strike_instance.min_percentage = strike_instance.current_percentage if strike_instance.current_percentage < strike_instance.min_percentage else strike_instance.min_percentage
-        
         strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
         strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
         strike_instance.sls_close = get_correct_close(long_data, strike_instance.second_long_stock)['price']
@@ -263,6 +257,7 @@ def update_strike(id):
         if strike_instance.current_percentage > 2 and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
             Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the 2% mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
+            trigger_close_strike(strike_instance.id)
         else:
             if strike_instance.current_percentage > 1: 
                 detail = f"Strike has exceeded the 1% mark"   
@@ -279,6 +274,58 @@ def update_strike(id):
         strike_instance.save()
     
     return True
+
+def trigger_close_strike(id):    
+    close_time = str(Stock.objects.latest('date_time').date_time)
+    
+    strike_instance = Strike.objects.filter(id=id).first() 
+    if not strike_instance:
+        return JsonResponse({ 'message':"Strike not found"}, status=status.HTTP_400_BAD_REQUEST)     
+    if not strike_instance.closed:
+        long = strike_instance.long_symbol
+        short = strike_instance.short_symbol
+        
+        long_data = process_strike_symbol(long)
+        short_data = process_strike_symbol(short)
+        
+        stock_time = Stock.objects.latest('date_time').date_time
+        
+        sum_total = 0
+        sum_total = get_current_value(strike_instance) + strike_instance.total_open_price
+        strike_instance.total_close_price = sum_total
+        
+            
+        strike_instance.close_time = stock_time
+        strike_instance.fls_close = get_correct_close(long_data, strike_instance.first_long_stock)['price']
+        strike_instance.fls_close_price = get_correct_close(long_data, strike_instance.first_long_stock)['final']
+        strike_instance.sls_close = get_correct_close(long_data, strike_instance.second_long_stock)['price']
+        strike_instance.sls_close_price = get_correct_close(long_data, strike_instance.second_long_stock)['final']                
+        strike_instance.tls_close = get_correct_close(long_data, strike_instance.third_long_stock)['price']
+        strike_instance.tls_close_price = get_correct_close(long_data, strike_instance.third_long_stock)['final']                
+
+        strike_instance.fss_close = get_correct_close(short_data, strike_instance.first_short_stock)['price']
+        strike_instance.fss_close_price = get_correct_close(short_data, strike_instance.first_short_stock)['final']
+        strike_instance.sss_close = get_correct_close(short_data, strike_instance.second_short_stock)['price']
+        strike_instance.sss_close_price = get_correct_close(short_data, strike_instance.second_short_stock)['final']                
+        strike_instance.tss_close = get_correct_close(short_data, strike_instance.third_short_stock)['price']
+        strike_instance.tss_close_price = get_correct_close(short_data, strike_instance.third_short_stock)['final']     
+        strike_instance.closed = True
+        
+        strike_instance.save()
+
+        profile_instance = Profile.objects.first()
+        previous_balance = profile_instance.porfolio
+        profile_instance.porfolio = previous_balance  + sum_total
+        profile_instance.save()
+        
+        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)     
+        Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
+        
+        return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
+    else:
+        return JsonResponse({ 'message':"Trade Closed Already", "data":StrikeSerializer(strike_instance).data})
+
+
 
 @api_view(['GET'])
 def cronat(response):
