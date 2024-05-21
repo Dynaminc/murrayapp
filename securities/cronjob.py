@@ -631,8 +631,9 @@ def check_strike_symbol(strike, earning_symbols):
     return False
     
 
-def mig_flow():
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
+def mig_flow(initial_timestamp):
+    
+    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
     
     stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
     print(len(stocks))
@@ -665,12 +666,7 @@ def mig_flow():
             dji_prev = item.avg
     
     print('dji_prev', dji_prev, len(prev_dict.keys()))
-    # combs = combinations(Company.SYMBOLS, 3)
-    # for comb in combs:
-    #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-    #     prev_dict[strike] = 0
                 
-    
     count = 0
     for timestamp in distinct_timestamps:
         if timestamp.time() >= time(9, 30): 
@@ -683,14 +679,7 @@ def mig_flow():
             end_date = current_date + timedelta(days=1)
             earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
             valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
-            print(valid_earnings_data)
-            
-            # set1 = set(valid_earnings_data)
-            # set2 = set(Company.SYMBOLS)
-            
-            # combines = list(set2 - set1)
-            # print(len(combines))
-            # combs = combinations(combines, 3)            
+            print(valid_earnings_data)      
             
             
             specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
@@ -707,7 +696,8 @@ def mig_flow():
                     stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
                     
                     
-                    current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                    # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                    current_percent = ((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)
                     cummulative_percent  =  prev_dict[strike] + current_percent
                     prev_dict[strike] = cummulative_percent 
                     try:
@@ -792,7 +782,8 @@ def all_flow(initial_timestamp):
                 stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
                 
                 
-                current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                current_percent = ((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
                 try:
@@ -883,8 +874,8 @@ def generate_flow_combinations(current_datetime):
         stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
         
-        current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        
+        # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+        current_percent = ((stock_1['close'] - stock_1['previous_close'] ) / stock_1['previous_close']) + ((stock_2['close'] - stock_2['previous_close'] ) / stock_2['previous_close']) + ((stock_3['close'] - stock_3['previous_close'] ) / stock_3['previous_close'])
         cummulative_percent = 0
         previous_instance = None 
         try:
