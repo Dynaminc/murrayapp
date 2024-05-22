@@ -50,15 +50,15 @@ class Command(BaseCommand):
         #     item.avg, item.stdev, item.z_score = 0,0,0
         #     item.save()
             
-        clean_comb(initial_timestamp)
+        # clean_comb(initial_timestamp)
         print("cleaned data")
-        get_test_data(initial_timestamp)
+        # get_test_data(initial_timestamp)
         print('test data obtained')
-        json_migrator(initial_timestamp)
+        # json_migrator(initial_timestamp)
         # new_flow_migrator()
         
-        all_flow(initial_timestamp)
-        # mig_flow(initial_timestamp)
+        # all_flow(initial_timestamp)
+        mig_flow(initial_timestamp)
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
