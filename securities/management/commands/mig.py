@@ -45,10 +45,10 @@ class Command(BaseCommand):
         # real_time_data()
         # return
         initial_timestamp = datetime(2024, 5, 17, 11)
-        initial = datetime(2024, 5, 17, 10, 59)
-        for item in Combination.objects.filter(date_time=initial).all():
-            item.avg, item.stdev, item.z_score = 0,0,0
-            item.save()
+        # initial = datetime(2024, 5, 17, 10, 59)
+        # for item in Combination.objects.filter(date_time=initial).all():
+        #     item.avg, item.stdev, item.z_score = 0,0,0
+        #     item.save()
             
         clean_comb(initial_timestamp)
         print("cleaned data")
