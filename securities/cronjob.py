@@ -697,7 +697,7 @@ def mig_flow(initial_timestamp):
                     
                     
                     # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                    current_percent = ((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close) * 100
+                    current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
                     cummulative_percent  =  prev_dict[strike] + current_percent
                     prev_dict[strike] = cummulative_percent 
                     try:
@@ -783,7 +783,7 @@ def all_flow(initial_timestamp):
                 
                 
                 # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                current_percent = ((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close) * 100
+                current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
                 try:
@@ -875,7 +875,7 @@ def generate_flow_combinations(current_datetime):
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
         
         # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        current_percent = ((stock_1['close'] - stock_1['previous_close'] ) / stock_1['previous_close']) + ((stock_2['close'] - stock_2['previous_close'] ) / stock_2['previous_close']) + ((stock_3['close'] - stock_3['previous_close'] ) / stock_3['previous_close']) * 100
+        current_percent = (((stock_1['close'] - stock_1['previous_close'] ) / stock_1['previous_close']) + ((stock_2['close'] - stock_2['previous_close'] ) / stock_2['previous_close']) + ((stock_3['close'] - stock_3['previous_close'] ) / stock_3['previous_close'])) * 100
         cummulative_percent = 0
         previous_instance = None 
         try:
