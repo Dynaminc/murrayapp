@@ -50,7 +50,7 @@ class Command(BaseCommand):
         #     item.avg, item.stdev, item.z_score = 0,0,0
         #     item.save()
             
-        # clean_comb(initial_timestamp)
+        clean_comb(initial_timestamp)
         print("cleaned data")
         # get_test_data(initial_timestamp)
         print('test data obtained')
