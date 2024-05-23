@@ -531,7 +531,7 @@ def load_stats(request):
     data['total_profits'] = sum(profit_trades)
     data['win_rate'] =  0
     
-    if len(strikes) > 0:
+    if len(strikes) > 0 and len([strike for strike in strikes if strike.closed]) > 0:
         data['win_rate'] = len(profit_trades) / len([strike for strike in strikes if strike.closed]) * 10
         
     
