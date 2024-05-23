@@ -58,7 +58,7 @@ class Command(BaseCommand):
         # new_flow_migrator()
         
         # all_flow(initial_timestamp)
-        all_flow(initial_timestamp)
+        mig_flow(initial_timestamp)
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
