@@ -44,6 +44,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         # return
+        return
         initial_timestamp = datetime(2024, 5, 17, 11)
         # initial = datetime(2024, 5, 17, 10, 59)
         # for item in Combination.objects.filter(date_time=initial).all():

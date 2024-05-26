@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from django.core.management.utils import get_random_secret_key
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
@@ -89,6 +90,21 @@ CRONJOBS = [
 
 ASGI_APPLICATION = 'app.asgi.application'
 
+ACCESS_TOKEN_LIFETIME = timedelta(days=1),
+REFRESH_TOKEN_LIFETIME = timedelta(days=1),
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
+JWT_AUTH = {
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
 
 
 CHANNEL_LAYERS = {
@@ -160,19 +176,19 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default= os.getenv('DATABASE_URL'),
-        conn_max_age=0
-    )
-}
-
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
+#     'default': dj_database_url.config(
+#         default= os.getenv('DATABASE_URL'),
+#         conn_max_age=0
+#     )
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # DATABASES = {
 #     'default': {

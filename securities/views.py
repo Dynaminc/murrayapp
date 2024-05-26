@@ -29,24 +29,26 @@ def load_missing(request):
     return JsonResponse({"data":data})
     
 def quantify_strike(portfolio, price):
-    unit_portfolio_size = 1000000 / 50
+    unit_portfolio_size = portfolio / 50
     quantity = unit_portfolio_size / price
     final_portfolio_size = int(quantity) * price
     
     return {'unit':unit_portfolio_size, 'quantity': int(quantity), 'final':final_portfolio_size}
 
-def process_strike_symbol(symbol):
+def process_strike_symbol(symbol, user):
     split_symbol = symbol.split('-')
-    portfolio = Profile.objects.first().porfolio
-    data = []
-    for item in split_symbol:
-        stk = Stock.objects.filter(symbol=item).latest('date_time')
-        price = stk.close
-        # price = Stock.objects.filter(symbol=item).first().close
-        portfolio_data = quantify_strike(portfolio, price)
-        data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final'], 'date_time': stk.date_time})
-    return data
-
+    profile_instance = Profile.objects.filter(user=user).first()
+    if profile_instance:
+        portfolio = profile_instance.size
+        data = []
+        for item in split_symbol:
+            stk = Stock.objects.filter(symbol=item).latest('date_time')
+            price = stk.close
+            # price = Stock.objects.filter(symbol=item).first().close
+            portfolio_data = quantify_strike(portfolio, price)
+            data.append({"title": item, "price": price, 'quantity': portfolio_data['quantity'], 'final': portfolio_data['final'], 'date_time': stk.date_time})
+        return data
+    return []
 def get_correct_close(array, title):
     data = [item for item in array if item['title'] == title][0]
     return data
@@ -96,29 +98,48 @@ def get_chart(request):
 
 @api_view(['GET'])
 def load_strikes(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    data = [StrikeSerializer(strike).data for strike in Strike.objects.filter(user=request.user).all()]
+    return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
+
+
+@api_view(['GET'])
+def load_all_strikes(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.is_superuser:
+        return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
     data = [StrikeSerializer(strike).data for strike in Strike.objects.all()]
     return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
 
 
-
 ### crud for earnings 
 
-@api_view(['POST','GET','PUT','DELETE'])
+@api_view(['POST','GET','PUT','DELETE','PATCH'])
 def ManageEarning(request):
+    if request.method == "POST" and request.method == "DELETE": 
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.is_superuser:
+            return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)    
+        
     if request.method == "POST":
         serializer = EarningForm(data=request.POST)
         if not serializer.is_valid():
             return JsonResponse({"data":[], 'errors': serializer.errors})    
         serializer = serializer.data
         
-        symbol = serializer['symbol']
-        datetime = serializer['datetime']
+        symbol = serializer['symbol'] # unit stock
+        datetimer = serializer['datetime']
         earning_instance = Earning.objects.filter(symbol=symbol).first()
         if earning_instance:
-            earning_instance.date_time = datetime
+            earning_instance.date_time = datetimer
             earning_instance.save()
         else:
-            earning_instance = Earning.objects.create(symbol=symbol, date_time=datetime)
+            earning_instance = Earning.objects.create(symbol=symbol, date_time=datetimer)
             
         all_data = Earning.objects.all()
         serialized_data = [ EarningSerializer(item).data for item in all_data ]             
@@ -131,6 +152,31 @@ def ManageEarning(request):
     if request.method == "PUT":
         return JsonResponse({ "data":Company.all_symbols})   
         
+    if request.method == "PATCH":
+        serializer = EarningForm(data=request.POST)
+        if not serializer.is_valid():
+            return JsonResponse({"data":[], 'errors': serializer.errors})    
+        serializer = serializer.data
+        
+        symbol = serializer['symbol'] # unit strike
+        datetimer = serializer['datetime']
+        
+        current_date = datetime.now().date()
+        start_datetime = current_date - timedelta(days=1)
+        start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+        end_date = current_date + timedelta(days=1)
+        earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+
+        valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
+        
+        if check_strike_symbol(symbol, valid_earnings_data):
+            return JsonResponse({ "data":True})               
+        else:
+            return JsonResponse({ "data":False})               
+        # filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
+        
+        return JsonResponse({ "data":Company.all_symbols})           
+    
     if request.method =="DELETE":
         data = request.POST
         id = data['id'] 
@@ -153,8 +199,8 @@ def update_striker(request):
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
         
-        long_data = process_strike_symbol(long)
-        short_data = process_strike_symbol(short)
+        long_data = process_strike_symbol(long, strike_instance.user)
+        short_data = process_strike_symbol(short, strike_instance.user)
         
         sum_total = 0
         sum_total += sum([item['final'] for item in long_data])
@@ -215,8 +261,8 @@ def update_strike(id):
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
         
-        long_data = process_strike_symbol(long)
-        short_data = process_strike_symbol(short)
+        long_data = process_strike_symbol(long, strike_instance.user)
+        short_data = process_strike_symbol(short, strike_instance.user)
         
         sum_total = 0
         sum_total += sum([item['final'] for item in long_data])
@@ -254,9 +300,9 @@ def update_strike(id):
         else:
             strike_instance.min_percentage = strike_instance.current_percentage 
         # process for exit signal             
-        if strike_instance.current_percentage > 2 and not strike_instance.signal_exit:
+        if strike_instance.current_percentage > 2 or strike_instance.current_percentage >= strike_instance.target_profit and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
-            Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the 2% mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
+            Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the profit mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
             trigger_close_strike(strike_instance.id)
         else:
             if strike_instance.current_percentage > 1: 
@@ -281,12 +327,17 @@ def trigger_close_strike(id):
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
         return JsonResponse({ 'message':"Strike not found"}, status=status.HTTP_400_BAD_REQUEST)     
+    
+    profile_instance = Profile.objects.filter(user=strike_instance.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
         
-        long_data = process_strike_symbol(long)
-        short_data = process_strike_symbol(short)
+        long_data = process_strike_symbol(long, strike_instance.user)
+        short_data = process_strike_symbol(short, strike_instance.user)
         
         stock_time = Stock.objects.latest('date_time').date_time
         
@@ -312,13 +363,12 @@ def trigger_close_strike(id):
         strike_instance.closed = True
         
         strike_instance.save()
-
-        profile_instance = Profile.objects.first()
-        previous_balance = profile_instance.porfolio
-        profile_instance.porfolio = previous_balance  + sum_total
+        
+        previous_balance = profile_instance.balance
+        profile_instance.balance = previous_balance  + sum_total
         profile_instance.save()
         
-        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)     
+        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)     
         Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
         
         return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
@@ -342,15 +392,27 @@ def close_strike(request):
     
     close_time = str(Stock.objects.latest('date_time').date_time)
     
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
     strike_instance = Strike.objects.filter(id=id).first() 
     if not strike_instance:
-        return JsonResponse({ 'message':"Strike not found"}, status=status.HTTP_400_BAD_REQUEST)     
+        return JsonResponse({ 'message':"Strike not found "}, status=status.HTTP_400_BAD_REQUEST)   
+    
+    if strike_instance.user != request.user :
+        return JsonResponse({ 'message':"You have no permission to  close this trade"}, status=status.HTTP_400_BAD_REQUEST)   
+        
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
     if not strike_instance.closed:
         long = strike_instance.long_symbol
         short = strike_instance.short_symbol
         
-        long_data = process_strike_symbol(long)
-        short_data = process_strike_symbol(short)
+        long_data = process_strike_symbol(long, strike_instance.user)
+        short_data = process_strike_symbol(short, strike_instance.user)
         
         stock_time = Stock.objects.latest('date_time').date_time
         
@@ -382,18 +444,17 @@ def close_strike(request):
         
         strike_instance.save()
 
-        profile_instance = Profile.objects.first()
-        previous_balance = profile_instance.porfolio
-        profile_instance.porfolio = previous_balance  + sum_total
+        previous_balance = profile_instance.balance
+        profile_instance.balance = previous_balance  + sum_total
         profile_instance.save()
         
-        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)       
+        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)       
         
-        # previous_balance = profile_instance.porfolio
-        # profile_instance.porfolio = previous_balance  - 10
+        # previous_balance = profile_instance.balance
+        # profile_instance.balance = previous_balance  - 10
         # profile_instance.save()
         
-        # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+        # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.balance, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
         Notification.objects.create(user=strike_instance.user, details=f"Strike {strike_instance.id} has been closed", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_CLOSED)   
         
         return JsonResponse({ 'message':"Trade Closed Succesfully", "data":StrikeSerializer(strike_instance).data})
@@ -408,21 +469,29 @@ def confirm_strike(request):
     if not serializer.is_valid():
         return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
                                 status=status.HTTP_400_BAD_REQUEST)
-        
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
     serialized = serializer.data
     short = serialized['short'] 
     long = serialized['long'] 
+    profit = serialized['profit'] 
     stock_time = Stock.objects.latest('date_time').date_time
 
-    long_data = process_strike_symbol(long)
-    short_data = process_strike_symbol(short)
+    long_data = process_strike_symbol(long, request.user)
+    short_data = process_strike_symbol(short, request.user)
     
     sum_total = 0
     sum_total += sum([item['final'] for item in long_data])
     sum_total += sum([item['final'] for item in short_data])
     
     strike_instance = Strike.objects.create( 
-            user = Profile.objects.first().user,
+            user = profile_instance.user,
+            target_profit = profit,
             long_symbol = long,
             short_symbol = short,
             total_open_price = sum_total,
@@ -461,18 +530,17 @@ def confirm_strike(request):
             tss_open = short_data[2]['price'],
             )
     
-    profile_instance = Profile.objects.first()
-    previous_balance = profile_instance.porfolio 
-    profile_instance.porfolio = previous_balance - sum_total
+    previous_balance = profile_instance.balance
+    profile_instance.balance = previous_balance - sum_total / (profile_instance.margin)
     profile_instance.save()
     
-    Transaction.objects.create(user=profile_instance.user, details=f'Your order has been placed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=sum_total, transaction_type=tran_not_type.TRADE_OPENED)
+    Transaction.objects.create(user=profile_instance.user, details=f'Your order has been placed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, credit=False, amount=sum_total, transaction_type=tran_not_type.TRADE_OPENED)
 
-    # previous_balance = profile_instance.porfolio
-    # profile_instance.porfolio = previous_balance  - 10
+    # previous_balance = profile_instance.balance
+    # profile_instance.balance = previous_balance  - 10
     # profile_instance.save()
     
-    # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.porfolio, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
+    # Transaction.objects.create(user=strike_instance.user, details=f"Broker's Commission for Strike:{strike_instance.long_symbol}/{strike_instance.short_symbol}", previous_balance=previous_balance, new_balance=profile_instance.balance, credit=False, amount=10, transaction_type=tran_not_type.COMMISSON_FEE)       
             
     Notification.objects.create(user=strike_instance.user, details=f"Trade {strike_instance.id} has been opened", strike_id=strike_instance.id, notification_type=tran_not_type.TRADE_OPENED)   
     return JsonResponse({ 'message':"Strike Saved Succesfully", "data":StrikeSerializer(strike_instance).data})
@@ -481,21 +549,27 @@ def confirm_strike(request):
 @api_view(['POST'])
 def add_fund(request):
     try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = FundSerializer(data=request.POST)
         if not serializer.is_valid():
             return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
                                     status=status.HTTP_400_BAD_REQUEST)
-            
+    
         serialized = serializer.data
         fund = int(serialized['fund'])
         
-        profile_instance = Profile.objects.first()
-        previous_balance = profile_instance.porfolio 
-        profile_instance.porfolio = previous_balance + fund
+        profile_instance = Profile.objects.filter(user=request.user).first()
+        if not profile_instance:
+            return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+                        
+        previous_balance = profile_instance.balance 
+        profile_instance.balance = previous_balance + fund
         profile_instance.save()
         
         Transaction.objects.create(user=profile_instance.user,  details=f"Wallet has been funded",
-                                new_balance=profile_instance.porfolio, 
+                                new_balance=profile_instance.balance, 
                                 credit=True, amount=fund, transaction_type=tran_not_type.WALLET_FUNDED)
         Notification.objects.create(user=profile_instance.user, details=f"Wallet has been funded with {fund}", notification_type=tran_not_type.WALLET_FUNDED)   
         
@@ -506,26 +580,62 @@ def add_fund(request):
 @api_view(['GET'])
 def load_transactions(request):
     data = {}
-    profile_instance = Profile.objects.first()
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
     transaction_instances = Transaction.objects.filter(user=profile_instance.user).all()
+    data = [TransactionSerializer(item).data for item in transaction_instances]
+    return JsonResponse({'data':data , 'message':"Trnasactions Loaded"})  
+
+
+@api_view(['GET'])
+def load_all_transactions(request):
+    data = {}
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not request.user.is_superuser:
+        return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+        
+    transaction_instances = Transaction.objects.all()
     data = [TransactionSerializer(item).data for item in transaction_instances]
     return JsonResponse({'data':data , 'message':"Trnasactions Loaded"})  
 
 @api_view(['GET'])
 def load_notifications(request):
     data = {}
-    profile_instance = Profile.objects.first()
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
     notification_instances = Notification.objects.filter(user=profile_instance.user).all()
     data = [NotificationSerializer(item).data for item in notification_instances]
     return JsonResponse({'data':data , 'message':"Notifations Loaded"})  
 
 @api_view(['GET'])
-def load_stats(request):
+def load_all_notifications(request):
     data = {}
-    profile_instance = Profile.objects.first()
-    for key, value in ProfileSerializer(profile_instance).data.items():
-        data[key] = value
-        
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not request.user.is_superuser:
+        return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    notification_instances = Notification.objects.all()
+    data = [NotificationSerializer(item).data for item in notification_instances]
+    return JsonResponse({'data':data , 'message':"Notifations Loaded"})  
+
+
+
+def calculate_stats(data, profile_instance):
+    
     strikes = Strike.objects.filter(user=profile_instance.user).all()
     profit_trades = [(strike.total_close_price - strike.total_open_price) for strike in strikes if strike.closed and strike.total_close_price > strike.total_open_price]
     data['total_profits'] = sum(profit_trades)
@@ -557,21 +667,69 @@ def load_stats(request):
     data['closed_trades'] = len([strike for strike in strikes if strike.closed])
     
     data['exit_alerts'] = len([strikes for strike in strikes if strike.signal_exit])
+    
+    return data
+
+
+@api_view(['GET'])
+def load_all_stats(request):
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.is_superuser:
+        return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    final_data = []
+    for profile_instance in Profile.objects.all(): 
+        print(profile_instance)
+        data = {}
+        for key, value in ProfileSerializer(profile_instance).data.items():    
+            data[key] = value
+            
+        final_data.append(calculate_stats(data, profile_instance))   
+        print(final_data)
+    
+    return JsonResponse({'data':final_data , 'message':"Loaded Succesfully"})  
+
+@api_view(['GET'])
+def load_stats(request):
+    data = {}
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    for key, value in ProfileSerializer(profile_instance).data.items():
+        data[key] = value
+        
+    data = calculate_stats(data, profile_instance)
+
     return JsonResponse({'data':data , 'message':"Loaded Succesfully"})  
+
 
 @api_view(['POST'])
 def get_strike_breakdown(request):
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+    profile_instance = Profile.objects.filter(user=request.user).first()
+    if not profile_instance:
+        return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
     serializer = StrikeManagementSerializer(data=request.POST)
     if not serializer.is_valid():
         return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
-                                status=status.HTTP_400_BAD_REQUEST)
-        
+                                status=status.HTTP_400_BAD_REQUEST)    
     serialized = serializer.data
     short = serialized['short'] 
     long = serialized['long'] 
     stock_time = str(Stock.objects.latest('date_time').date_time)
     
-    data = {'stock_time':stock_time, 'portfolio':Profile.objects.first().porfolio, 'shortSymbol':short,'shortData':process_strike_symbol(short), 'longSymbol': long, 'longData': process_strike_symbol(long) }
+    data = {'stock_time':stock_time, 'portfolio':profile_instance.balance, 'shortSymbol':short,'shortData':process_strike_symbol(short, request.user), 'longSymbol': long, 'longData': process_strike_symbol(long, request.user) }
     
     
     return JsonResponse({'data':data, 'message':"Loaded Succesfully"})  
@@ -579,7 +737,7 @@ def get_strike_breakdown(request):
 
 def clean_comb():
     # clean_redis()
-    # return 'cleaned'
+    return 'cleaned'
 
     count = 0 
     times = [datetime(2024, 4, 29, 11, 40)]
@@ -694,9 +852,14 @@ def test_end(request):
     try:
         market_state = check_market_hours(datetime.now())
         ad = Combination.objects.latest('date_time')
+        
         info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
         
-        dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+        print('latst',info['latest_time'])
+        try:
+            dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+        except:
+            dji_value = 0
         
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
@@ -727,11 +890,11 @@ def test_end(request):
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
             print('Combs gotten', len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
         else:
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg})
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
     except Exception as E:
-        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":dji_value.avg})
+        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
     
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')

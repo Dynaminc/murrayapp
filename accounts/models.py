@@ -33,11 +33,12 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, blank=True, null=True)  # First name of the user
     last_name = models.CharField(max_length=100, blank=True, null=True)  # Last name of the user
-    porfolio = models.FloatField()  # Last name of the user
-    
+    size = models.FloatField(default=1000000)  # Last name of the user
+    balance = models.FloatField()  # Last name of the user
+    margin = models.IntegerField(default=3)
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -48,7 +49,7 @@ class Notification(models.Model):
         (INVISIBLE,'invisible'),
         (VISIBLE,'visible'),
     )
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.CharField(max_length=64, default=generate_uuid,primary_key=True)
     details = models.TextField(max_length=5000, null=False, blank=True)  # User's interests
     strike_id = models.CharField(max_length=100, blank=True, null=True)
@@ -67,7 +68,7 @@ class Notification(models.Model):
     
     
 class Transaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.CharField(max_length=64, default=generate_uuid,primary_key=True)
     details = models.TextField(max_length=5000, null=False, blank=True)  # User's interests
     strike_id = models.CharField(max_length=100, blank=True, null=True)
@@ -88,7 +89,7 @@ class Transaction(models.Model):
         return f"{self.id}"
     
 class Strike(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.CharField(max_length=64, default=generate_uuid,primary_key=True)
     long_symbol = models.CharField(max_length=30)
     short_symbol = models.CharField(max_length=30)
@@ -148,6 +149,9 @@ class Strike(models.Model):
     tss_open = models.FloatField(null=True, blank=True)
     tss_close = models.FloatField(null=True, blank=True)            
     
+    target_profit = models.FloatField(null=False, default=1)            
+    
+    
     def __str__(self):
         profile_instance = Profile.objects.filter(user=self.user).first()
-        return f"{self.id}: {profile_instance.first_name}: {self.short_symbol} {self.long_symbol}.  closed:  {self.closed}"
+        return f"{self.id}: {self.short_symbol} {self.long_symbol}.  closed:  {self.closed}"

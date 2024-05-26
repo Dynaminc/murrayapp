@@ -4,6 +4,7 @@ from .models import *
 class StrikeManagementSerializer(serializers.Serializer):
     short = serializers.CharField() 
     long = serializers.CharField()
+    profit = serializers.CharField()
     
 class FundSerializer(serializers.Serializer):
     fund = serializers.CharField() 
