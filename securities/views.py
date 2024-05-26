@@ -365,7 +365,7 @@ def trigger_close_strike(id):
         strike_instance.save()
         
         previous_balance = profile_instance.balance
-        profile_instance.balance = previous_balance  + sum_total
+        profile_instance.balance = previous_balance  + get_current_value(strike_instance) + (strike_instance.total_open_price / profile_instance.margin)
         profile_instance.save()
         
         Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)     
@@ -564,12 +564,13 @@ def add_fund(request):
         if not profile_instance:
             return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
                         
-        previous_balance = profile_instance.balance 
-        profile_instance.balance = previous_balance + fund
+        # previous_balance = profile_instance.size
+        profile_instance.balance = profile_instance.balance + fund
+        profile_instance.size = profile_instance.size + fund
         profile_instance.save()
         
         Transaction.objects.create(user=profile_instance.user,  details=f"Wallet has been funded",
-                                new_balance=profile_instance.balance, 
+                                new_balance=profile_instance.size, 
                                 credit=True, amount=fund, transaction_type=tran_not_type.WALLET_FUNDED)
         Notification.objects.create(user=profile_instance.user, details=f"Wallet has been funded with {fund}", notification_type=tran_not_type.WALLET_FUNDED)   
         
