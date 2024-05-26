@@ -666,12 +666,26 @@ def mig_flow(initial_timestamp):
             dji_prev = item.avg
     
     print('dji_prev', dji_prev, len(prev_dict.keys()))
-                
+    
+    prev_close = {}
+    
+    last_min = (initial_timestamp - timedelta(minutes = 1)).replace(second=0, microsecond=0)    
+    last_stocks = Stock.objects.filter(date_time = last_min).all()
+          
+    for item in last_stocks:
+        prev_close[item.symbol] = item.close
+             
+    print('strocks', len(last_stocks))   
+    
     count = 0
     for timestamp in distinct_timestamps:
         if timestamp.time() >= time(9, 30): 
             print(timestamp)
             final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
+            if count > 0:
+                prev_set = [item for item in stocks if item.date_time == distinct_timestamps[count-1]]        
+                for item in prev_set:
+                    prev_close[item.symbol] = item.close
             
             current_date = timestamp.date()
             start_datetime = current_date - timedelta(days=1)
@@ -697,7 +711,8 @@ def mig_flow(initial_timestamp):
                     
                     
                     # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                    current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
+                    current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
+                    # current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
                     cummulative_percent  =  prev_dict[strike] + current_percent
                     prev_dict[strike] = cummulative_percent 
                     try:
@@ -715,7 +730,7 @@ def mig_flow(initial_timestamp):
                 except:
                     pass
             dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
-            dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
+            dji_current_percent = (dji.close - prev_close['DJI']) / prev_close['DJI'] * 100
             dji_cummulative_percent  =  dji_prev + dji_current_percent
             try:
                 Combination.objects.create(
@@ -740,11 +755,20 @@ def all_flow(initial_timestamp):
     new_distinct_timestamps = sorted(distinct_timestamps)
     
     prev_dict = {}
+    prev_close = {}
+    
     dji_prev = 0
     combs = combinations(Company.SYMBOLS, 3)
     for comb in combs:
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         prev_dict[strike] = 0
+    
+    last_min = (initial_timestamp - timedelta(minutes = 1)).replace(second=0, microsecond=0)    
+    last_stocks = Stock.objects.filter(date_time = last_min).all()
+    print('last stocks', len(last_stocks))
+          
+    for item in last_stocks:
+        prev_close[item.symbol] = item.close
                 
     
     count = 0
@@ -783,7 +807,7 @@ def all_flow(initial_timestamp):
                 
                 
                 # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
+                current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
                 cummulative_percent  =  prev_dict[strike] + current_percent
                 prev_dict[strike] = cummulative_percent 
                 try:
@@ -800,7 +824,7 @@ def all_flow(initial_timestamp):
                     pass
         
             dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
-            dji_current_percent = (dji.close - dji.previous_close) / dji.previous_close * 100
+            dji_current_percent = (dji.close - prev_close['DJI']) / prev_close['DJI'] * 100
             dji_cummulative_percent  =  dji_prev + dji_current_percent
             try:
                 Combination.objects.create(
@@ -814,6 +838,11 @@ def all_flow(initial_timestamp):
             except: 
                 pass
             Cronny.objects.create(symbol=f"{timestamp}")    
+        final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
+        
+        for item in final_set:
+            prev_close[item.symbol] = item.close
+            
         count += 1
             
         
@@ -831,10 +860,20 @@ def generate_flow_combinations(current_datetime):
     except:
         final_time = new_distinct_timestamps[current]
             
-    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
-                                            date_time__gte=final_time,
-                                            date_time__lt=(final_time + timedelta(minutes=1))).all()]
+    previous_time = new_distinct_timestamps[previous]
+    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = final_time).all()]
+    print ('len ', len(stocks))
     
+    prev_close = {}
+   
+   
+    last_stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = previous_time).all()]
+    for item in last_stocks:
+        prev_close[item['symbol']] = item['close']
+    
+    # stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
+    #                                         date_time__gte=final_time,
+    #                                         date_time__lt=(final_time + timedelta(minutes=1))).all()]
     # stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
     print('Stocks', len(stocks))
     
@@ -875,7 +914,7 @@ def generate_flow_combinations(current_datetime):
         stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
         
         # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        current_percent = (((stock_1['close'] - stock_1['previous_close'] ) / stock_1['previous_close']) + ((stock_2['close'] - stock_2['previous_close'] ) / stock_2['previous_close']) + ((stock_3['close'] - stock_3['previous_close'] ) / stock_3['previous_close'])) * 100
+        current_percent = (((stock_1['close'] - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2['close'] - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3['close'] - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
         cummulative_percent = 0
         previous_instance = None 
         try:
