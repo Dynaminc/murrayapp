@@ -45,11 +45,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # real_time_data()
-        initial_timestamp = datetime(2024, 5, 17, 11)
+        # return
+        initial_timestamp = datetime(2024, 5, 20, 11)
         
         combs = combinations(Company.SYMBOLS, 3)
         
-        initial = datetime(2024, 5, 17, 10, 59)
+        initial = datetime(2024, 5, 20, 10, 59)
         data = Combination.objects.filter(date_time=initial).all()
         data.delete()
         
