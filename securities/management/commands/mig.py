@@ -34,6 +34,8 @@ from datetime import datetime
 from securities.cronjob import new_calc_migrator, clean_comb,mig_flow, new_calc, new_flow_migrator, dji_migrator, real_time_data, all_flow
 from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, get_test_data, json_migrator
+from securities.models import Company
+from itertools import combinations
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -43,23 +45,39 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # real_time_data()
-        # return
-        return
         initial_timestamp = datetime(2024, 5, 17, 11)
-        # initial = datetime(2024, 5, 17, 10, 59)
-        # for item in Combination.objects.filter(date_time=initial).all():
-        #     item.avg, item.stdev, item.z_score = 0,0,0
-        #     item.save()
+        
+        combs = combinations(Company.SYMBOLS, 3)
+        
+        initial = datetime(2024, 5, 17, 10, 59)
+        data = Combination.objects.filter(date_time=initial).all()
+        data.delete()
+        
+        
+        for comb in combs:    
+            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+            try:
+                Combination.objects.create(
+                        symbol=strike,
+                        avg=0,
+                        stdev=0,
+                        strike=0,
+                        date_time=initial,
+                        z_score=0,
+                    ) 
+            except Exception as E:
+                pass
             
-        # clean_comb(initial_timestamp)
+        clean_comb(initial_timestamp)
         print("cleaned data")
         # get_test_data(initial_timestamp)
         print('test data obtained')
         # json_migrator(initial_timestamp)
         # new_flow_migrator()
         
-        # all_flow(initial_timestamp)
-        mig_flow(initial_timestamp)
+        all_flow(initial_timestamp)
+        print('Done')
+        # mig_flow(initial_timestamp)
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
