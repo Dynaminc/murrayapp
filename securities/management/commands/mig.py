@@ -45,29 +45,29 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # real_time_data()
-        return
-        initial_timestamp = datetime(2024, 5, 20, 11)
+        # return
+        initial_timestamp = datetime(2024, 5, 15, 59)
         
-        combs = combinations(Company.SYMBOLS, 3)
+        # combs = combinations(Company.SYMBOLS, 3)
         
-        initial = datetime(2024, 5, 20, 10, 59)
-        data = Combination.objects.filter(date_time=initial).all()
-        data.delete()
+        # initial = datetime(2024, 5, 20, 15, 58)
+        # data = Combination.objects.filter(date_time=initial).all()
+        # data.delete()
         
         
-        for comb in combs:    
-            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-            try:
-                Combination.objects.create(
-                        symbol=strike,
-                        avg=0,
-                        stdev=0,
-                        strike=0,
-                        date_time=initial,
-                        z_score=0,
-                    ) 
-            except Exception as E:
-                pass
+        # for comb in combs:    
+        #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        #     try:
+        #         Combination.objects.create(
+        #                 symbol=strike,
+        #                 avg=0,
+        #                 stdev=0,
+        #                 strike=0,
+        #                 date_time=initial,
+        #                 z_score=0,
+        #             ) 
+        #     except Exception as E:
+        #         pass
             
         clean_comb(initial_timestamp)
         print("cleaned data")
@@ -76,9 +76,10 @@ class Command(BaseCommand):
         # json_migrator(initial_timestamp)
         # new_flow_migrator()
         
-        all_flow(initial_timestamp)
+        # all_flow(initial_timestamp)
+        
+        mig_flow(initial_timestamp)
         print('Done')
-        # mig_flow(initial_timestamp)
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()

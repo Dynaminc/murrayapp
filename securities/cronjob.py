@@ -633,7 +633,7 @@ def check_strike_symbol(strike, earning_symbols):
 
 def mig_flow(initial_timestamp):
     
-    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
+    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
     
     stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
     print(len(stocks))
