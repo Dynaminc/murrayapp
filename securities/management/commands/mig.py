@@ -46,7 +46,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         # return
-        initial_timestamp = datetime(2024, 5, 15, 59)
+        initial_timestamp = datetime(2024, 5, 20, 15, 59)
         
         # combs = combinations(Company.SYMBOLS, 3)
         
