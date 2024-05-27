@@ -50,9 +50,9 @@ class AscendingDescendingStdevFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'asc':
-            return queryset.order_by('stdev')
+            return queryset.order_by('avg')
         elif self.value() == 'desc':
-            return queryset.order_by('-stdev')
+            return queryset.order_by('-avg')
         return queryset
 
 class AscendingDescendingZScoreFilter(admin.SimpleListFilter):
@@ -67,9 +67,9 @@ class AscendingDescendingZScoreFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'asc':
-            return queryset.order_by('z_score')
+            return queryset.order_by('avg')
         elif self.value() == 'desc':
-            return queryset.order_by('-z_score')
+            return queryset.order_by('-avg')
         return queryset
 
 # class CombinationAdmin(admin.ModelAdmin):
