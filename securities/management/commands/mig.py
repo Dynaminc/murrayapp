@@ -46,7 +46,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         # return
-        initial_timestamp = datetime(2024, 5, 24, 15, 58)
+        initial_timestamp = datetime(2024, 5, 27)
         
         # combs = combinations(Company.SYMBOLS, 3)
         
@@ -78,8 +78,8 @@ class Command(BaseCommand):
         
         # all_flow(initial_timestamp)
         
-        mig_flow(initial_timestamp)
-        # print('Done')
+        # mig_flow(initial_timestamp)
+        print('Done')
         # new_flow_migrator()
         # dji_migrator()
         # simulate_compute()
