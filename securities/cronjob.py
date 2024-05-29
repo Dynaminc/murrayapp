@@ -694,7 +694,7 @@ def mig_flow(initial_timestamp):
             end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
             earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
             valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]     
-            
+            print (start_date, earnings_data.first().date_time, end_date, valid_earnings_data)
             
             specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
             # print('sd', len(list()))
