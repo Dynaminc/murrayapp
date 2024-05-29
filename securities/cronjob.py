@@ -708,7 +708,7 @@ def mig_flow(initial_timestamp):
                 start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                 end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                 if start_date <= timestamp <= end_date:
-                    valid_earnings_data.append(item.symbol)
+                    valid_earnings_data.append(earnings.symbol)
                 
             
             specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
@@ -812,7 +812,7 @@ def all_flow(initial_timestamp):
                 start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                 end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                 if start_date <= timestamp <= end_date:
-                    valid_earnings_data.append(item.symbol)
+                    valid_earnings_data.append(earnings.symbol)
                                 
             # set1 = set(valid_earnings_data)
             # set2 = set(Company.SYMBOLS)
@@ -938,7 +938,7 @@ def generate_flow_combinations(current_datetime):
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         if start_date <= timestamp <= end_date:
-            valid_earnings_data.append(item.symbol)
+            valid_earnings_data.append(earnings.symbol)
             
     combs = combinations(Company.SYMBOLS, 3)
     
