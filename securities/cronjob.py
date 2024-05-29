@@ -688,13 +688,22 @@ def mig_flow(initial_timestamp):
                 for item in prev_set:
                     prev_close[item.symbol] = item.close
             
-            current_date = timestamp.date()
-            start_datetime = current_date - timedelta(days=1)
-            start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
-            end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
-            earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-            valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]     
-            print (start_date, earnings_data.first().date_time, end_date, valid_earnings_data)
+            # current_date = timestamp.date()
+            # start_datetime = current_date - timedelta(days=1)
+            # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
+            # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
+            # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+            # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]     
+            
+            
+            earning_dates = {}
+            valid_earnings_data = []
+            for earnings in Earning.objects.all():
+                start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                if start_date <= timestamp.date <= end_date:
+                    valid_earnings_data.append(item.symbol)
+                
             
             specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
             # print('sd', len(list()))
@@ -777,14 +786,23 @@ def all_flow(initial_timestamp):
             print(timestamp)
             final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
             
-            current_date = timestamp.date()
-            start_datetime = current_date - timedelta(days=1)
-            start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
-            end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
-            earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-            valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
-            print(valid_earnings_data)
+            # current_date = timestamp.date()
+            # start_datetime = current_date - timedelta(days=1)
+            # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
+            # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
+            # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+            # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
+            # print(valid_earnings_data)
             
+            
+            earning_dates = {}
+            valid_earnings_data = []
+            for earnings in Earning.objects.all():
+                start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                if start_date <= timestamp.date <= end_date:
+                    valid_earnings_data.append(item.symbol)
+                                
             # set1 = set(valid_earnings_data)
             # set2 = set(Company.SYMBOLS)
             
@@ -896,13 +914,21 @@ def generate_flow_combinations(current_datetime):
     print(len(previous_set))
     
     
-    current_date = timestamp.date()
-    start_datetime = current_date - timedelta(days=1)
-    start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
-    end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
-    earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-    valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
+    # current_date = timestamp.date()
+    # start_datetime = current_date - timedelta(days=1)
+    # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
+    # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
+    # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+    # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
 
+    earning_dates = {}
+    valid_earnings_data = []
+    for earnings in Earning.objects.all():
+        start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        if start_date <= timestamp.date <= end_date:
+            valid_earnings_data.append(item.symbol)
+            
     combs = combinations(Company.SYMBOLS, 3)
     
     for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
