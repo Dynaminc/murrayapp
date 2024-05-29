@@ -875,7 +875,14 @@ def test_end(request):
         print(latest_data, 'latest')
         if latest_data:
             latest_time = latest_data
-            pre_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+            pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+            done = []
+            pre_filtered_combinations = []
+            for item in pre_peri_filtered_combinations:
+                if item.symbol not in done:
+                    pre_filtered_combinations.append(item)
+                    done.append(item.symbol)
+            
             # # Get earnings data for the relevant period
             # current_date = datetime.now().date()
             # start_datetime = current_date - timedelta(days=1)
