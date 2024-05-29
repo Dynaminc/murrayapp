@@ -634,7 +634,7 @@ def check_strike_symbol(strike, earning_symbols):
 def mig_flow(initial_timestamp):
     
     # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    
+    print(initial_timestamp)
     stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
     print(len(stocks))
     # stocks = [StockSerializer(item) for item in stock_query]
@@ -672,7 +672,12 @@ def mig_flow(initial_timestamp):
     
     last_min = (initial_timestamp - timedelta(minutes = 1)).replace(second=0, microsecond=0)    
     last_stocks = Stock.objects.filter(date_time = last_min).all()
-          
+    if len(last_stocks) == 0:
+        print('zero stcoks', len(last_stocks))       
+        last_min = Stock.objects.filter(date_time_lt=initial_timestamp).latest().date_time
+        last_stocks = Stock.objects.filter(date_time = last_min).all()
+        print('last min', len(last_min))       
+        print('final strocks', len(last_stocks))       
     for item in last_stocks:
         prev_close[item.symbol] = item.close
              
@@ -774,11 +779,16 @@ def all_flow(initial_timestamp):
     
     last_min = (initial_timestamp - timedelta(minutes = 1)).replace(second=0, microsecond=0)    
     last_stocks = Stock.objects.filter(date_time = last_min).all()
-    print('last stocks', len(last_stocks))
-          
+    if len(last_stocks) == 0:
+        print('zero stcoks', len(last_stocks))       
+        last_min = Stock.objects.filter(date_time_lt=initial_timestamp).latest().date_time
+        last_stocks = Stock.objects.filter(date_time = last_min).all()
+        print('last min', len(last_min))       
+        print('final strocks', len(last_stocks))       
     for item in last_stocks:
         prev_close[item.symbol] = item.close
-                
+             
+    print('strocks', len(last_stocks))   
     
     count = 0
     for timestamp in distinct_timestamps:
