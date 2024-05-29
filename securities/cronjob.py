@@ -668,6 +668,7 @@ def mig_flow(initial_timestamp):
     print('dji_prev', dji_prev, len(prev_dict.keys()))
     
     prev_close = {}
+    prev_close["DJI"] = dji_prev
     
     last_min = (initial_timestamp - timedelta(minutes = 1)).replace(second=0, microsecond=0)    
     last_stocks = Stock.objects.filter(date_time = last_min).all()
@@ -864,7 +865,7 @@ def generate_flow_combinations(current_datetime):
     print ('len ', len(stocks))
     
     prev_close = {}
-   
+    prev_close["DJI"] = 0
    
     last_stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = previous_time).all()]
     for item in last_stocks:
