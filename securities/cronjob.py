@@ -674,7 +674,7 @@ def mig_flow(initial_timestamp):
     last_stocks = Stock.objects.filter(date_time = last_min).all()
     if len(last_stocks) == 0:
         print('zero stcoks', len(last_stocks))       
-        last_min = Stock.objects.filter(date_time__lt=initial_timestamp).latest().date_time
+        last_min = Stock.objects.filter(date_time__lt=initial_timestamp).latest('date_time').date_time
         last_stocks = Stock.objects.filter(date_time = last_min).all()
         print('last min', len(last_min))       
         print('final strocks', len(last_stocks))       
@@ -781,7 +781,7 @@ def all_flow(initial_timestamp):
     last_stocks = Stock.objects.filter(date_time = last_min).all()
     if len(last_stocks) == 0:
         print('zero stcoks', len(last_stocks))       
-        last_min = Stock.objects.filter(date_time__lt=initial_timestamp).latest().date_time
+        last_min = Stock.objects.filter(date_time__lt=initial_timestamp).latest('date_time').date_time
         last_stocks = Stock.objects.filter(date_time = last_min).all()
         print('last min', len(last_min))       
         print('final strocks', len(last_stocks))       
