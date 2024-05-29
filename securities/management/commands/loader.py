@@ -51,6 +51,7 @@ class Command(BaseCommand):
         # get_test_data()
         # # print('test data obtained')
         # json_migrator()
+        real_time_data()
         return
         initial_timestamp = datetime(2024, 5, 16, 13, 5)
         clean_comb(initial_timestamp)
