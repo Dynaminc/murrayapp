@@ -86,7 +86,7 @@ class Transaction(models.Model):
     ) 
     transaction_type = models.CharField(choices=TYPE_CHOICES, max_length=1000, default='CUSTOM')  # Status of the bid
     def __str__(self):
-        return f"{self.id}"
+        return f"{self.id}: {self.user} {self.details}"
     
 class Strike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

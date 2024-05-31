@@ -300,8 +300,9 @@ def update_strike(id):
         else:
             strike_instance.min_percentage = strike_instance.current_percentage 
         # process for exit signal             
-        if strike_instance.current_percentage > 2 or strike_instance.current_percentage >= strike_instance.target_profit and not strike_instance.signal_exit:
+        if strike_instance.current_percentage >= strike_instance.target_profit and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
+            strike_instance.save()
             Notification.objects.create(user=strike_instance.user, details=f"Strike has exceeded the profit mark", strike_id=strike_instance.id, notification_type=tran_not_type.EXIT_ALERT)   
             trigger_close_strike(strike_instance.id)
         else:
@@ -392,8 +393,8 @@ def close_strike(request):
     
     close_time = str(Stock.objects.latest('date_time').date_time)
     
-    if not request.user.is_authenticated:
-        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    # if not request.user.is_authenticated:
+    #     return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
     
     
     strike_instance = Strike.objects.filter(id=id).first() 
