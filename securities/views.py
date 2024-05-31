@@ -299,6 +299,7 @@ def update_strike(id):
         
         else:
             strike_instance.min_percentage = strike_instance.current_percentage 
+        strike_instance.save() 
         # process for exit signal             
         if strike_instance.current_percentage >= strike_instance.target_profit and not strike_instance.signal_exit:
             strike_instance.signal_exit = True
@@ -318,7 +319,7 @@ def update_strike(id):
                 detail = f"Strike has exceeded the -1.5% mark"
                 if not Notification.objects.filter(strike_id=strike_instance.id).filter(details=detail).first():
                     Notification.objects.create(user=strike_instance.user, details=detail, strike_id=strike_instance.id, notification_type=tran_not_type.CUSTOM)                     
-        strike_instance.save()
+                   
     
     return True
 
@@ -393,8 +394,8 @@ def close_strike(request):
     
     close_time = str(Stock.objects.latest('date_time').date_time)
     
-    # if not request.user.is_authenticated:
-    #     return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
     
     
     strike_instance = Strike.objects.filter(id=id).first() 
@@ -445,11 +446,16 @@ def close_strike(request):
         
         strike_instance.save()
 
+
         previous_balance = profile_instance.balance
-        profile_instance.balance = previous_balance  + sum_total
+        diff =  get_current_value(strike_instance) + (strike_instance.total_open_price / profile_instance.margin)
+        profile_instance.balance = previous_balance  + get_current_value(strike_instance) + (strike_instance.total_open_price / profile_instance.margin)
+        
         profile_instance.save()
         
-        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, amount=sum_total, transaction_type=tran_not_type.TRADE_CLOSED)       
+        
+        
+        Transaction.objects.create(user=strike_instance.user, details=f'Your order has been closed for strike {strike_instance.long_symbol}/{strike_instance.short_symbol}', strike_id=strike_instance.id, previous_balance=previous_balance, new_balance=profile_instance.balance, amount=diff, transaction_type=tran_not_type.TRADE_CLOSED)       
         
         # previous_balance = profile_instance.balance
         # profile_instance.balance = previous_balance  - 10
