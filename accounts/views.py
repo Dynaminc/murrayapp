@@ -7,6 +7,7 @@ from .serializer import *
 from .models import Profile
 from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from datetime import timedelta
 # Create your views here.
 
 # make user creation only possible by admin
@@ -47,6 +48,10 @@ def sign_in(request):
             # Logs in the user and generates JWT tokens.
             login(request, authenticated_user)     
             tokenr = RefreshToken().for_user(request.user)
+            try:
+                tokenr.access_token.set_exp(lifetime=timedelta(days=2))
+            except:
+                print('error here')
             jwt_token = str(tokenr.access_token)
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
                                     'response': {'jwt_token': jwt_token,
