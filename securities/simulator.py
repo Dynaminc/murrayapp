@@ -44,7 +44,8 @@ def simulate_compute():
     
 def export_min_max():
     # Define the timestamp
-    timestamp = datetime(2024, 5, 20, 11)
+    # timestamp = datetime(2024, 5, 20, 11)
+    timestamp = datetime(2024, 6, 1, 11)
 
     # Fetch all combinations grouped by timestamp
     combinations = Combination.objects.filter(date_time__gte=timestamp)\
