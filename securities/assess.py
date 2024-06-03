@@ -135,7 +135,7 @@ def json_migrator(initial_timestamp):
                 previous_stock = stock_instance
             except:
                 errors.append(f"{stock}: {timestamp}")
-                Missing.objects.create(data=f"{stock}: {timestamp}")
+                # Missing.objects.create(data=f"{stock}: {timestamp}")
                 if not previous_stock:
                     data = [stock_data for stock_data in stocks if stock_data.symbol == stock and stock_data.date_time == distinct_timestamps_list[distinct_timestamps_list.index(timestamp) - 1]]
                     if len(data) > 0:
