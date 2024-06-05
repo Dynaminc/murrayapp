@@ -80,10 +80,9 @@ def sign_in(request):
             # Logs in the user and generates JWT tokens.
             login(request, authenticated_user)     
             tokenr = RefreshToken().for_user(request.user)
-            try:
-                tokenr.access_token.set_exp(lifetime=timedelta(days=2))
-            except:
-                print('error here')
+            tokenr.set_exp(lifetime=timedelta(days=2))
+            tokenr.access_token.set_exp(lifetime=timedelta(days=2))
+      
             jwt_token = str(tokenr.access_token)
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
                                     'response': {'jwt_token': jwt_token,
