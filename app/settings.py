@@ -96,21 +96,22 @@ ASGI_APPLICATION = 'app.asgi.application'
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     
 }
 
-ACCESS_TOKEN_LIFETIME = timedelta(days=2),
-REFRESH_TOKEN_LIFETIME = timedelta(days=2),
+# ACCESS_TOKEN_LIFETIME = timedelta(days=2),
+# REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
 
-JWT_AUTH = {
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': True,
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-    'ROTATE_REFRESH_TOKENS': False, 
-}
+# JWT_AUTH = {
+#     'JWT_VERIFY': True,
+#     'JWT_VERIFY_EXPIRATION': False,
+#     'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+#     
+#     'ROTATE_REFRESH_TOKENS': False, 
+# }
 
 
 CHANNEL_LAYERS = {

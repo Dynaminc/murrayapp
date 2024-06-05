@@ -59,6 +59,8 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 @api_view(['GET'])
 def get_auth_info(request):
+    print('reqeust')
+    print(request.user)
     # Verifies the authentication info using jwt_token
     # try:
     if request.user:
@@ -89,23 +91,17 @@ def sign_in(request):
         authenticated_user = authenticate(request, username=username, password=password)      
         if authenticated_user:
             # Logs in the user and generates JWT tokens.
-            login(request, authenticated_user)     
-            tokenr = RefreshToken().for_user(request.user)
-            # tokenr.set_exp(lifetime=timedelta(days=2))
-            # tokenr.access_token.set_exp(lifetime=timedelta(days=2))
-      
-            # jwt_token = str(tokenr.access_token)
-            
-            # Generate an access token for the authenticated user
-            access_token = AccessToken.for_user(authenticated_user)
-            # Set the expiration time for the access token
-            access_token.set_exp(lifetime=timedelta(days=2))
-
-            jwt_token = str(access_token)
+            login(request, authenticated_user)
+            refresh_token = RefreshToken.for_user(authenticated_user)
+            refresh_token.set_exp(lifetime=timedelta(days=2))
+            access_token = refresh_token.access_token
             
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
-                                    'response': {'jwt_token': jwt_token,
-                                                'refresh_token': str(tokenr)}, 'status': 200},
+                                    'response': {                     
+                                        'jwt_token': str(access_token),
+                                        'refresh_token': str(refresh_token)
+                                        }, 
+                                    'status': 200},
                                 status=status.HTTP_200_OK)
         else:
             return JsonResponse({'message': 'Login failed', 'status': 400}, status=status.HTTP_400_BAD_REQUEST)            
