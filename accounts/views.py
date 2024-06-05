@@ -95,6 +95,7 @@ def sign_in(request):
             login(request, authenticated_user)
             
             expiration_time = timezone.now() + timezone.timedelta(days=2)
+            print(expiration_time)
             expiration_timestamp = int(expiration_time.timestamp())
             
             refresh_token = RefreshToken.for_user(authenticated_user)

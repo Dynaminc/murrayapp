@@ -16,6 +16,7 @@ from django.utils import timezone
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+from pytz import timezone as tz
 
 load_dotenv() 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -94,25 +95,26 @@ ASGI_APPLICATION = 'app.asgi.application'
 # ACCESS_TOKEN_LIFETIME = timedelta(days=2),
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=2),
-#     'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=2),
-#     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
+    'REFRESH_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     
-# }
+}
 
 # ACCESS_TOKEN_LIFETIME = timedelta(days=2),
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
 
-JWT_AUTH = {
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': False,
-    'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=2),
-    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=2),
+# JWT_AUTH = {
+#     'JWT_VERIFY': True,
+#     'JWT_VERIFY_EXPIRATION': False,
+#     'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=2),
+#     'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=2),
     
-    'ROTATE_REFRESH_TOKENS': False, 
-}
+#     'ROTATE_REFRESH_TOKENS': False, 
+# }
 
 
 CHANNEL_LAYERS = {
