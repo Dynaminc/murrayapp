@@ -20,7 +20,6 @@ django-redis==5.4.0
 django-restframework==0.0.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
-djangorestframework-jwt
 et-xmlfile==1.1.0
 hyperlink==21.0.0
 idna==3.6

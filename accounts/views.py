@@ -12,11 +12,22 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-class CustomTokenRefreshSerializer(TokenRefreshSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        data['refresh'] = str(self.context['request'].META.get('HTTP_AUTHORIZATION', ''))
-        return data
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def get_token(self, serializer):
+        refresh = serializer.validated_data['refresh']
+        token = RefreshToken(refresh)
+
+        # Set the expiration time for the new token
+        token.set_exp(timedelta(days=2))  # Set to expire in 2 days
+
+        return token
+    
+# class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+#     def validate(self, attrs):
+#         data = super().validate(attrs)
+#         data['refresh'] = str(self.context['request'].META.get('HTTP_AUTHORIZATION', ''))
+#         return data
     
 # Create your views here.
 
@@ -24,27 +35,27 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 # show all users created by admin
 # admin signup and users sign up
 
-class CustomTokenRefreshView(TokenRefreshView):
-    serializer_class = CustomTokenRefreshSerializer
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+# class CustomTokenRefreshView(TokenRefreshView):
+#     serializer_class = CustomTokenRefreshSerializer
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
+#         try:
+#             serializer.is_valid(raise_exception=True)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=400)
 
-        data = serializer.validated_data
-        refresh = data['refresh']
+#         data = serializer.validated_data
+#         refresh = data['refresh']
 
-        # Decode the refresh token to get its payload
-        payload = RefreshToken(refresh).payload
+#         # Decode the refresh token to get its payload
+#         payload = RefreshToken(refresh).payload
 
-        # Here you can add any additional validation if needed
-        # For example, check if the refresh token is valid or has expired
+#         # Here you can add any additional validation if needed
+#         # For example, check if the refresh token is valid or has expired
 
-        # Return the same refresh token
-        return Response({"refresh": refresh}, status=200)
+#         # Return the same refresh token
+#         return Response({"refresh": refresh}, status=200)
 
 @api_view(['GET'])
 def get_auth_info(request):
@@ -80,10 +91,18 @@ def sign_in(request):
             # Logs in the user and generates JWT tokens.
             login(request, authenticated_user)     
             tokenr = RefreshToken().for_user(request.user)
-            tokenr.set_exp(lifetime=timedelta(days=2))
-            tokenr.access_token.set_exp(lifetime=timedelta(days=2))
+            # tokenr.set_exp(lifetime=timedelta(days=2))
+            # tokenr.access_token.set_exp(lifetime=timedelta(days=2))
       
-            jwt_token = str(tokenr.access_token)
+            # jwt_token = str(tokenr.access_token)
+            
+            # Generate an access token for the authenticated user
+            access_token = AccessToken.for_user(authenticated_user)
+            # Set the expiration time for the access token
+            access_token.set_exp(lifetime=timedelta(days=2))
+
+            jwt_token = str(access_token)
+            
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
                                     'response': {'jwt_token': jwt_token,
                                                 'refresh_token': str(tokenr)}, 'status': 200},
