@@ -12,10 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from django.core.management.utils import get_random_secret_key
 import os
 from datetime import timedelta
-from django.utils import timezone
+
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+from django.utils import timezone
 from pytz import timezone as tz
 
 load_dotenv() 
@@ -92,16 +93,35 @@ CRONJOBS = [
 
 ASGI_APPLICATION = 'app.asgi.application'
 
+# Define the token lifetimes in days
+token_lifetime_days = 2
+
+# Get the current time in the US/Eastern timezone
+us_eastern = tz('US/Eastern')
+current_time = timezone.now().astimezone(us_eastern)
+
+# Calculate the expiration time for the tokens
+expiration_time = current_time + timezone.timedelta(days=token_lifetime_days)
+
+# Set the token lifetimes in the SIMPLE_JWT configuration
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=token_lifetime_days),
+    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=token_lifetime_days),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+
 # ACCESS_TOKEN_LIFETIME = timedelta(days=2),
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
-    'REFRESH_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+# from django.utils import timezone
+# from pytz import timezone as tz
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
+#     'REFRESH_TOKEN_LIFETIME': tz('US/Eastern').localize(timezone.timedelta(days=2)),
+#     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     
-}
+# }
 
 # ACCESS_TOKEN_LIFETIME = timedelta(days=2),
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
