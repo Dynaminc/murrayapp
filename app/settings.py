@@ -93,14 +93,15 @@ ASGI_APPLICATION = 'app.asgi.application'
 # ACCESS_TOKEN_LIFETIME = timedelta(days=2),
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
-#     'JWT_VERIFY': False,
-#     'JWT_VERIFY_EXPIRATION': False,
-#     'ROTATE_REFRESH_TOKENS': False, 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
     
-# }
+}
+
+ACCESS_TOKEN_LIFETIME = timedelta(days=2),
+REFRESH_TOKEN_LIFETIME = timedelta(days=2),
+
 
 JWT_AUTH = {
     'JWT_VERIFY': False,
