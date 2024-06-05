@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'channels',
     'django_crontab',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
 
     # Internal Apps
