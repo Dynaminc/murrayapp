@@ -64,7 +64,7 @@ def get_auth_info(request):
     print(request.user)
     # Verifies the authentication info using jwt_token
     # try:
-    if request.user:
+    if request.user and not request.user.is_anonymous:
         user_data = {}
         user = UserSerializer(request.user).data
         profile_instance = Profile.objects.filter(user=request.user).first()
@@ -89,42 +89,18 @@ def sign_in(request):
         serialized = serializer.data
         username = serialized['username'].lower()
         password = serialized['password']  
-        authenticated_user = authenticate(request, username=username, password=password)      
+        print(request.user)
+        authenticated_user = authenticate(username=username, password=password)      
+        print(authenticated_user)
         if authenticated_user:
             # Logs in the user and generates JWT tokens.
             login(request, authenticated_user)
-            # Set the expiration time using timezone-aware datetime objects
-            expiration_time = timezone.now() + timezone.timedelta(days=2)
-
-            # Convert expiration_time to the timezone of the server (US/Eastern)
-            us_eastern = timezone.get_current_timezone()
-            expiration_time = expiration_time.astimezone(us_eastern)
-
-            # Convert expiration_time to a timestamp (in the timezone of the server)
-            expiration_timestamp = int(expiration_time.timestamp())
-
-            # Generate refresh token
-            refresh_token = RefreshToken.for_user(authenticated_user)
-
-            # Set the expiration time for both the refresh token and the access token
-            refresh_token.set_exp(expiration_timestamp)
-            access_token = refresh_token.access_token
-            access_token.set_exp(expiration_timestamp)
-            
-            
-            # expiration_time = timezone.now() + timezone.timedelta(days=2)
-            # print(expiration_time)
-            # expiration_timestamp = int(expiration_time.timestamp())
-            
-            # refresh_token = RefreshToken.for_user(authenticated_user)
-            # refresh_token.set_exp(expiration_timestamp)
-            # access_token = refresh_token.access_token
-            # access_token.set_exp(expiration_timestamp)
-            
+            profile_instance = Profile.objects.filter(user=authenticated_user).first()
+            profile_instance.update_token()
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
                                     'response': {                     
-                                        'jwt_token': str(access_token),
-                                        'refresh_token': str(refresh_token)
+                                        'jwt_token': str(profile_instance.token),
+                                        'refresh_token': str(profile_instance.token)
                                         }, 
                                     'status': 200},
                                 status=status.HTTP_200_OK)

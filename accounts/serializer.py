@@ -9,7 +9,7 @@ class StrikeSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        exclude = ['id']
+        exclude = ['id', 'token', 'token_expires']
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

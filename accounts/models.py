@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
@@ -39,8 +40,17 @@ class Profile(models.Model):
     size = models.FloatField(default=1000000)  # Last name of the user
     balance = models.FloatField()  # Last name of the user
     margin = models.IntegerField(default=3)
+    
+    token = models.CharField(max_length=64, default=generate_uuid, null=True, blank=True)
+    token_expires = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def update_token(self):
+        self.token = generate_uuid()
+        self.token_expires = timezone.now() + timezone.timedelta(days=2)
+        self.save()
 
 class Notification(models.Model):
     NOTIFICATION_STATUS_CHOICES = (

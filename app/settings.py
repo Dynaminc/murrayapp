@@ -101,9 +101,10 @@ token_lifetime_days = 2
 us_eastern = tz('US/Eastern')
 current_time = timezone.now().astimezone(us_eastern)
 
+
 # Calculate the expiration time for the tokens
 expiration_time = current_time + timezone.timedelta(days=token_lifetime_days)
-
+print('current time ', current_time, 'expire', expiration_time)
 # Set the token lifetimes in the SIMPLE_JWT configuration
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=token_lifetime_days),
@@ -161,9 +162,9 @@ CHANNEL_LAYERS = {
 # }
 
 REST_FRAMEWORK = {
-
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'accounts.middleware.JWTMiddleware',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -173,6 +174,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -181,6 +183,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+
 ]
 
 ROOT_URLCONF = 'app.urls'
