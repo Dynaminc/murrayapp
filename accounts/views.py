@@ -11,6 +11,7 @@ from datetime import timedelta
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from django.utils import timezone
 
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -92,9 +93,14 @@ def sign_in(request):
         if authenticated_user:
             # Logs in the user and generates JWT tokens.
             login(request, authenticated_user)
+            
+            expiration_time = timezone.now() + timezone.timedelta(days=2)
+            expiration_timestamp = int(expiration_time.timestamp())
+            
             refresh_token = RefreshToken.for_user(authenticated_user)
-            refresh_token.set_exp(lifetime=timedelta(days=2))
+            refresh_token.set_exp(expiration_timestamp)
             access_token = refresh_token.access_token
+            access_token.set_exp(expiration_timestamp)
             
             return JsonResponse({'message': 'Welcome back! You are now logged in.',
                                     'response': {                     

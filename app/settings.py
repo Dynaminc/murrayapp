@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from django.core.management.utils import get_random_secret_key
 import os
 from datetime import timedelta
+from django.utils import timezone
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
@@ -94,8 +95,8 @@ ASGI_APPLICATION = 'app.asgi.application'
 # REFRESH_TOKEN_LIFETIME = timedelta(days=2),
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+    'ACCESS_TOKEN_LIFETIME': timezone.timedelta(days=2),
+    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=2),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     
 }
