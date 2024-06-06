@@ -46,7 +46,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # real_time_data()
         # return
-        initial_timestamp = datetime(2024, 5, 29)
+        initial_timestamp = datetime(2024, 6, 4, 14)
         
         # combs = combinations(Company.SYMBOLS, 3)
         
@@ -71,9 +71,9 @@ class Command(BaseCommand):
             
         clean_comb(initial_timestamp)
         print("cleaned data")
-        # get_test_data(initial_timestamp)
+        get_test_data(initial_timestamp)
         print('test data obtained')
-        # json_migrator(initial_timestamp)
+        json_migrator(initial_timestamp)
         # new_flow_migrator()
         
         # all_flow(initial_timestamp)
