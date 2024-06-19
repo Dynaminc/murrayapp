@@ -20,7 +20,7 @@ from .assess import get_test_data, json_migrator, all_strikes, export_file, top_
 import pandas as pd 
 
 con = get_redis_connection("default")
-info = {'previous_time': None, 'latest_time': None}
+info = {'previous_time': None, 'latest_time': None, "combs": [], "dji_value":0}
 def index(request):
     return render(request, "securities/ranks.html")
 
@@ -860,6 +860,10 @@ def test_end(request):
     try:
         market_state = check_market_hours(datetime.now())
         ad = Combination.objects.latest('date_time')
+        if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
+            print('fetching saved combs')
+            combs =  info['combs']
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
         
         info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
         
@@ -868,7 +872,7 @@ def test_end(request):
             dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
         except:
             dji_value = 0
-        
+        info['dji_value'] = dji_value
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
@@ -903,8 +907,9 @@ def test_end(request):
             # combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
             
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
-            print('Combs gotten', len(combs))
             combs.sort(key=lambda x: x['score'], reverse=True)
+            info['combs'] = combs[:5]+combs[-5:]
+            print('saved combs fr min')
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
         else:
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
