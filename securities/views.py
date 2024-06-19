@@ -79,9 +79,8 @@ def get_chart(request):
         all_combs = Combination.objects.filter(
                             Q(symbol=short) | 
                             Q(symbol=long) | 
-                            Q(symbol='DJI') ).filter(
-                                    date_time__gte=last_24_hours,
-                                date_time__gte=strike_instance.open_time).all()
+                            Q(symbol='DJI') ).filter(date_time__gte=max(last_24_hours,strike_instance.open_time)).all()
+                                    # last_24_hours, date_time__gte=strike_instance.open_time)
         print('fetched all combs', len(all_combs))
         shorts = [item for item in all_combs if item.symbol == short]
         
