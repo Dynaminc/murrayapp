@@ -20,7 +20,7 @@ from .assess import get_test_data, json_migrator, all_strikes, export_file, top_
 import pandas as pd 
 
 con = get_redis_connection("default")
-info = {'previous_time': None, 'latest_time': None, "combs": [], "dji_value":0}
+info = {'previous_time': None, 'latest_time': None, "combs": [], "dji_value":0, 'loading' : False}
 def index(request):
     return render(request, "securities/ranks.html")
 
@@ -861,11 +861,17 @@ def test_end(request):
     try:
         market_state = check_market_hours(datetime.now())
         ad = Combination.objects.latest('date_time')
+        if info['loading']:
+            print('loading combs')
+            combs =  info['combs']
+            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+                    
         if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
             print('fetching saved combs')
             combs =  info['combs']
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
         
+        info['loading'] = True
         info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
         
         print('latst',info['latest_time'])
@@ -911,10 +917,13 @@ def test_end(request):
             combs.sort(key=lambda x: x['score'], reverse=True)
             info['combs'] = combs[:5]+combs[-5:]
             print('saved combs fr min')
+            info['loading'] = False
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
         else:
+            info['loading'] = False
             return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
     except Exception as E:
+        info['loading'] = False
         return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
     
 def stocks(request):
