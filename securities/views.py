@@ -72,14 +72,16 @@ def get_chart(request):
     try:
         id = request.GET.get('id', "")
         dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
-        
+        last_24_hours = datetime.now() - timedelta(hours=24)
         strike_instance = Strike.objects.filter(id=id).first() 
         short = strike_instance.short_symbol
         long = strike_instance.long_symbol
         all_combs = Combination.objects.filter(
                             Q(symbol=short) | 
                             Q(symbol=long) | 
-                            Q(symbol='DJI') ).filter(date_time__gte=strike_instance.open_time).all()
+                            Q(symbol='DJI') ).filter(
+                                    date_time__gte=last_24_hours,
+                                date_time__gte=strike_instance.open_time).all()
         print('fetched all combs', len(all_combs))
         shorts = [item for item in all_combs if item.symbol == short]
         
