@@ -976,7 +976,7 @@ def generate_flow_combinations(current_datetime):
     pre_filtered_combinations = Combination.objects.filter(
         date_time__gte=timestamp).order_by('symbol', '-date_time').distinct('symbol')    
     pre_filtered_combinations = list(pre_filtered_combinations)
-    pre_filtered_combinations.sort(key=lambda x: x.score, reverse=True)
+    pre_filtered_combinations.sort(key=lambda x: x.avg, reverse=True)
     cmb = pre_filtered_combinations[:20]+pre_filtered_combinations[-20:]
     
     instances = MiniCombination.objects.all()
