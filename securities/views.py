@@ -900,13 +900,13 @@ def test_end(request):
         f = open(os.path.join(os.getcwd(),'loading.txt'), 'r')
         content = f.read()
         f.close()
-        if content == 'loading' :
+        if content == f'{datetime.now().replace(second=0, microsecond=0)}-loading' :
             info['loading'] = True
         else:
             info['loading'] = False
             print('initing loading')
             f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
-            f.write('loading')
+            f.write(f'{datetime.now().replace(second=0, microsecond=0)}-loading')
             f.close()  
             
     # try:
@@ -915,7 +915,7 @@ def test_end(request):
     market_state = check_market_hours(datetime.now())
     
     if info['loading']:
-        print('loading combs')
+        # print('loading combs')
         # combs =  info['combs']
         
         dji_here = 0
@@ -925,9 +925,11 @@ def test_end(request):
                 data = json.load(f)
                 combs = data['comb']
                 dji_here = data['dji']
-        print(combs, 'combs fetched')
+        # print(combs, 'combs fetched')
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_here}, status=status.HTTP_200_OK)
     ad = Combination.objects.latest('date_time')
+    
+    
     # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
     # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
     #     print('fetching saved combs')
