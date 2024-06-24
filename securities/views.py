@@ -891,75 +891,77 @@ def check_strike_symbol(strike, earning_symbols):
 def test_end(request):
     combs = []
     market_state = "off"
+    # try:
+    market_state = check_market_hours(datetime.now())
+    ad = Combination.objects.latest('date_time')
+    if info['loading']:
+        print('loading combs')
+        combs =  info['combs']
+        print(combs, 'combs fetched')
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+    
+    print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
+    if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
+        print('fetching saved combs')
+        combs =  info['combs']
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+    
+    info['loading'] = True
+    info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+    
+    print('latst',info['latest_time'])
     try:
-        market_state = check_market_hours(datetime.now())
-        ad = Combination.objects.latest('date_time')
-        if info['loading']:
-            print('loading combs')
-            combs =  info['combs']
-            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
-                    
-        if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
-            print('fetching saved combs')
-            combs =  info['combs']
-            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
-        
-        info['loading'] = True
-        info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
-        
-        print('latst',info['latest_time'])
-        try:
-            dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
-            info['dji_value'] = dji_value.avg
-        except:
-            dji_value = 0
-            info['dji_value'] = 0
-        
+        dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+        info['dji_value'] = dji_value.avg
+    except:
+        dji_value = 0
+        info['dji_value'] = 0
+    
+    display_time = datetime.now()
+    current_time = str(display_time).split('.')[0]
+    
+    eastern = pytz.timezone('US/Eastern')
+    dt = eastern.localize(datetime.now())
+    if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
-        eastern = pytz.timezone('US/Eastern')
-        dt = eastern.localize(datetime.now())
-        if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
-            display_time = datetime.now()
-            current_time = str(display_time).split('.')[0]
-            
-        latest_data = info['latest_time']
-        print(latest_data, 'latest')
-        if latest_data:
-            latest_time = latest_data
-            pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
-            done = []
-            pre_filtered_combinations = []
-            for item in pre_peri_filtered_combinations:
-                if item.symbol not in done:
-                    pre_filtered_combinations.append(item)
-                    done.append(item.symbol)
-            
-            # # Get earnings data for the relevant period
-            # current_date = datetime.now().date()
-            # start_datetime = current_date - timedelta(days=1)
-            # start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
-            # end_date = current_date + timedelta(days=1)
-            # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-            
-            # valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
-            # filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
-            
-            # combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
-            
-            combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
-            combs.sort(key=lambda x: x['score'], reverse=True)
-            info['combs'] = combs[:20]+combs[-20:]
-            print('saved combs fr min')
-            info['loading'] = False
-            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
-        else:
-            info['loading'] = False
-            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
-    except Exception as E:
+    latest_data = info['latest_time']
+    print(latest_data, 'latest')
+    if latest_data:
+        latest_time = latest_data
+        pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+        done = []
+        pre_filtered_combinations = []
+        for item in pre_peri_filtered_combinations:
+            if item.symbol not in done:
+                pre_filtered_combinations.append(item)
+                done.append(item.symbol)
+        
+        # # Get earnings data for the relevant period
+        # current_date = datetime.now().date()
+        # start_datetime = current_date - timedelta(days=1)
+        # start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
+        # end_date = current_date + timedelta(days=1)
+        # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+        
+        # valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
+        # filtered_combinations = [item for item in pre_filtered_combinations if not check_strike_symbol(item.symbol, valid_earnings_data)]
+        
+        # combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]
+        
+        combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
+        combs.sort(key=lambda x: x['score'], reverse=True)
+        info['combs'] = combs[:20]+combs[-20:]
+        print('saved combs fr min', info['latest'])
         info['loading'] = False
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
+    else:
+        info['loading'] = False
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
+    # except Exception as E:
+    #     info['loading'] = False
+    #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
     
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')
