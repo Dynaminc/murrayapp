@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/closestrike", views.close_strike),
     
     path("api/add_fund", views.add_fund),
+    path("api/remove_fund", views.remove_fund),
     path("api/load_stats", views.load_stats),
     path("api/load_all_stats", views.load_all_stats),
     

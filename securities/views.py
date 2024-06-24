@@ -79,7 +79,8 @@ def get_chart(request):
         all_combs = Combination.objects.filter(
                             Q(symbol=short) | 
                             Q(symbol=long) | 
-                            Q(symbol='DJI') ).filter(date_time__gte=max(last_24_hours,strike_instance.open_time)).all()
+                            Q(symbol='DJI') ).filter(date_time__gte=strike_instance.open_time).all()
+        # .filter(date_time__gte=max(last_24_hours,strike_instance.open_time)).all()
                                     # last_24_hours, date_time__gte=strike_instance.open_time)
         print('fetched all combs', len(all_combs))
         shorts = [item for item in all_combs if item.symbol == short]
@@ -555,6 +556,38 @@ def confirm_strike(request):
 
 
 @api_view(['POST'])
+def remove_fund(request):
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = FundSerializer(data=request.POST)
+        if not serializer.is_valid():
+            return JsonResponse({'message': f'{serializer.errors}', 'status': 400}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+    
+        serialized = serializer.data
+        fund = int(serialized['fund'])
+        
+        profile_instance = Profile.objects.filter(user=request.user).first()
+        if not profile_instance:
+            return JsonResponse({'message': 'Profile not found','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+                        
+        # previous_balance = profile_instance.size
+        profile_instance.balance = profile_instance.balance - fund
+        profile_instance.size = profile_instance.size - fund
+        profile_instance.save()
+        
+        Transaction.objects.create(user=profile_instance.user,  details=f"Wallet has been funded",
+                                new_balance=profile_instance.size, 
+                                credit=True, amount=fund, transaction_type=tran_not_type.WALLET_FUNDED)
+        Notification.objects.create(user=profile_instance.user, details=f"Wallet has been funded with {fund}", notification_type=tran_not_type.WALLET_FUNDED)   
+        
+        return JsonResponse({'message':"Fund added Succesfully"})  
+    except:
+        return JsonResponse({'message':"Fund not added"})  
+    
+@api_view(['POST'])
 def add_fund(request):
     try:
         if not request.user.is_authenticated:
@@ -915,16 +948,16 @@ def test_end(request):
             
             combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
             combs.sort(key=lambda x: x['score'], reverse=True)
-            info['combs'] = combs[:5]+combs[-5:]
+            info['combs'] = combs[:20]+combs[-20:]
             print('saved combs fr min')
             info['loading'] = False
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
+            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
         else:
             info['loading'] = False
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
+            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
     except Exception as E:
         info['loading'] = False
-        return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
     
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')
