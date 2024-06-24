@@ -953,7 +953,7 @@ def test_end(request):
         combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
         combs.sort(key=lambda x: x['score'], reverse=True)
         info['combs'] = combs[:20]+combs[-20:]
-        print('saved combs fr min', info['latest'])
+        print('saved combs fr min', info['latest_time'])
         info['loading'] = False
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
     else:
