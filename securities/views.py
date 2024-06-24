@@ -891,53 +891,13 @@ def check_strike_symbol(strike, earning_symbols):
 def test_end(request):
     combs = []
     market_state = "off"
-    if 'loading.txt' not in os.listdir(os.getcwd()):
-        print('File not found, creating')
-        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
-        f.write('first')
-        f.close()
-    else:
-        f = open(os.path.join(os.getcwd(),'loading.txt'), 'r')
-        content = f.read()
-        f.close()
-        if content == f'{datetime.now().replace(second=0, microsecond=0)}-loading' :
-            info['loading'] = True
-        else:
-            info['loading'] = False
-            print('initing loading')
-            f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
-            f.write(f'{datetime.now().replace(second=0, microsecond=0)}-loading')
-            f.close()  
             
     # try:
     initial_time = datetime.now()
     dji_val = 0
     market_state = check_market_hours(datetime.now())
-    
-    if info['loading']:
-        # print('loading combs')
-        # combs =  info['combs']
-        
-        dji_here = 0
-        combs = [] 
-        if 'jsn.json' in os.listdir(os.getcwd()):
-            with open('jsn.json', 'r') as f:
-                data = json.load(f)
-                combs = data['comb']
-                dji_here = data['dji']
-        # print(combs, 'combs fetched')
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_here}, status=status.HTTP_200_OK)
-    ad = Combination.objects.latest('date_time')
-    
-    
-    # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
-    # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
-    #     print('fetching saved combs')
-    #     combs =  info['combs']
-    #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
-    
     start_time = datetime.now()
-    
+    ad = Combination.objects.latest('date_time')    
     info['loading'] = True
     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
     try:
@@ -948,11 +908,7 @@ def test_end(request):
         dji_value = 0
         info['dji_value'] = 0
     
-    
-    end_time = datetime.now()
-    time_difference = end_time - start_time
-    print(f'fetched dji {initial_time} ', time_difference)
-    
+
     display_time = datetime.now()
     current_time = str(display_time).split('.')[0]
     
@@ -962,60 +918,150 @@ def test_end(request):
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
-        
-    
-    
     latest_data = info['latest_time']
     print(latest_data, 'latest')
     if latest_data:
-        start_time = datetime.now()
-        
         latest_time = latest_data
-        # pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
-    
-        pre_filtered_combinations = Combination.objects.filter(
-            date_time__gte=latest_time
-        ).order_by('symbol', '-date_time').distinct('symbol')
+        pre_filtered_combinations = MiniCombination.objects.all()
         pre_filtered_combinations = list(pre_filtered_combinations)
-        # done = []
-        # pre_filtered_combinations = []
-        # for item in pre_peri_filtered_combinations:
-        #     if item.symbol not in done:
-        #         pre_filtered_combinations.append(item)
-        #         done.append(item.symbol)
-        
-        end_time = datetime.now()
-        time_difference = end_time - start_time
-        print(f'Fetched and processed combs {initial_time} ', time_difference) 
-        
-        
-        start_time = datetime.now()
-        
         combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
         combs.sort(key=lambda x: x['score'], reverse=True)
         info['combs'] = combs[:20]+combs[-20:]
         cmb = combs[:20]+combs[-20:]
-        with open('jsn.json', 'w') as f:
-            json.dump({'comb':cmb, 'dji':dji_val}, f)
-
-        print('saved combs fr min', info['latest_time'])
-        # info['loading'] = False
-        
-        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
-        f.write('done')
-        f.close()
-        
-        end_time = datetime.now()
-        time_difference = end_time - start_time
-        print(f'final  sort {initial_time} ', time_difference) 
-                
-                
-        end_time = datetime.now()
-        time_difference = end_time - initial_time
-        print(f'Total Time {initial_time} ', time_difference)        
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_val }, status=status.HTTP_200_OK )
     else:
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value": dji_val}, status=status.HTTP_200_OK)
+
+
+# @api_view(['GET', 'POST'])
+# def test_end(request):
+#     combs = []
+#     market_state = "off"
+#     if 'loading.txt' not in os.listdir(os.getcwd()):
+#         print('File not found, creating')
+#         f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+#         f.write('first')
+#         f.close()
+#     else:
+#         f = open(os.path.join(os.getcwd(),'loading.txt'), 'r')
+#         content = f.read()
+#         f.close()
+#         if content == f'{datetime.now().replace(second=0, microsecond=0)}-loading' :
+#             info['loading'] = True
+#         else:
+#             info['loading'] = False
+#             print('initing loading')
+#             f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+#             f.write(f'{datetime.now().replace(second=0, microsecond=0)}-loading')
+#             f.close()  
+            
+#     # try:
+#     initial_time = datetime.now()
+#     dji_val = 0
+#     market_state = check_market_hours(datetime.now())
+    
+#     if info['loading']:
+#         # print('loading combs')
+#         # combs =  info['combs']
+        
+#         dji_here = 0
+#         combs = [] 
+#         if 'jsn.json' in os.listdir(os.getcwd()):
+#             with open('jsn.json', 'r') as f:
+#                 data = json.load(f)
+#                 combs = data['comb']
+#                 dji_here = data['dji']
+#         # print(combs, 'combs fetched')
+#         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_here}, status=status.HTTP_200_OK)
+#     ad = Combination.objects.latest('date_time')
+    
+    
+#     # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
+#     # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
+#     #     print('fetching saved combs')
+#     #     combs =  info['combs']
+#     #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+    
+#     start_time = datetime.now()
+    
+#     info['loading'] = True
+#     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
+#     try:
+#         dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+#         info['dji_value'] = dji_value.avg
+#         dji_val = dji_value.avg
+#     except:
+#         dji_value = 0
+#         info['dji_value'] = 0
+    
+    
+#     end_time = datetime.now()
+#     time_difference = end_time - start_time
+#     print(f'fetched dji {initial_time} ', time_difference)
+    
+#     display_time = datetime.now()
+#     current_time = str(display_time).split('.')[0]
+    
+#     eastern = pytz.timezone('US/Eastern')
+#     dt = eastern.localize(datetime.now())
+#     if dt.weekday() < 5 and (dt.time() >= time(9, 30) and dt.time() <= time(16, 0)):
+#         display_time = datetime.now()
+#         current_time = str(display_time).split('.')[0]
+        
+        
+    
+    
+#     latest_data = info['latest_time']
+#     print(latest_data, 'latest')
+#     if latest_data:
+#         start_time = datetime.now()
+        
+#         latest_time = latest_data
+#         # pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+    
+#         pre_filtered_combinations = Combination.objects.filter(
+#             date_time__gte=latest_time
+#         ).order_by('symbol', '-date_time').distinct('symbol')
+#         pre_filtered_combinations = list(pre_filtered_combinations)
+#         # done = []
+#         # pre_filtered_combinations = []
+#         # for item in pre_peri_filtered_combinations:
+#         #     if item.symbol not in done:
+#         #         pre_filtered_combinations.append(item)
+#         #         done.append(item.symbol)
+        
+#         end_time = datetime.now()
+#         time_difference = end_time - start_time
+#         print(f'Fetched and processed combs {initial_time} ', time_difference) 
+        
+        
+#         start_time = datetime.now()
+        
+#         combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
+#         combs.sort(key=lambda x: x['score'], reverse=True)
+#         info['combs'] = combs[:20]+combs[-20:]
+#         cmb = combs[:20]+combs[-20:]
+#         with open('jsn.json', 'w') as f:
+#             json.dump({'comb':cmb, 'dji':dji_val}, f)
+
+#         print('saved combs fr min', info['latest_time'])
+#         # info['loading'] = False
+        
+#         f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+#         f.write('done')
+#         f.close()
+        
+#         end_time = datetime.now()
+#         time_difference = end_time - start_time
+#         print(f'final  sort {initial_time} ', time_difference) 
+                
+                
+#         end_time = datetime.now()
+#         time_difference = end_time - initial_time
+#         print(f'Total Time {initial_time} ', time_difference)        
+#         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_val }, status=status.HTTP_200_OK )
+#     else:
+#         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value": dji_val}, status=status.HTTP_200_OK)
     # except Exception as E:
     #     info['loading'] = False
     #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)

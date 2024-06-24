@@ -970,7 +970,26 @@ def generate_flow_combinations(current_datetime):
             )  
         except Exception as E:
             pass
-        
+    pre_filtered_combinations = Combination.objects.filter(
+        date_time__gte=timestamp).order_by('symbol', '-date_time').distinct('symbol')    
+    pre_filtered_combinations = list(pre_filtered_combinations)
+    pre_filtered_combinations.sort(key=lambda x: x.score, reverse=True)
+    cmb = pre_filtered_combinations[:20]+pre_filtered_combinations[-20:]
+    
+    instances = MiniCombination.objects.all()
+    instances.delete()
+    
+    for item in cmb:
+        MiniCombination.objects.create(
+            symbol=item.symbol,
+            avg=item.avg,
+            stdev=item.stdev,
+            strike=item.strike,
+            z_score=0,
+        )     
+      
+    
+    
 def clean_avgs(current_datetime):
     print('updating')
     Combination.objects.filter(date_time__gte=current_datetime).update(avg=0)

@@ -100,5 +100,13 @@ class Combination(models.Model):
     class Meta:
         unique_together = [["symbol", "date_time"]]
 
+class MiniCombination(models.Model):
+    symbol = models.CharField(max_length=30)
+    strike = models.FloatField()
+    avg = models.FloatField(null=True, blank=True)
+    stdev = models.FloatField(null=True, blank=True)
+    z_score = models.FloatField(null=True, blank=True)
+    class Meta:
+        unique_together = [["symbol"]]
 
 
