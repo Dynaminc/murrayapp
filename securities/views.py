@@ -910,9 +910,11 @@ def test_end(request):
         print('latst',info['latest_time'])
         try:
             dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
+            info['dji_value'] = dji_value.avg
         except:
             dji_value = 0
-        info['dji_value'] = dji_value
+            info['dji_value'] = 0
+        
         display_time = datetime.now()
         current_time = str(display_time).split('.')[0]
         
