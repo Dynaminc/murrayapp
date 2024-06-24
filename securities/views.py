@@ -11,7 +11,7 @@ from .models import Combination, Missing
 from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
 from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
 from datetime import datetime, time, timedelta
-import pytz, os
+import pytz, os, json
 import pprint, random
 from .utils import quick_run
 # from .cronjob import new_calc, clean_comb
@@ -911,15 +911,22 @@ def test_end(request):
             
     # try:
     initial_time = datetime.now()
-    
+    dji_val = 0
     market_state = check_market_hours(datetime.now())
     
     if info['loading']:
         print('loading combs')
-        combs =  info['combs']
-        print(combs, 'combs fetched')
+        # combs =  info['combs']
         
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+        dji_here = 0
+        combs = [] 
+        if 'jsn.json' in os.listdir(os.getcwd()):
+            with open('jsn.json', 'r') as f:
+                data = json.load(f)
+                combs = data['comb']
+                dji_here = data['dji']
+        print(combs, 'combs fetched')
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_here}, status=status.HTTP_200_OK)
     ad = Combination.objects.latest('date_time')
     # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
     # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
@@ -934,6 +941,7 @@ def test_end(request):
     try:
         dji_value = Combination.objects.filter(symbol="DJI").latest('date_time')
         info['dji_value'] = dji_value.avg
+        dji_val = dji_value.avg
     except:
         dji_value = 0
         info['dji_value'] = 0
@@ -984,6 +992,10 @@ def test_end(request):
         combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
         combs.sort(key=lambda x: x['score'], reverse=True)
         info['combs'] = combs[:20]+combs[-20:]
+        cmb = combs[:20]+combs[-20:]
+        with open('jsn.json', 'w') as f:
+            json.dump({'comb':cmb, 'dji':dji_val}, f)
+
         print('saved combs fr min', info['latest_time'])
         # info['loading'] = False
         
@@ -999,9 +1011,9 @@ def test_end(request):
         end_time = datetime.now()
         time_difference = end_time - initial_time
         print(f'Total Time {initial_time} ', time_difference)        
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_val }, status=status.HTTP_200_OK )
     else:
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
+        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value": dji_val}, status=status.HTTP_200_OK)
     # except Exception as E:
     #     info['loading'] = False
     #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": "red", 'error':str(E), "dji_value":0}, status=status.HTTP_200_OK)
