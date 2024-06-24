@@ -896,8 +896,9 @@ def test_end(request):
         f.write('loading')
         f.close()
     else:
-        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+        f = open(os.path.join(os.getcwd(),'loading.txt'), 'r')
         content = f.read()
+        f.close()
         if content == 'loading':
             info['loading'] = True
         else:
