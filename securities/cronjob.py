@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from django.utils import timezone as tz
 from django.core.cache import cache
-from .models import Stock, Company, Combination, Cronny
+from .models import Stock, Company, Combination, Cronny, MiniCombination
 from scipy.stats import zscore
 from django.db.models import F
 from .serializer import *
@@ -970,6 +970,9 @@ def generate_flow_combinations(current_datetime):
             )  
         except Exception as E:
             pass
+    print('now filtering db')
+    start_time = datetime.now()
+    
     pre_filtered_combinations = Combination.objects.filter(
         date_time__gte=timestamp).order_by('symbol', '-date_time').distinct('symbol')    
     pre_filtered_combinations = list(pre_filtered_combinations)
@@ -988,7 +991,9 @@ def generate_flow_combinations(current_datetime):
             z_score=0,
         )     
       
-    
+    end_time = datetime.now()
+    time_difference = end_time - start_time
+    print(f"data created in {time_difference.total_seconds()} seconds" 'Saved')    
     
 def clean_avgs(current_datetime):
     print('updating')

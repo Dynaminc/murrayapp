@@ -7,6 +7,7 @@ from openpyxl import Workbook
 # Register your models here.
 admin.site.register(Company)
 admin.site.register(Missing)
+admin.site.register(MiniCombination)
 # admin.site.register(Combination)
 admin.site.register(Cronny)
 
