@@ -894,7 +894,7 @@ def test_end(request):
     # try:
     market_state = check_market_hours(datetime.now())
     ad = Combination.objects.latest('date_time')
-    if info['loading']:
+    if info['loading'] and len(info['combs']) > 0:
         print('loading combs')
         combs =  info['combs']
         print(combs, 'combs fetched')
