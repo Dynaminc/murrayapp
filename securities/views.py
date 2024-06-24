@@ -911,18 +911,16 @@ def test_end(request):
             
     # try:
     initial_time = datetime.now()
-    start_time = datetime.now()
+    
     market_state = check_market_hours(datetime.now())
-    ad = Combination.objects.latest('date_time')
-    end_time = datetime.now()
-    time_difference = end_time - start_time
-    print(f'fetched combination for {initial_time} ', time_difference)
+    
     if info['loading']:
         print('loading combs')
         combs =  info['combs']
         print(combs, 'combs fetched')
+        
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
-    
+    ad = Combination.objects.latest('date_time')
     # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
     # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
     #     print('fetching saved combs')
