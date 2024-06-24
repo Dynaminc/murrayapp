@@ -897,12 +897,12 @@ def test_end(request):
         if info['loading']:
             print('loading combs')
             combs =  info['combs']
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
                     
         if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
             print('fetching saved combs')
             combs =  info['combs']
-            return JsonResponse({"top_5": combs[:5], "low_5":combs[-5:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+            return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
         
         info['loading'] = True
         info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
