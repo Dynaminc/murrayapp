@@ -942,6 +942,8 @@ def generate_flow_combinations(current_datetime):
             
     combs = combinations(Company.SYMBOLS, 3)
     
+    pre_filtered_combinations = []
+    
     for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -960,6 +962,17 @@ def generate_flow_combinations(current_datetime):
                 cummulative_percent  =  previous_instance.avg + current_percent
             else:
                 cummulative_percent  =  current_percent
+                
+            pre_filtered_combinations.append(
+                 Combination(
+                            symbol=strike,
+                            avg=cummulative_percent,
+                            stdev=current_percent,
+                            strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                            date_time=timestamp,
+                            z_score=0,
+                        )
+            )
             Combination.objects.create(
                 symbol=strike,
                 avg=cummulative_percent,
@@ -971,11 +984,8 @@ def generate_flow_combinations(current_datetime):
         except Exception as E:
             pass
     print('now filtering db')
-    start_time = datetime.now()
     
-    pre_filtered_combinations = Combination.objects.filter(
-        date_time__gte=timestamp).order_by('symbol', '-date_time').distinct('symbol')    
-    pre_filtered_combinations = list(pre_filtered_combinations)
+    start_time = datetime.now()
     pre_filtered_combinations.sort(key=lambda x: x.avg, reverse=True)
     cmb = pre_filtered_combinations[:20]+pre_filtered_combinations[-20:]
     
