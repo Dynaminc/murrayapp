@@ -892,17 +892,19 @@ def test_end(request):
     combs = []
     market_state = "off"
     if 'loading.txt' not in os.listdir(os.getcwd()):
+        print('File not found, creating')
         f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
-        f.write('loading')
+        f.write('first')
         f.close()
     else:
         f = open(os.path.join(os.getcwd(),'loading.txt'), 'r')
         content = f.read()
         f.close()
-        if content == 'loading':
+        if content == 'loading' :
             info['loading'] = True
         else:
             info['loading'] = False
+            print('initing loading')
             f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
             f.write('loading')
             f.close()  
