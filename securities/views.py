@@ -11,7 +11,7 @@ from .models import Combination, Missing
 from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
 from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
 from datetime import datetime, time, timedelta
-import pytz
+import pytz, os
 import pprint, random
 from .utils import quick_run
 # from .cronjob import new_calc, clean_comb
@@ -891,6 +891,21 @@ def check_strike_symbol(strike, earning_symbols):
 def test_end(request):
     combs = []
     market_state = "off"
+    if 'loading.txt' not in os.listdir(os.getcwd()):
+        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+        f.write('loading')
+        f.close()
+    else:
+        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+        content = f.read()
+        if content == 'loading':
+            info['loading'] = True
+        else:
+            info['loading'] = False
+            f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+            f.write('loading')
+            f.close()  
+            
     # try:
     initial_time = datetime.now()
     start_time = datetime.now()
@@ -969,7 +984,11 @@ def test_end(request):
         combs.sort(key=lambda x: x['score'], reverse=True)
         info['combs'] = combs[:20]+combs[-20:]
         print('saved combs fr min', info['latest_time'])
-        info['loading'] = False
+        # info['loading'] = False
+        
+        f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
+        f.write('done')
+        f.close()
         
         end_time = datetime.now()
         time_difference = end_time - start_time
