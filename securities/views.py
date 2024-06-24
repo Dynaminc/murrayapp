@@ -900,11 +900,11 @@ def test_end(request):
         print(combs, 'combs fetched')
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
     
-    print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
-    if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
-        print('fetching saved combs')
-        combs =  info['combs']
-        return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
+    # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
+    # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
+    #     print('fetching saved combs')
+    #     combs =  info['combs']
+    #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
     
     info['loading'] = True
     info['latest_time'] = ad.date_time.replace(second=0, microsecond=0)
@@ -957,7 +957,6 @@ def test_end(request):
         info['loading'] = False
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_value.avg }, status=status.HTTP_200_OK )
     else:
-        info['loading'] = False
         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_value.avg}, status=status.HTTP_200_OK)
     # except Exception as E:
     #     info['loading'] = False
