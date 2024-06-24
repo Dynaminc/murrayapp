@@ -945,23 +945,22 @@ def test_end(request):
         start_time = datetime.now()
         
         latest_time = latest_data
-        pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+        # pre_peri_filtered_combinations = Combination.objects.filter(date_time__gte = latest_time )
+    
+        pre_filtered_combinations = Combination.objects.filter(
+            date_time__gte=latest_time
+        ).order_by('symbol', '-date_time').distinct('symbol')
+        pre_filtered_combinations = list(pre_filtered_combinations)
+        # done = []
+        # pre_filtered_combinations = []
+        # for item in pre_peri_filtered_combinations:
+        #     if item.symbol not in done:
+        #         pre_filtered_combinations.append(item)
+        #         done.append(item.symbol)
         
         end_time = datetime.now()
         time_difference = end_time - start_time
-        print(f'fetched combs fitered {initial_time} ', time_difference) 
-        
-        start_time = datetime.now()
-        done = []
-        pre_filtered_combinations = []
-        for item in pre_peri_filtered_combinations:
-            if item.symbol not in done:
-                pre_filtered_combinations.append(item)
-                done.append(item.symbol)
-        
-        end_time = datetime.now()
-        time_difference = end_time - start_time
-        print(f'Processed {initial_time} ', time_difference) 
+        print(f'Fetched and processed combs {initial_time} ', time_difference) 
         
         
         start_time = datetime.now()
