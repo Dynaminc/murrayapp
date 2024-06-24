@@ -915,7 +915,7 @@ def test_end(request):
     end_time = datetime.now()
     time_difference = end_time - start_time
     print(f'fetched combination for {initial_time} ', time_difference)
-    if info['loading'] and len(info['combs']) > 0:
+    if info['loading']:
         print('loading combs')
         combs =  info['combs']
         print(combs, 'combs fetched')
