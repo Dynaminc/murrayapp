@@ -106,7 +106,8 @@ class MiniCombination(models.Model):
     avg = models.FloatField(null=True, blank=True)
     stdev = models.FloatField(null=True, blank=True)
     z_score = models.FloatField(null=True, blank=True)
+    date_time = models.DateTimeField(null=True, blank=True)
     class Meta:
-        unique_together = [["symbol"]]
+        unique_together = [["symbol",  "date_time"]]
 
 

@@ -992,14 +992,19 @@ def generate_flow_combinations(current_datetime):
     instances = MiniCombination.objects.all()
     instances.delete()
     
-    for item in cmb:
-        MiniCombination.objects.create(
-            symbol=item.symbol,
-            avg=item.avg,
-            stdev=item.stdev,
-            strike=item.strike,
-            z_score=0,
-        )     
+    try:
+        MiniCombination.objects.bulk_create(cmb, ignore_conflicts=True)
+    except IntegrityError:
+        pass
+    # for item in cmb:
+    #     MiniCombination.objects.create(
+    #         symbol=item.symbol,
+    #         avg=item.avg,
+    #         stdev=item.stdev,
+    #         strike=item.strike,
+    #         z_score=0,
+    #         date_time=timestamp,
+    #     )     
       
     end_time = datetime.now()
     time_difference = end_time - start_time

@@ -924,7 +924,7 @@ def test_end(request):
         latest_time = latest_data
         pre_filtered_combinations = MiniCombination.objects.all()
         pre_filtered_combinations = list(pre_filtered_combinations)
-        combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in pre_filtered_combinations ]
+        combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(item.date_time)} for item in pre_filtered_combinations ]
         combs.sort(key=lambda x: x['score'], reverse=True)
         info['combs'] = combs[:20]+combs[-20:]
         cmb = combs[:20]+combs[-20:]
