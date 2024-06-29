@@ -12,7 +12,17 @@ class FundSerializer(serializers.Serializer):
 class EarningForm(serializers.Serializer):
     symbol = serializers.CharField() 
     datetime = serializers.CharField()
+
+class NondayForm(serializers.Serializer):
+    info = serializers.CharField() 
+    datetime = serializers.CharField()
+        
     
+class NondaySerializer(serializers.ModelSerializer):
+    class Meta:
+            model = Nonday
+            include = ['pk']
+            fields = '__all__'    
 class EarningSerializer(serializers.ModelSerializer):
     class Meta:
         model = Earning

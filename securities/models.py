@@ -73,6 +73,14 @@ class Earning(models.Model):
 
     def __str__(self):
         return f"{str(self.date_time)}: {self.symbol}"
+
+class Nonday(models.Model):
+    info = models.TextField(max_length=1000)
+    date_time = models.DateTimeField()
+    
+    def __str__(self):
+        return f"{str(self.date_time)}: {self.info}"
+
     
 class Cronny(models.Model):
     symbol = models.CharField(max_length=30)

@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/remove_fund", views.remove_fund),
     path("api/load_stats", views.load_stats),
     path("api/load_all_stats", views.load_all_stats),
+    path("api/load_unique_days", views.load_unique_days),
     
     path("api/load_notifs", views.load_notifications),
     path("api/load_transactions", views.load_transactions),
@@ -29,6 +30,7 @@ urlpatterns = [
     path("api/testit", views.trigger_store),
     path("api/check", views.trigger_lens),
     path("api/earnings", views.ManageEarning),
+    path("api/nondays", views.ManageNonday),
     
    
     

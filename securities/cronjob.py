@@ -1112,18 +1112,23 @@ def new_flow_migrator(initial):
 def real_time_data():
     done = False
     count = 0 
-    timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
-    timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
-    if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
-        res = get_data(timestamp)
-        stocks = res["stocks"]
-        stock_time = create_stocks(stocks, timestamp)
-        generate_flow_combinations(timestamp)
-        generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
-        end_time = datetime.now()
-        Cronny.objects.create(symbol=f"{stock_time}")    
-        done = True
-        print('Finally Done', count)
-        for item in Strike.objects.filter(closed=False):
-            update_strike(item.id)
-        
+    current_date = datetime.now().date()
+    queryset = Nonday.objects.filter(date_time__date=current_date)
+    if len(queryset) > 0:
+        return "Non trading day"
+    else:
+        timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
+        timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
+        if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
+            res = get_data(timestamp)
+            stocks = res["stocks"]
+            stock_time = create_stocks(stocks, timestamp)
+            generate_flow_combinations(timestamp)
+            generate_dji_combinations(timestamp, [item['date_time'] for item in Stock.objects.filter(symbol="DJI").values("date_time").order_by("date_time").distinct()])
+            end_time = datetime.now()
+            Cronny.objects.create(symbol=f"{stock_time}")    
+            done = True
+            print('Finally Done', count)
+            for item in Strike.objects.filter(closed=False):
+                update_strike(item.id)
+            

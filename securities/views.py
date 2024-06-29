@@ -9,8 +9,10 @@ from django.utils import timezone as tz
 from securities.models import Stock
 from .models import Combination, Missing
 from accounts.models import Strike, Profile, Transaction, Notification, tran_not_type
-from accounts.serializer import StrikeSerializer, ProfileSerializer, TransactionSerializer, NotificationSerializer
+from accounts.serializer import *
 from datetime import datetime, time, timedelta
+from django.db.models import DateTimeField
+from django.db.models.functions import TruncDate
 import pytz, os, json
 import pprint, random
 from .utils import quick_run
@@ -88,15 +90,22 @@ def get_chart(request):
         data = [
             {
                 'time': comb.date_time,
-                'svalue': comb.avg ,  #- get_long_dji_value(all_combs, False, '', comb.date_time),
-                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg, - get_long_dji_value(all_combs, False, '', comb.date_time)
-                'dji': get_long_dji_value(all_combs, False, '', comb.date_time) , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
+                'svalue': comb.avg/3 ,  #- get_long_dji_value(all_combs, False, '', comb.date_time),
+                'lvalue': get_long_dji_value(all_combs, True, long, comb.date_time)/3 , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == long][0].avg, - get_long_dji_value(all_combs, False, '', comb.date_time)
+                'dji': get_long_dji_value(all_combs, False, '', comb.date_time)/3 , #[item for item in all_combs if item.date_time == comb.date_time and item.symbol == 'DJI'][0].avg,
             }
             for comb in shorts
         ]   
         return JsonResponse({ 'message':"Chart loaded Succesfully", "data":data, "dji_value": dji_value.avg})
     except:
         return JsonResponse({ 'message':"Load Failed", "data":[], "dji_value": 0})
+
+
+@api_view(['GET'])
+def load_unique_days(request):
+    unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
+    unique_days_list = [day['day'] for day in unique_days]
+    return JsonResponse({"data":unique_days_list})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -118,6 +127,54 @@ def load_all_strikes(request):
     return JsonResponse({ 'message':"Strike Loaded Succesfully", "data":data})
 
 
+
+### crud for nondays
+
+@api_view(['POST','GET','PUT','DELETE','PATCH'])
+def ManageNonday(request):
+    if request.method == "POST" and request.method == "DELETE": 
+        if not request.user.is_authenticated:
+            return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.is_superuser:
+            return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)    
+        
+    if request.method == "POST":
+        serializer = NondayForm(data=request.POST)
+        if not serializer.is_valid():
+            return JsonResponse({"data":[], 'errors': serializer.errors})    
+        serializer = serializer.data
+        
+        info = serializer['info'] # unit stock
+        datetimer = serializer['datetime']
+        
+        nonday_instance = Nonday.objects.create(info=info, date_time=datetimer)
+            
+        all_data = Nonday.objects.all()
+        serialized_data = [ NondaySerializer(item).data for item in all_data ]             
+        return JsonResponse({"data":serialized_data})    
+    
+    if request.method == "GET":
+        all_data = Nonday.objects.all()
+        serialized_data = [ NondaySerializer(item).data for item in all_data ] 
+        return JsonResponse({"data":serialized_data})
+    
+    if request.method == "PUT":
+        # serialized_data = [ NondaySerializer(item).data for item in Nonday.objects.all()
+        #                    if item.date_time.date() == datetime.now().date()] 
+        current_date = datetime.now().date()
+        serialized_data = [ NondaySerializer(item).data for item in Nonday.objects.filter(date_time__date=current_date)]
+        return JsonResponse({"data":serialized_data})
+        
+    if request.method =="DELETE":
+        data = request.POST
+        id = data['id'] 
+        earning_instance = Nonday.objects.filter(id=id).first()
+        earning_instance.delete()
+        all_data = Nonday.objects.all()
+        serialized_data = [ NondaySerializer(item).data for item in all_data ]             
+        return JsonResponse({"data":serialized_data}) 
+            
+   
 ### crud for earnings 
 
 @api_view(['POST','GET','PUT','DELETE','PATCH'])
@@ -862,6 +919,10 @@ def check_market_hours(dat):
     eastern = pytz.timezone('US/Eastern')
     dt = eastern.localize(dat)
     print(dt)
+    current_date = datetime.now().date()
+    queryset = Nonday.objects.filter(date_time__date=current_date)
+    if len(queryset) > 0:
+        return "red"
     if dt.weekday() >= 5:  # Weekend
         return "red"
     elif dt.weekday() < 5 and (dt.time() < time(9, 30) or dt.time() > time(16, 0)):  # Weekday before 9:30 or after 4:00

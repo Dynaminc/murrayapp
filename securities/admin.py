@@ -8,6 +8,7 @@ from openpyxl import Workbook
 admin.site.register(Company)
 admin.site.register(Missing)
 admin.site.register(MiniCombination)
+admin.site.register(Nonday)
 # admin.site.register(Combination)
 admin.site.register(Cronny)
 
