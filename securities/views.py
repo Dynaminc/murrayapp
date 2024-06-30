@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
 from django.core.paginator import Paginator
 from rest_framework import status
@@ -15,6 +15,7 @@ from django.db.models import DateTimeField
 from django.db.models.functions import TruncDate
 import pytz, os, json
 import pprint, random
+import csv
 from .utils import quick_run
 # from .cronjob import new_calc, clean_comb
 from .serializer import *   
@@ -1175,3 +1176,75 @@ def get_security_info(request, symbol):
             "total_items": paginator.count,
         }
     )
+    
+        
+@api_view(['GET', 'POST'])    
+def download_file(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'message': 'You need to login','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    admin = request.GET.get('admin', False)
+    if admin and not request.user.is_superuser:
+        return JsonResponse({'message': 'You have no access to this action','status': 400}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    # id = request.GET.get('id', "")
+    # Generate or retrieve the file (e.g., CSV file)
+    # strikes = []
+    if admin:
+        strikes = Strike.objects.all()    
+    else:
+        strikes = Strike.objects.filter(user=request.user)
+    
+    
+    unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
+    m = [day['day'] for day in unique_days]
+    
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="strikes.csv"'
+    # Create a CSV writer
+    writer = csv.writer(response)
+    
+    # Write headers
+    writer.writerow([
+        'User',
+        'ID',
+        'Long Symbol',
+        'Short Symbol',
+        'Total Open Price',
+        'Total Close Price',
+        'P&L',
+        'Current Percentage',
+        'Min Percentage',
+        'Max Percentage',
+        'Target Profit',
+        'Open Time',
+        'Close Time',
+        'Days Open'
+        
+    ])    
+    
+    for strike in strikes:
+        writer.writerow([
+            strike.user.username if strike.user else '',
+            strike.id,
+            strike.long_symbol,
+            strike.short_symbol,
+            strike.total_open_price,
+            strike.total_close_price if strike.closed else "N/A",
+            strike.current_price,
+            strike.current_percentage,
+            strike.min_percentage,
+            strike.max_percentage,
+            strike.target_profit,
+            strike.open_time.date(),
+            str(strike.close_time) if strike.closed else "N/A",
+            len(m[m.index(strike.open_time.date()):]) if not strike.closed else (len(m[m.index(strike.open_time.date()):]) - len(m[m.index(strike.close_time.date()):]))
+        ])    
+    # file_content = "id,name\n1,John\n2,Jane"
+
+    # Prepare HTTP response with the file content
+    # response = HttpResponse(file_content, content_type='text/csv')
+    # response['Content-Disposition'] = 'attachment; filename="example.csv"'
+    
+    return response

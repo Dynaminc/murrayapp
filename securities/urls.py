@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/load_percent", views.cronat),
     path("api/clean", views.clean_end),
     path("api/missingdata", views.load_missing),
+    path("api/download", views.download_file),
     path("api/cronny", views.update_striker),
     path(
         "api/stocks/<str:symbol>/",
