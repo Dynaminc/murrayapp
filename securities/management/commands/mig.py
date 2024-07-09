@@ -47,25 +47,28 @@ class Command(BaseCommand):
         # real_time_data()
         # return
         # initial_timestamp = datetime(2024, 6, 4, 14)
-        print('initiated')
-        initial = datetime(2024, 7, 1, 9, 30)
-        clean_comb(initial)
-        print('Creating Data for 9:30')
-        combs = combinations(Company.SYMBOLS, 3)
-        for comb in combs:    
-            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-            try:
-                Combination.objects.create(
-                        symbol=strike,
-                        avg=0,
-                        stdev=0,
-                        strike=0,
-                        date_time=initial,
-                        z_score=0,
-                    ) 
-            except Exception as E:
-                pass       
-                     
+        
+        ## to start afesh ##
+        # print('initiated')
+        # initial = datetime(2024, 7, 1, 9, 30)
+        # clean_comb(initial)
+        # print('Creating Data for 9:30')
+        # combs = combinations(Company.SYMBOLS, 3)
+        # for comb in combs:    
+        #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        #     try:
+        #         Combination.objects.create(
+        #                 symbol=strike,
+        #                 avg=0,
+        #                 stdev=0,
+        #                 strike=0,
+        #                 date_time=initial,
+        #                 z_score=0,
+        #             ) 
+        #     except Exception as E:
+        #         pass       
+        # all_flow(initial_timestamp)
+                             
         initial_timestamp = datetime(2024, 7, 1, 9, 31)
         
         
@@ -86,9 +89,9 @@ class Command(BaseCommand):
         # json_migrator(initial_timestamp)
         # new_flow_migrator()
 
-        all_flow(initial_timestamp)
         
-        # mig_flow(initial_timestamp)
+        
+        mig_flow(initial_timestamp)
         print('Done')
         # new_flow_migrator()
         # dji_migrator()

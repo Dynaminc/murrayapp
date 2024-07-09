@@ -633,8 +633,9 @@ def check_strike_symbol(strike, earning_symbols):
 
 def mig_flow(initial_timestamp):
     
-    # initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
-    print(initial_timestamp)
+    initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") 
+    # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
+    # print(initial_timestamp)
     stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
     print(len(stocks))
     # stocks = [StockSerializer(item) for item in stock_query]
@@ -686,80 +687,85 @@ def mig_flow(initial_timestamp):
     
     count = 0
     for timestamp in distinct_timestamps:
-        if timestamp.time() >= time(9, 30): 
-            print(timestamp)
-            final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
-            if count > 0:
-                prev_set = [item for item in stocks if item.date_time == distinct_timestamps[count-1]]        
-                for item in prev_set:
-                    prev_close[item.symbol] = item.close
-            
-            # current_date = timestamp.date()
-            # start_datetime = current_date - timedelta(days=1)
-            # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
-            # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
-            # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-            # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]     
-            
-            
-            earning_dates = {}
-            valid_earnings_data = []
-            for earnings in Earning.objects.all():
-                start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-                end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-                if start_date <= timestamp <= end_date:
-                    valid_earnings_data.append(earnings.symbol)
+        current_date = timestamp.date()
+        queryset = Nonday.objects.filter(date_time__date=current_date)
+        if len(queryset) > 0:
+            print("Non trading day")
+        else:
+            if timestamp.time() >= time(9, 30): 
+                print(timestamp)
+                final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
+                if count > 0:
+                    prev_set = [item for item in stocks if item.date_time == distinct_timestamps[count-1]]        
+                    for item in prev_set:
+                        prev_close[item.symbol] = item.close
                 
-            
-            specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
-            # print('sd', len(list()))
-            print(len(prev_dict.keys()), len(specials))
-            for itm in specials:
-                comb = itm.split('-')
-                try:
-                    strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+                # current_date = timestamp.date()
+                # start_datetime = current_date - timedelta(days=1)
+                # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
+                # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
+                # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+                # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]     
+                
+                
+                earning_dates = {}
+                valid_earnings_data = []
+                for earnings in Earning.objects.all():
+                    start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    if start_date <= timestamp <= end_date:
+                        valid_earnings_data.append(earnings.symbol)
                     
-                    
-                    stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
-                    stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
-                    stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
-                    
-                    
-                    # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                    current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
-                    # current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
-                    cummulative_percent  =  prev_dict[strike] + current_percent
-                    prev_dict[strike] = cummulative_percent 
+                
+                specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
+                # print('sd', len(list()))
+                print(len(prev_dict.keys()), len(specials))
+                for itm in specials:
+                    comb = itm.split('-')
                     try:
-                        Combination.objects.create(
-                                symbol=strike,
-                                avg=cummulative_percent,
-                                stdev=current_percent,
-                                strike=(stock_1.close + stock_2.close + stock_3.close)/3,
-                                date_time=timestamp,
-                                z_score=0,
-                            ) 
-                    except Exception as E:
-                        print(E)
+                        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+                        
+                        
+                        stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
+                        stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
+                        stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
+                        
+                        
+                        # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                        current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
+                        # current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
+                        cummulative_percent  =  prev_dict[strike] + current_percent
+                        prev_dict[strike] = cummulative_percent 
+                        try:
+                            Combination.objects.create(
+                                    symbol=strike,
+                                    avg=cummulative_percent,
+                                    stdev=current_percent,
+                                    strike=(stock_1.close + stock_2.close + stock_3.close)/3,
+                                    date_time=timestamp,
+                                    z_score=0,
+                                ) 
+                        except Exception as E:
+                            print(E)
+                            pass
+                    except:
                         pass
-                except:
+                dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
+                dji_current_percent = (dji.close - prev_close['DJI']) / prev_close['DJI'] * 100
+                dji_cummulative_percent  =  dji_prev + dji_current_percent
+                try:
+                    Combination.objects.create(
+                        symbol="DJI",
+                        avg=dji_cummulative_percent,
+                        stdev=dji_current_percent,
+                        strike=dji.close,
+                        date_time=timestamp,
+                        z_score=0,
+                    ) 
+                except: 
                     pass
-            dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
-            dji_current_percent = (dji.close - prev_close['DJI']) / prev_close['DJI'] * 100
-            dji_cummulative_percent  =  dji_prev + dji_current_percent
-            try:
-                Combination.objects.create(
-                    symbol="DJI",
-                    avg=dji_cummulative_percent,
-                    stdev=dji_current_percent,
-                    strike=dji.close,
-                    date_time=timestamp,
-                    z_score=0,
-                ) 
-            except: 
-                pass
-            Cronny.objects.create(symbol=f"{timestamp}")    
-        count += 1
+                Cronny.objects.create(symbol=f"{timestamp}")    
+            count += 1
             
             
 def all_flow(initial_timestamp):
