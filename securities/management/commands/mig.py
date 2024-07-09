@@ -49,15 +49,16 @@ class Command(BaseCommand):
         # initial_timestamp = datetime(2024, 6, 4, 14)
         initial_timestamp = datetime(2024, 7, 1, 9, 31)
         
-        # combs = combinations(Company.SYMBOLS, 3)
+        
         
         # initial = datetime(2024, 5, 20, 15, 58)
         # data = Combination.objects.filter(date_time=initial).all()
         # data.delete()
         
+        print('initiated')
         initial = datetime(2024, 7, 1, 9, 30)
-        combs = Combination.objects.filter(date_time=initial).all()
-        
+        # combs = Combination.objects.filter(date_time=initial).all()
+        combs = combinations(Company.SYMBOLS, 3)
         for comb in combs:    
             strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
             try:
@@ -71,7 +72,8 @@ class Command(BaseCommand):
                     ) 
             except Exception as E:
                 pass
-            
+        print('now cleaning')
+    
         clean_comb(initial_timestamp)
         print("cleaned data")
         get_test_data(initial_timestamp)
