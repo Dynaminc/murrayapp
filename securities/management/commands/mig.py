@@ -47,7 +47,7 @@ class Command(BaseCommand):
         # real_time_data()
         # return
         # initial_timestamp = datetime(2024, 6, 4, 14)
-        initial_timestamp = datetime(2024, 7, 1, 9, 31)
+        initial_timestamp = datetime(2024, 7, 1, 9, 30)
         
         
         
@@ -56,8 +56,18 @@ class Command(BaseCommand):
         # data.delete()
         
         print('initiated')
-        initial = datetime(2024, 7, 1, 9, 30)
+        
         # combs = Combination.objects.filter(date_time=initial).all()
+
+        print('now cleaning')
+    
+        clean_comb(initial_timestamp)
+        print("cleaned data")
+        get_test_data(initial_timestamp)
+        print('test data obtained')
+        json_migrator(initial_timestamp)
+        # new_flow_migrator()
+        initial = datetime(2024, 7, 1, 9, 30)
         combs = combinations(Company.SYMBOLS, 3)
         for comb in combs:    
             strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
@@ -71,16 +81,7 @@ class Command(BaseCommand):
                         z_score=0,
                     ) 
             except Exception as E:
-                pass
-        print('now cleaning')
-    
-        clean_comb(initial_timestamp)
-        print("cleaned data")
-        get_test_data(initial_timestamp)
-        print('test data obtained')
-        json_migrator(initial_timestamp)
-        # new_flow_migrator()
-        
+                pass        
         # all_flow(initial_timestamp)
         
         mig_flow(initial_timestamp)
