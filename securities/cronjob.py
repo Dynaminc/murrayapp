@@ -803,15 +803,6 @@ def all_flow(initial_timestamp):
                 print(timestamp)
                 final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
                 
-                # current_date = timestamp.date()
-                # start_datetime = current_date - timedelta(days=1)
-                # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
-                # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
-                # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
-                # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
-                # print(valid_earnings_data)
-                
-                
                 earning_dates = {}
                 valid_earnings_data = []
                 for earnings in Earning.objects.all():
@@ -819,14 +810,6 @@ def all_flow(initial_timestamp):
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     if start_date <= timestamp <= end_date:
                         valid_earnings_data.append(earnings.symbol)
-                                    
-                # set1 = set(valid_earnings_data)
-                # set2 = set(Company.SYMBOLS)
-                
-                # combines = list(set2 - set1)
-                # print(len(combines))
-                # combs = combinations(combines, 3)            
-                
                 
                 specials = [cmbo for cmbo in list(prev_dict.keys()) if not check_strike_symbol(cmbo, valid_earnings_data)]
                 # print('sd', len(list()))

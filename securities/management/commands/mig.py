@@ -47,41 +47,45 @@ class Command(BaseCommand):
         # real_time_data()
         # return
         # initial_timestamp = datetime(2024, 6, 4, 14)
-        initial_timestamp = datetime(2024, 7, 1, 9, 30)
-        
+        print('initiated')
+        initial = datetime(2024, 7, 1, 9, 30)
+        clean_comb(initial)
+        print('Creating Data for 9:30')
+        combs = combinations(Company.SYMBOLS, 3)
+        for comb in combs:    
+            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+            try:
+                Combination.objects.create(
+                        symbol=strike,
+                        avg=0,
+                        stdev=0,
+                        strike=0,
+                        date_time=initial,
+                        z_score=0,
+                    ) 
+            except Exception as E:
+                pass       
+                     
+        initial_timestamp = datetime(2024, 7, 1, 9, 31)
         
         
         # initial = datetime(2024, 5, 20, 15, 58)
         # data = Combination.objects.filter(date_time=initial).all()
         # data.delete()
         
-        print('initiated')
+        
         
         # combs = Combination.objects.filter(date_time=initial).all()
 
         print('now cleaning')
     
-        clean_comb(initial_timestamp)
+        # clean_comb(initial_timestamp)
         print("cleaned data")
         # get_test_data(initial_timestamp)
         print('test data obtained')
         # json_migrator(initial_timestamp)
         # new_flow_migrator()
-        # initial = datetime(2024, 7, 1, 9, 30)
-        # combs = combinations(Company.SYMBOLS, 3)
-        # for comb in combs:    
-        #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        #     try:
-        #         Combination.objects.create(
-        #                 symbol=strike,
-        #                 avg=0,
-        #                 stdev=0,
-        #                 strike=0,
-        #                 date_time=initial,
-        #                 z_score=0,
-        #             ) 
-        #     except Exception as E:
-        #         pass        
+
         all_flow(initial_timestamp)
         
         # mig_flow(initial_timestamp)
