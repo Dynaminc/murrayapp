@@ -70,7 +70,7 @@ class Command(BaseCommand):
         # all_flow(initial_timestamp)
                              
         # initial_timestamp = datetime(2024, 7, 1, 9, 31)
-        initial_timestamp = datetime(2024, 7, 9, 12, 26)
+        initial_timestamp = datetime(2024, 7, 9, 12, 27)
         
         
         # initial = datetime(2024, 5, 20, 15, 58)
@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         print('now cleaning')
     
-        # clean_comb(initial_timestamp)
+        clean_comb(initial_timestamp)
         print("cleaned data")
         get_test_data(initial_timestamp)
         print('test data obtained')
