@@ -63,28 +63,28 @@ class Command(BaseCommand):
     
         clean_comb(initial_timestamp)
         print("cleaned data")
-        get_test_data(initial_timestamp)
+        # get_test_data(initial_timestamp)
         print('test data obtained')
-        json_migrator(initial_timestamp)
+        # json_migrator(initial_timestamp)
         # new_flow_migrator()
-        initial = datetime(2024, 7, 1, 9, 30)
-        combs = combinations(Company.SYMBOLS, 3)
-        for comb in combs:    
-            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-            try:
-                Combination.objects.create(
-                        symbol=strike,
-                        avg=0,
-                        stdev=0,
-                        strike=0,
-                        date_time=initial,
-                        z_score=0,
-                    ) 
-            except Exception as E:
-                pass        
-        # all_flow(initial_timestamp)
+        # initial = datetime(2024, 7, 1, 9, 30)
+        # combs = combinations(Company.SYMBOLS, 3)
+        # for comb in combs:    
+        #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        #     try:
+        #         Combination.objects.create(
+        #                 symbol=strike,
+        #                 avg=0,
+        #                 stdev=0,
+        #                 strike=0,
+        #                 date_time=initial,
+        #                 z_score=0,
+        #             ) 
+        #     except Exception as E:
+        #         pass        
+        all_flow(initial_timestamp)
         
-        mig_flow(initial_timestamp)
+        # mig_flow(initial_timestamp)
         print('Done')
         # new_flow_migrator()
         # dji_migrator()
