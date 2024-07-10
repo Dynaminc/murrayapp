@@ -31,7 +31,7 @@ from securities.models import Combination, Stock
 import json
 from django.core.paginator import Paginator
 from datetime import datetime
-from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator, real_time_data, cronny, mig_flow
+from securities.cronjob import new_calc_migrator, clean_comb, new_calc, new_flow_migrator, dji_migrator, real_time_data, cronny, mig_flow,quick_real_time_data
 from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, top_glow
 from datetime import timedelta
@@ -53,9 +53,10 @@ class Command(BaseCommand):
         # json_migrator()
         # real_time_data()|
         # initial_timestamp = datetime(2024, 5, 29, 14, 5)
-        initial_timestamp = datetime(2024, 7, 1, 9, 31)
+        timestamp = datetime(2024, 7, 9, 15, 59)
+        quick_real_time_data(timestamp)
         # clean_comb(initial_timestamp)
-        new_flow_migrator(initial_timestamp)
+        # new_flow_migrator(initial_timestamp)
         return
         initial_timestamp = datetime(2024, 5, 16, 13, 5)
         clean_comb(initial_timestamp)
