@@ -631,13 +631,30 @@ def check_strike_symbol(strike, earning_symbols):
     return False
     
 
+def is_in_trading(stock_time):
+    queryset = Nonday.objects.all()
+    nonday_of_interest = [nonday for nonday in Nonday.objects.all() if stock_time.date() == nonday.date()]
+    if not nonday_of_interest:
+        return True
+    
+    if nonday_of_interest[0] and nonday_of_interest[0].half_day:
+        if stock_time.time() <= time(13, 00):
+            return True
+        else:
+            return False
+    
 def mig_flow(initial_timestamp):
     
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") 
     # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
     # print(initial_timestamp)
-    stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+    pre_stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+
+    print(len(pre_stocks))
+    print("post clean")
+    stocks = [item for item in pre_stocks if is_in_trading(item.date_time)]
     print(len(stocks))
+
     # stocks = [StockSerializer(item) for item in stock_query]
     distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
     new_distinct_timestamps = sorted(distinct_timestamps)
@@ -688,10 +705,15 @@ def mig_flow(initial_timestamp):
     count = 0
     for timestamp in distinct_timestamps:
         current_date = timestamp.date()
-        queryset = Nonday.objects.filter(date_time__date=current_date)
-        if len(queryset) > 0:
-            print("Non trading day")
+        queryset = Nonday.objects.filter(date_time__date=current_date).first()
+        proceed = False
+        if queryset:
+            if queryset.half_day == True and timestamp.time() <= time(13, 00):
+                proceed = True
         else:
+            proceed = True
+            
+        if proceed:        
             if timestamp.time() >= time(9, 30): 
                 print(timestamp)
                 final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
@@ -770,7 +792,15 @@ def mig_flow(initial_timestamp):
             
 def all_flow(initial_timestamp):
     
-    stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+    # stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+    
+    pre_stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
+
+    print(len(pre_stocks))
+    print("post clean")
+    stocks = [item for item in pre_stocks if is_in_trading(item.date_time)]
+    print(len(stocks))
+
     # stocks = [StockSerializer(item) for item in stock_query]
     distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
     new_distinct_timestamps = sorted(distinct_timestamps)
@@ -801,10 +831,15 @@ def all_flow(initial_timestamp):
     
     for timestamp in distinct_timestamps:
         current_date = timestamp.date()
-        queryset = Nonday.objects.filter(date_time__date=current_date)
-        if len(queryset) > 0:
-            print("Non trading day")
+        queryset = Nonday.objects.filter(date_time__date=current_date).first()
+        proceed = False
+        if queryset:
+            if queryset.half_day == True and timestamp.time() >= time(13, 00):
+                proceed = True
         else:
+            proceed = True
+            
+        if proceed:
             if timestamp.time() >= time(9, 30): 
                 print(timestamp)
                 final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
@@ -872,7 +907,7 @@ def all_flow(initial_timestamp):
         
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
-    distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct()]
+    distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct() if is_in_trading(item['date_time'])]
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
@@ -1059,7 +1094,6 @@ def clean_comb(initial):
         # con.set("comb_time", "[]")
         # con.set("stock_data", "[]")
         # print('cleaned redis')
-        
     
     return 'cleaned'
        
@@ -1109,10 +1143,15 @@ def real_time_data():
     done = False
     count = 0 
     current_date = datetime.now().date()
-    queryset = Nonday.objects.filter(date_time__date=current_date)
-    if len(queryset) > 0:
-        return "Non trading day"
+    queryset = Nonday.objects.filter(date_time__date=current_date).first()
+    proceed = False
+    if queryset:
+        if queryset.half_day == True and timestamp.time() >= time(13, 00):
+            proceed = True
     else:
+        proceed = True
+        
+    if proceed:    
         timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
         timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
         if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 

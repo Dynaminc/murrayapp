@@ -53,7 +53,7 @@ class Command(BaseCommand):
         # json_migrator()
         # real_time_data()|
         # initial_timestamp = datetime(2024, 5, 29, 14, 5)
-        timestamp = datetime(2024, 7, 9, 15, 59)
+        timestamp = datetime(2024, 7, 2, 15, 59)
         quick_real_time_data(timestamp)
         # clean_comb(initial_timestamp)
         # new_flow_migrator(initial_timestamp)

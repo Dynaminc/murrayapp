@@ -48,10 +48,10 @@ class Command(BaseCommand):
         # return
         # initial_timestamp = datetime(2024, 6, 4, 14)
         
-        ## to start afesh ##
+        # # to start afesh ##
         # print('initiated')
-        # initial = datetime(2024, 7, 1, 9, 30)
-        # clean_comb(initial)
+        initial = datetime(2024, 7, 3)
+        clean_comb(initial)
         # print('Creating Data for 9:30')
         # combs = combinations(Company.SYMBOLS, 3)
         # for comb in combs:    
@@ -69,8 +69,8 @@ class Command(BaseCommand):
         #         pass       
         # all_flow(initial_timestamp)
                              
-        # initial_timestamp = datetime(2024, 7, 1, 9, 31)
-        initial_timestamp = datetime(2024, 7, 9, 12, 27)
+        initial_timestamp = datetime(2024, 7, 3)
+        # initial_timestamp = datetime(2024, 7, 9, 12, 27)
         
         
         # initial = datetime(2024, 5, 20, 15, 58)
