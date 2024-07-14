@@ -1083,12 +1083,31 @@ def clean_comb(initial):
     times = [initial]
     for item in times:
         print('Running clean module ')
+        
+        end_datetime = datetime.now()  # Replace with your end datetime condition
+
+        # Define the step size (1 day)
+        step = datetime.timedelta(days=1)
+        current_datetime = item
         count = 0
-        data = Combination.objects.filter(date_time__gte=item).all()
-        for item in data:
-            item.delete()
-            count+=1
+        while current_datetime <= end_datetime:
+            next_datetime = current_datetime + step
+            
+            # Query data for the current day
+            data = Combination.objects.filter(date_time__gte=current_datetime, date_time__lt=next_datetime).all()
+            print('fetched')
+            count += len(data)
+            
+            data.delete()
             print(f'\r deleted {count}', end='', flush=True)
+            current_datetime = next_datetime
+    
+        
+        # data = Combination.objects.filter(date_time__gte=item).all()
+        # for item in data:
+        #     item.delete()
+        #     count+=1
+            
         # print(len(data))
         # data.delete()
         print('cleaned combinations')
