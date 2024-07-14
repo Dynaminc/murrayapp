@@ -49,27 +49,28 @@ class Command(BaseCommand):
         # initial_timestamp = datetime(2024, 6, 4, 14)
         
         # # to start afesh ##
-        # print('initiated')
-        # initial = datetime(2024, 7, 3)
-        # clean_comb(initial)
-        # print('Creating Data for 9:30')
-        # combs = combinations(Company.SYMBOLS, 3)
-        # for comb in combs:    
-        #     strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        #     try:
-        #         Combination.objects.create(
-        #                 symbol=strike,
-        #                 avg=0,
-        #                 stdev=0,
-        #                 strike=0,
-        #                 date_time=initial,
-        #                 z_score=0,
-        #             ) 
-        #     except Exception as E:
-        #         pass       
-        # all_flow(initial_timestamp)
+        print('initiated')
+        initial = datetime(2024, 7, 8, 9, 30)
+        clean_comb(initial)
+        print('Creating Data for 9:30')
+        combs = combinations(Company.SYMBOLS, 3)
+        for comb in combs:    
+            strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+            try:
+                Combination.objects.create(
+                        symbol=strike,
+                        avg=0,
+                        stdev=0,
+                        strike=0,
+                        date_time=initial,
+                        z_score=0,
+                    ) 
+            except Exception as E:
+                pass       
+        initial_timestamp = datetime(2024, 7, 8, 9, 31)
+        all_flow(initial_timestamp)
                              
-        initial_timestamp = datetime(2024, 7, 12)
+        
         # initial_timestamp = datetime(2024, 7, 9, 12, 27)
         
         
@@ -82,15 +83,15 @@ class Command(BaseCommand):
         # combs = Combination.objects.filter(date_time=initial).all()
 
         # print('now cleaning')
-    
-        clean_comb(initial_timestamp)
+        # initial_timestamp = datetime(2024, 7, 12)
+        # clean_comb(initial_timestamp)
         # print("cleaned data")
-        get_test_data(initial_timestamp)
+        # get_test_data(initial_timestamp)
         # print('test data obtained')
-        json_migrator(initial_timestamp)
+        # json_migrator(initial_timestamp)
         # new_flow_migrator()
 
-        mig_flow(initial_timestamp)
+        
         print('Done')
         # new_flow_migrator()
         # dji_migrator()
