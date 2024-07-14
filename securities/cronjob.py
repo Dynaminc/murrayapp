@@ -656,7 +656,8 @@ def mig_flow(initial_timestamp):
     print(len(stocks))
 
     # stocks = [StockSerializer(item) for item in stock_query]
-    distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
+    # distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
+    distinct_timestamps = list(set([item.date_time for item in stocks]))
     new_distinct_timestamps = sorted(distinct_timestamps)
     
     
@@ -802,7 +803,8 @@ def all_flow(initial_timestamp):
     print(len(stocks))
 
     # stocks = [StockSerializer(item) for item in stock_query]
-    distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
+    # distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
+    distinct_timestamps = list(set([item.date_time for item in stocks]))
     new_distinct_timestamps = sorted(distinct_timestamps)
     
     prev_dict = {}
