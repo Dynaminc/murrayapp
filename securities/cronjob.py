@@ -769,7 +769,6 @@ def mig_flow(initial_timestamp):
                                     z_score=0,
                                 ) 
                         except Exception as E:
-                            print(E)
                             pass
                     except:
                         pass
