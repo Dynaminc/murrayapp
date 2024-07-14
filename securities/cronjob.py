@@ -1083,9 +1083,14 @@ def clean_comb(initial):
     times = [initial]
     for item in times:
         print('Running clean module ')
+        count = 0
         data = Combination.objects.filter(date_time__gte=item).all()
-        print(len(data))
-        data.delete()
+        for item in data:
+            item.delete()
+            count+=1
+            print(f'\r deleted {count}', end='', flush=True)
+        # print(len(data))
+        # data.delete()
         print('cleaned combinations')
         # data = Stock.objects.filter(date_time__gte=item).all()
         # data.delete()
