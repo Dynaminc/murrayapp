@@ -69,7 +69,7 @@ class Command(BaseCommand):
         #         pass       
         # all_flow(initial_timestamp)
                              
-        initial_timestamp = datetime(2024, 7, 3)
+        initial_timestamp = datetime(2024, 7, 12)
         # initial_timestamp = datetime(2024, 7, 9, 12, 27)
         
         
@@ -83,11 +83,11 @@ class Command(BaseCommand):
 
         # print('now cleaning')
     
-        # clean_comb(initial_timestamp)
+        clean_comb(initial_timestamp)
         # print("cleaned data")
-        # get_test_data(initial_timestamp)
+        get_test_data(initial_timestamp)
         # print('test data obtained')
-        # json_migrator(initial_timestamp)
+        json_migrator(initial_timestamp)
         # new_flow_migrator()
 
         mig_flow(initial_timestamp)
