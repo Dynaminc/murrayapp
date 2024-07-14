@@ -657,7 +657,7 @@ def mig_flow(initial_timestamp):
 
     # stocks = [StockSerializer(item) for item in stock_query]
     # distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
-    distinct_timestamps = list(set([item.date_time for item in stocks]))
+    distinct_timestamps = sorted(list(set([item.date_time for item in stocks])))
     new_distinct_timestamps = sorted(distinct_timestamps)
     
     
@@ -804,7 +804,8 @@ def all_flow(initial_timestamp):
 
     # stocks = [StockSerializer(item) for item in stock_query]
     # distinct_timestamps = [item['date_time'] for item in stocks.values("date_time").order_by("date_time").distinct()]
-    distinct_timestamps = list(set([item.date_time for item in stocks]))
+    # distinct_timestamps = list(set([item.date_time for item in stocks]))
+    distinct_timestamps = sorted(list(set([item.date_time for item in stocks])))
     new_distinct_timestamps = sorted(distinct_timestamps)
     
     prev_dict = {}
@@ -1086,29 +1087,30 @@ def clean_comb(initial):
     for item in times:
         print('Running clean module ')
         
-        end_datetime = datetime.now()  # Replace with your end datetime condition
+        # end_datetime = datetime.now()  # Replace with your end datetime condition
 
-        # Define the step size (1 day)
-        step = timedelta(days=1)
-        current_datetime = item
-        count = 0
-        while current_datetime <= end_datetime:
-            next_datetime = current_datetime + step
+        # # Define the step size (1 day)
+        # step = timedelta(days=1)
+        # current_datetime = item
+        # count = 0
+        # while current_datetime <= end_datetime:
+        #     next_datetime = current_datetime + step
             
-            # Query data for the current day
-            data = Combination.objects.filter(date_time__gte=current_datetime, date_time__lt=next_datetime).all()
-            print('fetched')
-            count += len(data)
+        #     # Query data for the current day
+        #     data = Combination.objects.filter(date_time__gte=current_datetime, date_time__lt=next_datetime).all()
+        #     print('fetched')
+        #     count += len(data)
             
-            data.delete()
-            print(f'\r deleted {count}', end='', flush=True)
-            current_datetime = next_datetime
+        #     data.delete()
+        #     print(f'\r deleted {count}', end='', flush=True)
+        #     current_datetime = next_datetime
     
         
-        # data = Combination.objects.filter(date_time__gte=item).all()
-        # for item in data:
-        #     item.delete()
-        #     count+=1
+        data = Combination.objects.filter(date_time__gte=item).all()
+        data.delete()
+        
+            # count+=1
+            # for item in data:
             
         # print(len(data))
         # data.delete()

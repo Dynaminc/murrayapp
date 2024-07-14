@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         print('now cleaning')
     
-        # clean_comb(initial_timestamp)
+        clean_comb(initial_timestamp)
         print("cleaned data")
         # get_test_data(initial_timestamp)
         print('test data obtained')

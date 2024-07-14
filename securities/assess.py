@@ -378,7 +378,7 @@ def top_low():
     
     return len(combs)
     
-def clean_comb(): # rmove the precalculated combs for a new calculation
+def clean_comab(): # rmove the precalculated combs for a new calculation
     
     times = [datetime(2024, 4, 22)]
     # strike = "VZ-WBA-WMT"
