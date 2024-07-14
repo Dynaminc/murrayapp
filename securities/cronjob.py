@@ -633,7 +633,7 @@ def check_strike_symbol(strike, earning_symbols):
 
 def is_in_trading(stock_time):
     queryset = Nonday.objects.all()
-    nonday_of_interest = [nonday for nonday in Nonday.objects.all() if stock_time.date() == nonday.date()]
+    nonday_of_interest = [nonday for nonday in Nonday.objects.all() if stock_time.date() == nonday.date_time.date()]
     if not nonday_of_interest:
         return True
     
