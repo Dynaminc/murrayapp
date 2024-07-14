@@ -834,7 +834,7 @@ def all_flow(initial_timestamp):
         queryset = Nonday.objects.filter(date_time__date=current_date).first()
         proceed = False
         if queryset:
-            if queryset.half_day == True and timestamp.time() >= time(13, 00):
+            if queryset.half_day == True and timestamp.time() <= time(13, 00):
                 proceed = True
         else:
             proceed = True
@@ -1146,7 +1146,7 @@ def real_time_data():
     queryset = Nonday.objects.filter(date_time__date=current_date).first()
     proceed = False
     if queryset:
-        if queryset.half_day == True and timestamp.time() >= time(13, 00):
+        if queryset.half_day == True and timestamp.time() <= time(13, 00):
             proceed = True
     else:
         proceed = True
