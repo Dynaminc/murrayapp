@@ -50,8 +50,8 @@ class Command(BaseCommand):
         
         # # to start afesh ##
         # print('initiated')
-        initial = datetime(2024, 7, 3)
-        clean_comb(initial)
+        # initial = datetime(2024, 7, 3)
+        # clean_comb(initial)
         # print('Creating Data for 9:30')
         # combs = combinations(Company.SYMBOLS, 3)
         # for comb in combs:    
@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         print('now cleaning')
     
-        clean_comb(initial_timestamp)
+        # clean_comb(initial_timestamp)
         print("cleaned data")
         # get_test_data(initial_timestamp)
         print('test data obtained')
