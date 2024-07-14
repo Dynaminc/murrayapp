@@ -1087,7 +1087,7 @@ def clean_comb(initial):
         end_datetime = datetime.now()  # Replace with your end datetime condition
 
         # Define the step size (1 day)
-        step = datetime.timedelta(days=1)
+        step = timedelta(days=1)
         current_datetime = item
         count = 0
         while current_datetime <= end_datetime:
