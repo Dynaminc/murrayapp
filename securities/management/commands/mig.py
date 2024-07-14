@@ -85,9 +85,9 @@ class Command(BaseCommand):
     
         clean_comb(initial_timestamp)
         print("cleaned data")
-        get_test_data(initial_timestamp)
+        # get_test_data(initial_timestamp)
         print('test data obtained')
-        json_migrator(initial_timestamp)
+        # json_migrator(initial_timestamp)
         # new_flow_migrator()
 
         mig_flow(initial_timestamp)
