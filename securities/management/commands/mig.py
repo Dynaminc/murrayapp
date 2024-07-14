@@ -81,12 +81,12 @@ class Command(BaseCommand):
         
         # combs = Combination.objects.filter(date_time=initial).all()
 
-        print('now cleaning')
+        # print('now cleaning')
     
-        clean_comb(initial_timestamp)
-        print("cleaned data")
+        # clean_comb(initial_timestamp)
+        # print("cleaned data")
         # get_test_data(initial_timestamp)
-        print('test data obtained')
+        # print('test data obtained')
         # json_migrator(initial_timestamp)
         # new_flow_migrator()
 
