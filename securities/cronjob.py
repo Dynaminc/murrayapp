@@ -677,7 +677,7 @@ def mig_flow(initial_timestamp):
     # Iterate over distinct symbols
     for symbol in distinct_symbols:
         # Get the most recent combination object for each symbol
-        most_recent_combination = Combination.objects.filter(date_time__lt = final_time).filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        most_recent_combination = Combination.objects.filter(date_time__lt = initial_timestamp).filter(symbol=symbol['symbol']).order_by('-date_time').first()
         print(most_recent_combination.date_time)
         # Add the most recent combination object to the list
         recent_objects.append(most_recent_combination)
@@ -1088,11 +1088,18 @@ def dji_migrator():
 def clean_comb(initial):
     # clean_redis()
     # return 'cleaned'
-
-    count = 0 
-    times = [initial]
-    for item in times:
-        print('Running clean module ')
+    cleaning  = int(input("Cleaning: 1-Yes: 2: No "))
+    if cleaning == 1:
+        year = int(input("year: "))
+        month = int(input("month: "))
+        day = int(input("day: "))
+        hour = int(input("hour: "))
+        minute = int(input("minute: "))
+        item = datetime(year, month, day, hour, minute)            
+    # count = 0 
+    # times = [initial]
+    # for item in times:
+    #     print('Running clean module ')
         
         # end_datetime = datetime.now()  # Replace with your end datetime condition
 
