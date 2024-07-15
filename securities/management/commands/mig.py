@@ -67,6 +67,7 @@ class Command(BaseCommand):
                         z_score=0,
                     ) 
             except Exception as E:
+                print(E)
                 pass       
         initial_timestamp = datetime(2024, 7, 8, 9, 31)
         all_flow(initial_timestamp)
