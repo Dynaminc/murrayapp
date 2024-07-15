@@ -1244,7 +1244,7 @@ def generate_test_combinations(current_datetime):
     for item in last_stocks:
         prev_close[item['symbol']] = item['close']
     print('last_stock')
-    pprint(stocks[0])
+    pprint(last_stocks[0])
     # stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
     #                                         date_time__gte=final_time,
     #                                         date_time__lt=(final_time + timedelta(minutes=1))).all()]
@@ -1266,7 +1266,7 @@ def generate_test_combinations(current_datetime):
 
     # Print the count of recent_objects
     print(len(recent_objects), 'recent combos')
-    print(recent_objects[0].symbol, recent_objects[0].date_time, receent_objects[0].avg )
+    print(recent_objects[0].symbol, recent_objects[0].date_time, recent_objects[0].avg )
     previous_set = list(recent_objects)
     print(len(previous_set))
     
