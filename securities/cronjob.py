@@ -644,8 +644,15 @@ def is_in_trading(stock_time):
             return False
     
 def mig_flow(initial_timestamp):
-    
+    custom = int(input("1 for custom, 2 for cronny: "))
     initial_timestamp = datetime.strptime(str(Cronny.objects.latest('date_time').symbol), "%Y-%m-%d %H:%M:%S") 
+    if custom == 1: 
+        year = int(input("year: "))
+        month = int(input("month: "))
+        day = int(input("day: "))
+        hour = int(input("hour: "))
+        minute = int(input("minute: "))
+        initial_timestamp = datetime(year, month, day, hour, minute)
     # datetime(2024, 4,  29, 9,39 ) # # datetime(2024, 4,  30, 16) 
     # print(initial_timestamp)
     pre_stocks = Stock.objects.filter(date_time__gte = initial_timestamp).all()
@@ -947,7 +954,8 @@ def generate_flow_combinations(current_datetime):
     # Iterate over distinct symbols
     for symbol in distinct_symbols:
         # Get the most recent combination object for each symbol
-        most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        most_recent_combination = Combination.objects.filter(date_time__lt = final_time).filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        # most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
         # Add the most recent combination object to the list
         recent_objects.append(most_recent_combination)
 
@@ -1104,9 +1112,10 @@ def clean_comb(initial):
         #     print(f'\r deleted {count}', end='', flush=True)
         #     current_datetime = next_datetime
     
-        
-        data = Combination.objects.filter(date_time__gte=item).all()
-        data.delete()
+        del_combs = int(input("Combinations: 1 for delete, 2 for not: "))
+        if del_combs == 1:
+            data = Combination.objects.filter(date_time__gte=item).all()
+            data.delete()
         
             # count+=1
             # for item in data:
@@ -1114,8 +1123,10 @@ def clean_comb(initial):
         # print(len(data))
         # data.delete()
         print('cleaned combinations')
-        # data = Stock.objects.filter(date_time__gte=item).all()
-        # data.delete()
+        del_combs = int(input("Stocks:   1 for delete, 2 for not: "))
+        if del_combs == 1:
+            data = Stock.objects.filter(date_time__gte=item).all()
+            data.delete()
         # print('cleaned stocks')
         # con.set("combinations_data", "[]")
         # con.set("comb_time", "[]")

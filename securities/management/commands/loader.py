@@ -54,10 +54,11 @@ class Command(BaseCommand):
         # real_time_data()|
         # initial_timestamp = datetime(2024, 5, 29, 14, 5)
         # print('starting')
-        timestamp = datetime(2024, 7, 12, 15, 59)
-        # mig_flow(initial_timestamp)
+        initial_timestamp = datetime(2024, 7, 12, 15, 59)
+        clean_comb(initial_timestamp)
+        mig_flow(initial_timestamp)
         # print('Done')
-        quick_real_time_data(timestamp)
+        # quick_real_time_data(timestamp)
         # clean_comb(initial_timestamp)
         # new_flow_migrator(initial_timestamp)
         return
