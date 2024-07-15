@@ -776,6 +776,7 @@ def mig_flow(initial_timestamp):
                                     z_score=0,
                                 ) 
                         except Exception as E:
+                            print(E)
                             pass
                     except:
                         pass
@@ -1123,17 +1124,19 @@ def clean_comb(initial):
         if del_combs == 1:
             data = Combination.objects.filter(date_time__gte=item).all()
             data.delete()
+            print('cleaned combinations')
         
             # count+=1
             # for item in data:
             
         # print(len(data))
         # data.delete()
-        print('cleaned combinations')
+        
         del_combs = int(input("Stocks:   1 for delete, 2 for not: "))
         if del_combs == 1:
             data = Stock.objects.filter(date_time__gte=item).all()
             data.delete()
+            print('cleaned stocks')
         # print('cleaned stocks')
         # con.set("combinations_data", "[]")
         # con.set("comb_time", "[]")
