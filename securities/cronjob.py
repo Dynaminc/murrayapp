@@ -1215,10 +1215,12 @@ def quick_real_time_data(timestamp):
 def generate_test_combinations(current_datetime):
     start_time = datetime.now()
     timestamp = current_datetime
+    print(timestamp)
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct() if is_in_trading(item['date_time'])]
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
     previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+    
     # print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
 
     final_time = None
@@ -1227,17 +1229,22 @@ def generate_test_combinations(current_datetime):
     except:
         final_time = new_distinct_timestamps[current]
             
+                
     previous_time = new_distinct_timestamps[previous]
+    print(previous_time, final_time)
     stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = final_time).all()]
     print ('len ', len(stocks))
+    pprint(stocks[0])
     
     prev_close = {}
     prev_close["DJI"] = 0
    
     last_stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = previous_time).all()]
+    
     for item in last_stocks:
         prev_close[item['symbol']] = item['close']
-    
+    print('last_stock')
+    pprint(stocks[0])
     # stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
     #                                         date_time__gte=final_time,
     #                                         date_time__lt=(final_time + timedelta(minutes=1))).all()]
@@ -1253,12 +1260,13 @@ def generate_test_combinations(current_datetime):
     # Iterate over distinct symbols
     for symbol in distinct_symbols:
         # Get the most recent combination object for each symbol
-        most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        most_recent_combination = Combination.objects.filter(date_time__lt = final_time).filter(symbol=symbol['symbol']).order_by('-date_time').first()
         # Add the most recent combination object to the list
         recent_objects.append(most_recent_combination)
 
     # Print the count of recent_objects
-    print(len(recent_objects))
+    print(len(recent_objects), 'recent combos')
+    print(recent_objects[0].symbol, recent_objects[0].date_time, receent_objects[0].avg )
     previous_set = list(recent_objects)
     print(len(previous_set))
     
