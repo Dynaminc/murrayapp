@@ -677,7 +677,7 @@ def mig_flow(initial_timestamp):
     # Iterate over distinct symbols
     for symbol in distinct_symbols:
         # Get the most recent combination object for each symbol
-        most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        most_recent_combination = Combination.objects.filter(date_time__lt = final_time).filter(symbol=symbol['symbol']).order_by('-date_time').first()
         print(most_recent_combination.date_time)
         # Add the most recent combination object to the list
         recent_objects.append(most_recent_combination)

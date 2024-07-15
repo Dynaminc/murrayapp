@@ -54,8 +54,23 @@ class Command(BaseCommand):
         # real_time_data()|
         # initial_timestamp = datetime(2024, 5, 29, 14, 5)
         # print('starting')
+        
+        
         initial_timestamp = datetime(2024, 7, 12, 15, 59)
+        
         clean_comb(initial_timestamp)
+        
+        del_combs = int(input("1 to fetch data, 2 for none: "))
+        if del_combs == 1:
+            year = int(input("year: "))
+            month = int(input("month: "))
+            day = int(input("day: "))
+            hour = int(input("hour: "))
+            minute = int(input("minute: "))
+            initial_timestamp = datetime(year, month, day, hour, minute)        
+            get_test_data(initial_timestamp)
+            json_migrator(initial_timestamp)
+            
         mig_flow(initial_timestamp)
         # print('Done')
         # quick_real_time_data(timestamp)
