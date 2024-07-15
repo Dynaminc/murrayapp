@@ -1211,3 +1211,127 @@ def quick_real_time_data(timestamp):
         print('Finally Done')
         for item in Strike.objects.filter(closed=False):
             update_strike(item.id)            
+            
+def generate_test_combinations(current_datetime):
+    start_time = datetime.now()
+    timestamp = current_datetime
+    distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct() if is_in_trading(item['date_time'])]
+    distinct_timestamps.append(timestamp)
+    new_distinct_timestamps = sorted(distinct_timestamps)
+    previous, current, final = new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 
+    # print(new_distinct_timestamps.index(timestamp) - 1,  new_distinct_timestamps.index(timestamp), new_distinct_timestamps.index(timestamp) + 1 )
+
+    final_time = None
+    try:
+        final_time = new_distinct_timestamps[final]
+    except:
+        final_time = new_distinct_timestamps[current]
+            
+    previous_time = new_distinct_timestamps[previous]
+    stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = final_time).all()]
+    print ('len ', len(stocks))
+    
+    prev_close = {}
+    prev_close["DJI"] = 0
+   
+    last_stocks = [ StockSerializer(item).data for item in Stock.objects.filter(date_time = previous_time).all()]
+    for item in last_stocks:
+        prev_close[item['symbol']] = item['close']
+    
+    # stocks = [ StockSerializer(item).data for item in Stock.objects.filter(
+    #                                         date_time__gte=final_time,
+    #                                         date_time__lt=(final_time + timedelta(minutes=1))).all()]
+    # stocks = [ StockSerializer(item).data for item in Stock.objects.order_by('-date_time')[:31]]
+    print('Stocks', len(stocks))
+    
+    # Get distinct symbols
+    distinct_symbols = Combination.objects.values('symbol').distinct()
+
+    # Initialize a list to store the most recent combination objects
+    recent_objects = []
+
+    # Iterate over distinct symbols
+    for symbol in distinct_symbols:
+        # Get the most recent combination object for each symbol
+        most_recent_combination = Combination.objects.filter(symbol=symbol['symbol']).order_by('-date_time').first()
+        # Add the most recent combination object to the list
+        recent_objects.append(most_recent_combination)
+
+    # Print the count of recent_objects
+    print(len(recent_objects))
+    previous_set = list(recent_objects)
+    print(len(previous_set))
+    
+    
+    # current_date = timestamp.date()
+    # start_datetime = current_date - timedelta(days=1)
+    # start_date = datetime.combine(start_datetime, datetime.strptime("15:59", "%H:%M").time())
+    # end_date = datetime.combine((current_date + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time()) 
+    # earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
+    # valid_earnings_data = [item.symbol for item in earnings_data if start_date <= item.date_time <= end_date]
+
+    earning_dates = {}
+    valid_earnings_data = []
+    for earnings in Earning.objects.all():
+        start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        if start_date <= timestamp <= end_date:
+            valid_earnings_data.append(earnings.symbol)
+            
+    combs = combinations(Company.SYMBOLS, 3)
+    
+    pre_filtered_combinations = []
+    
+    for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
+        
+        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        
+        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] ][0]
+        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
+        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
+        
+        # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+        current_percent = (((stock_1['close'] - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2['close'] - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3['close'] - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
+        cummulative_percent = 0
+        previous_instance = None 
+        try:
+            previous_instance = [item for item in previous_set if item.symbol == strike][0]    
+            if previous_instance:
+                cummulative_percent  =  previous_instance.avg + current_percent
+            else:
+                cummulative_percent  =  current_percent
+                
+            pre_filtered_combinations.append(
+                 Combination(
+                            symbol=strike,
+                            avg=cummulative_percent,
+                            stdev=current_percent,
+                            strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                            date_time=timestamp,
+                            z_score=0,
+                        )
+            )
+        except Exception as E:
+            pass
+    print('now filtering db')
+    
+    
+    pre_filtered_combinations.sort(key=lambda x: x.avg, reverse=True)
+    cmb = pre_filtered_combinations[:5]+pre_filtered_combinations[-5:]
+    print(current_datetime)
+    for item in cmb:
+        print(f"{item.symbol} {item.avg}")
+        
+    end_time = datetime.now()
+    time_difference = end_time - start_time
+    print(f"data created in {time_difference.total_seconds()} seconds" 'Saved')    
+
+
+def test_datetime():
+    year = int(input("year: "))
+    month = int(input("month: "))
+    day = int(input("day: "))
+    hour = int(input("hour: "))
+    minute = int(input("minute: "))
+    current_datetime = datetime(year, month, day, hour, minute)
+    generate_test_combinations(current_datetime)
