@@ -195,11 +195,11 @@ def ManageEarning(request):
         symbol = serializer['symbol'] # unit stock
         datetimer = serializer['datetime']
         earning_instance = Earning.objects.filter(symbol=symbol).first()
-        if earning_instance:
-            earning_instance.date_time = datetimer
-            earning_instance.save()
-        else:
-            earning_instance = Earning.objects.create(symbol=symbol, date_time=datetimer)
+        # if earning_instance:
+        #     earning_instance.date_time = datetimer
+        #     earning_instance.save()
+        # else:
+        earning_instance = Earning.objects.create(symbol=symbol, date_time=datetimer)
             
         all_data = Earning.objects.all()
         serialized_data = [ EarningSerializer(item).data for item in all_data ]             
