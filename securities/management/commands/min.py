@@ -1,5 +1,3 @@
-
-
 from django.core.management.base import BaseCommand
 from securities.models import Combination, Stock
 import json
