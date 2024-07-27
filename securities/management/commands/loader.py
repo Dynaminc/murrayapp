@@ -36,6 +36,8 @@ from securities.simulator import simulate_compute
 from securities.assess import get_all_stocks, top_glow
 from datetime import timedelta
 from securities.assess import get_all_stocks, get_test_data, json_migrator
+from itertools import combinations
+from securities.models import Company
 
 class Command(BaseCommand):
     help = 'Dump Combination and Stock data'
@@ -57,11 +59,37 @@ class Command(BaseCommand):
         
         
         initial_timestamp = datetime(2024, 7, 12, 15, 59)
-        
+
         clean_comb(initial_timestamp)
         
-        del_combs = int(input("1 to fetch data, 2 for none: "))
-        if del_combs == 1:
+        fresh_combs = int(input("1 for a fresh start, 2 for none: "))        
+        if fresh_combs:
+            year = int(input("year: "))
+            month = int(input("month: "))
+            day = int(input("day: "))
+            hour = int(input("hour: "))
+            minute = int(input("minute: "))
+            initial_timestamp = datetime(year, month, day, hour, minute)        
+            print('Creating Data for 9:30')
+            combs = combinations(Company.SYMBOLS, 3)
+            for comb in combs:    
+                strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+                try:
+                    Combination.objects.create(
+                            symbol=strike,
+                            avg=0,
+                            stdev=0,
+                            strike=0,
+                            date_time=initial_timestamp,
+                            z_score=0,
+                        ) 
+                except Exception as E:
+                    print(E)
+                    pass    
+                
+        
+        fetch_combs = int(input("1 to fetch data, 2 for none: "))
+        if fetch_combs == 1:
             year = int(input("year: "))
             month = int(input("month: "))
             day = int(input("day: "))

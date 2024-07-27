@@ -44,7 +44,7 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        # return
+        return
         # real_time_data()
         # return
         # initial_timestamp = datetime(2024, 6, 4, 14)

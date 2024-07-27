@@ -743,6 +743,15 @@ def mig_flow(initial_timestamp):
                 for earnings in Earning.objects.all():
                     start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    dt = earnings.date_time
+                    end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    if dt.weekday() == 4:  # Weekend
+                        end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())                    
+                    # if queryset = Nonday.objects.filter(date_time__date=current_date).first()    
+                    for obj in Nonday.objects.all():
+                        if start_date <= obj.date_time <= end_date:
+                            end_date += timedelta(days=1)  # Extend end_date by one more day
+                                               
                     if start_date <= timestamp <= end_date:
                         valid_earnings_data.append(earnings.symbol)
                     
@@ -858,7 +867,14 @@ def all_flow(initial_timestamp):
                 valid_earnings_data = []
                 for earnings in Earning.objects.all():
                     start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    dt = earnings.date_time
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+                    if dt.weekday() == 4:  # Weekend
+                        end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
+                    for obj in Nonday.objects.all():
+                        if start_date <= obj.date_time <= end_date:
+                            end_date += timedelta(days=1)  # Extend end_date by one more day
+                                                                       
                     if start_date <= timestamp <= end_date:
                         valid_earnings_data.append(earnings.symbol)
                 
@@ -914,9 +930,41 @@ def all_flow(initial_timestamp):
                 
             count += 1
             
+
+def resetEarnings(timestamp):    
+    symbols_reset = []     
+    yesterday = timestamp - timedelta(days=1)
+    # valid_earnings_data.append(earnings.symbol)    
+    for earnings in Earning.objects.all():
+        start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        dt = earnings.date_time
+        end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        if dt.weekday() == 4:  # Weekend
+            end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
+        for obj in Nonday.objects.all():
+            if start_date <= obj.date_time <= end_date:
+                end_date += timedelta(days=1)  
+                                                        
+        if start_date <= yesterday <= end_date:
+            if timestamp > end_date:
+                symbols_reset.append(earnings.symbol)    
+                
+    combs = combinations(Company.SYMBOLS, 3)
+    for comb in [cmb for cmb in combs if check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", symbols_reset)]:   
+        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        Combination.objects.create(
+            symbol=strike,
+            avg=0,
+            stdev=0,
+            strike=0,
+            date_time=timestamp,
+            z_score=0,
+        )          
         
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
+    if timestamp.time() == time(9, 30):
+        resetEarnings(timestamp)
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct() if is_in_trading(item['date_time'])]
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
@@ -977,7 +1025,15 @@ def generate_flow_combinations(current_datetime):
     valid_earnings_data = []
     for earnings in Earning.objects.all():
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        dt = earnings.date_time
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        if dt.weekday() == 4:  # Weekend
+            end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
+            
+        for obj in Nonday.objects.all():
+            if start_date <= obj.date_time <= end_date:
+                end_date += timedelta(days=1)  # Extend end_date by one more day
+                                                
         if start_date <= timestamp <= end_date:
             valid_earnings_data.append(earnings.symbol)
             
@@ -1203,6 +1259,7 @@ def real_time_data():
         timestamp = (datetime.now() - timedelta(minutes = 2)).replace(second=0, microsecond=0)
         timestamp  = datetime.strptime(str(timestamp), "%Y-%m-%d %H:%M:%S")
         if timestamp.time() >= time(9, 30) and timestamp.time() <= time(15, 59): 
+
             res = get_data(timestamp)
             stocks = res["stocks"]
             stock_time = create_stocks(stocks, timestamp)
@@ -1303,7 +1360,15 @@ def generate_test_combinations(current_datetime):
     valid_earnings_data = []
     for earnings in Earning.objects.all():
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        dt = earnings.date_time
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
+        if dt.weekday() == 4:  # Weekend
+            end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
+            
+        for obj in Nonday.objects.all():
+            if start_date <= obj.date_time <= end_date:
+                end_date += timedelta(days=1)  # Extend end_date by one more day
+                                                
         if start_date <= timestamp <= end_date:
             valid_earnings_data.append(earnings.symbol)
             

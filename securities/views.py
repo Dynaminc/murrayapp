@@ -145,10 +145,12 @@ def ManageNonday(request):
             return JsonResponse({"data":[], 'errors': serializer.errors})    
         serializer = serializer.data
         
-        info = serializer['info'] # unit stock
+        info = serializer['info'] 
         datetimer = serializer['datetime']
+        half_day = serializer['half_day']
+        print("creting nonday", half_day, serializer['half_day'], bool(half_day))
         
-        nonday_instance = Nonday.objects.create(info=info, date_time=datetimer)
+        Nonday.objects.create(info=info, date_time=datetimer, half_day=bool(half_day))
             
         all_data = Nonday.objects.all()
         serialized_data = [ NondaySerializer(item).data for item in all_data ]             
@@ -222,14 +224,18 @@ def ManageEarning(request):
         datetimer = serializer['datetime']
         
         current_date = datetime.now().date()
-        start_datetime = current_date - timedelta(days=1)
+        start_datetime = current_date - timedelta(days=3)
         start_date = datetime.combine(start_datetime, datetime.strptime("3:59", "%H:%M").time())
         end_date = current_date + timedelta(days=1)
+        
+        
+        
         earnings_data = Earning.objects.filter(date_time__date__range=[start_date, end_date])
 
         valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
         
         if check_strike_symbol(symbol, valid_earnings_data):
+            print(start_date, end_date, current_date, datetimer, symbol)
             return JsonResponse({ "data":True})               
         else:
             return JsonResponse({ "data":False})               
@@ -944,6 +950,7 @@ def check_market_hours(dat):
 def check_strike_symbol(strike, earning_symbols):
     for item in earning_symbols:
         if item in strike:
+            print(item)
             return True
     return False
         

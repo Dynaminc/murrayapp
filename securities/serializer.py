@@ -16,6 +16,7 @@ class EarningForm(serializers.Serializer):
 class NondayForm(serializers.Serializer):
     info = serializers.CharField() 
     datetime = serializers.CharField()
+    half_day = serializers.CharField()
         
     
 class NondaySerializer(serializers.ModelSerializer):
