@@ -63,7 +63,7 @@ class Command(BaseCommand):
         clean_comb(initial_timestamp)
         
         fresh_combs = int(input("1 for a fresh start, 2 for none: "))        
-        if fresh_combs:
+        if fresh_combs == 1:
             year = int(input("year: "))
             month = int(input("month: "))
             day = int(input("day: "))
