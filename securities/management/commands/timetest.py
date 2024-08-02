@@ -14,8 +14,8 @@ class Command(BaseCommand):
     #     parser.add_argument('timestamp', type=str, help='Timestamp to filter data (format: YYYY-MM-DD HH:MM:SS)')
 
     def handle(self, *args, **kwargs):
-        # test_datetime()
-        test_reset()
+        test_datetime()
+        # test_reset()
         try:
             self.stdout.write(self.style.SUCCESS('Data dumped successfully'))
         except Exception as E:

@@ -765,8 +765,8 @@ def mig_flow(initial_timestamp):
                 print(len(prev_dict.keys()), len(specials))
                 for itm in specials:
                     comb = itm.split('-')
-                    strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
                     try:
+                        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
                         if strikess and strike in strikess:
                             print('has strikes', 'in stirkes', strike, timestamp)
             
