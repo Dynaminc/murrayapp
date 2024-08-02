@@ -934,10 +934,20 @@ def all_flow(initial_timestamp):
             count += 1
 
 
+def test_reset():
+    
+    ss = resetEarnings(datetime(2024, 7, 24, 9, 30))
+    print(len(ss))
+    while True:
+        symbol = input('Symbol: ')
+        if symbol in ss:
+            print('True')
+        else:
+            print('False')
+
 def resetEarnings(timestamp):    
     pre_symbol_reset = []
-    symbols_reset = []   
-      
+    symbols_reset = []    
     
     # valid_earnings_data.append(earnings.symbol)   
     yester_count, today_count =  0, 0 
@@ -962,10 +972,12 @@ def resetEarnings(timestamp):
                 today_count += 1
                 symbols_reset.append(earnings.symbol)  
                 
-                
+    print(yester_count, pre_symbol_reset, today_count, symbols_reset )            
+    strikess = [] 
     combs = combinations(Company.SYMBOLS, 3)
     for comb in [cmb for cmb in combs if check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", symbols_reset)]:   
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
+        strikess.append(strike)
         Combination.objects.create(
             symbol=strike,
             avg=0,
@@ -974,11 +986,13 @@ def resetEarnings(timestamp):
             date_time=timestamp,
             z_score=0,
         )          
-        
+    return strikess
+
 def generate_flow_combinations(current_datetime):
     timestamp = current_datetime
+    strikess = False
     if timestamp.time() == time(9, 30):
-        resetEarnings(timestamp)
+        strikess = resetEarnings(timestamp)
     distinct_timestamps = [item['date_time'] for item in Stock.objects.values("date_time").order_by("date_time").distinct() if is_in_trading(item['date_time'])]
     distinct_timestamps.append(timestamp)
     new_distinct_timestamps = sorted(distinct_timestamps)
@@ -1060,42 +1074,45 @@ def generate_flow_combinations(current_datetime):
     for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
         
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-        
-        stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] ][0]
-        stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
-        stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
-        
-        # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
-        current_percent = (((stock_1['close'] - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2['close'] - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3['close'] - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
-        cummulative_percent = 0
-        previous_instance = None 
-        try:
-            previous_instance = [item for item in previous_set if item.symbol == strike][0]    
-            if previous_instance:
-                cummulative_percent  =  previous_instance.avg + current_percent
-            else:
-                cummulative_percent  =  current_percent
-                
-            pre_filtered_combinations.append(
-                 Combination(
-                            symbol=strike,
-                            avg=cummulative_percent,
-                            stdev=current_percent,
-                            strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
-                            date_time=timestamp,
-                            z_score=0,
-                        )
-            )
-            Combination.objects.create(
-                symbol=strike,
-                avg=cummulative_percent,
-                stdev=current_percent,
-                strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
-                date_time=timestamp,
-                z_score=0,
-            )  
-        except Exception as E:
+        if strikess and strike in strikess:
             pass
+        else:
+            
+            stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] ][0]
+            stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
+            stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
+            
+            # current_percent = ((stock_1['close'] + stock_2['close'] + stock_3['close']) - (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) ) / (stock_1['previous_close'] + stock_2['previous_close'] + stock_3['previous_close']) * 100
+            current_percent = (((stock_1['close'] - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2['close'] - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3['close'] - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
+            cummulative_percent = 0
+            previous_instance = None 
+            try:
+                previous_instance = [item for item in previous_set if item.symbol == strike][0]    
+                if previous_instance:
+                    cummulative_percent  =  previous_instance.avg + current_percent
+                else:
+                    cummulative_percent  =  current_percent
+                    
+                pre_filtered_combinations.append(
+                    Combination(
+                                symbol=strike,
+                                avg=cummulative_percent,
+                                stdev=current_percent,
+                                strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                                date_time=timestamp,
+                                z_score=0,
+                            )
+                )
+                Combination.objects.create(
+                    symbol=strike,
+                    avg=cummulative_percent,
+                    stdev=current_percent,
+                    strike=(stock_1['close'] + stock_2['close'] + stock_3['close'])/3,
+                    date_time=timestamp,
+                    z_score=0,
+                )  
+            except Exception as E:
+                pass
     print('now filtering db')
     
     start_time = datetime.now()
