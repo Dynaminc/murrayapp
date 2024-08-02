@@ -745,7 +745,7 @@ def mig_flow(initial_timestamp):
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     dt = earnings.date_time
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-                    if dt.weekday() == 5:  # Weekend
+                    if dt.weekday() == 4:  # Weekend
                         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())                    
                     # if queryset = Nonday.objects.filter(date_time__date=current_date).first()    
                     for obj in Nonday.objects.all():
@@ -869,7 +869,7 @@ def all_flow(initial_timestamp):
                     start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     dt = earnings.date_time
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-                    if dt.weekday() == 5:  # Weekend
+                    if dt.weekday() == 4:  # Weekend
                         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
                     for obj in Nonday.objects.all():
                         if start_date <= obj.date_time <= end_date:
@@ -939,7 +939,7 @@ def resetEarnings(timestamp):
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         dt = earnings.date_time
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-        if dt.weekday() == 5:  # Weekend
+        if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
         for obj in Nonday.objects.all():
             if start_date <= obj.date_time <= end_date:
@@ -1027,7 +1027,7 @@ def generate_flow_combinations(current_datetime):
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         dt = earnings.date_time
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-        if dt.weekday() == 5:  # Weekend
+        if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
             
         for obj in Nonday.objects.all():
@@ -1362,7 +1362,7 @@ def generate_test_combinations(current_datetime):
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         dt = earnings.date_time
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-        if dt.weekday() == 5:  # Weekend
+        if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
             
         for obj in Nonday.objects.all():
