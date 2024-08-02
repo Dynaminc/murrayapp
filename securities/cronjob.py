@@ -936,8 +936,8 @@ def all_flow(initial_timestamp):
 
 def test_reset():
     
-    ss = resetEarnings(datetime(2024, 7, 25, 9,30))
-    generate_flow_combinations(datetime(2024, 7, 25, 9,30))
+    ss = resetEarnings(datetime(2024, 7, 24, 9,30))
+    generate_flow_combinations(datetime(2024, 7, 24, 9,30))
     print(len(ss))
     while True:
         symbol = input('Symbol: ')
