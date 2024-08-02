@@ -979,14 +979,16 @@ def resetEarnings(timestamp):
     for comb in [cmb for cmb in combs if check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", symbols_reset)]:   
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         strikess.append(strike)
-        # Combination.objects.create(
-        #     symbol=strike,
-        #     avg=0,
-        #     stdev=0,
-        #     strike=0,
-        #     date_time=timestamp,
-        #     z_score=0,
-        # )          
+        Combination.objects.create(
+            symbol=strike,
+            avg=0,
+            stdev=0,
+            strike=0,
+            date_time=timestamp,
+            z_score=0,
+        )         
+        print('created', strike, timestamp) 
+    print('len striks', len(strikess))
     return strikess
 
 def generate_flow_combinations(current_datetime):
