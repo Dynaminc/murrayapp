@@ -936,7 +936,8 @@ def all_flow(initial_timestamp):
 
 def test_reset():
     
-    ss = resetEarnings(datetime(2024, 7, 24, 9, 30))
+    ss = resetEarnings(datetime(2024, 7, 25, 9,30))
+    generate_flow_combinations(datetime(2024, 7, 25, 9,30))
     print(len(ss))
     while True:
         symbol = input('Symbol: ')
@@ -972,20 +973,20 @@ def resetEarnings(timestamp):
                 today_count += 1
                 symbols_reset.append(earnings.symbol)  
                 
-    print(yester_count, pre_symbol_reset, today_count, symbols_reset )            
+    print(yester_count, pre_symbol_reset, today_count, symbols_reset, timestamp )            
     strikess = [] 
     combs = combinations(Company.SYMBOLS, 3)
     for comb in [cmb for cmb in combs if check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", symbols_reset)]:   
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         strikess.append(strike)
-        Combination.objects.create(
-            symbol=strike,
-            avg=0,
-            stdev=0,
-            strike=0,
-            date_time=timestamp,
-            z_score=0,
-        )          
+        # Combination.objects.create(
+        #     symbol=strike,
+        #     avg=0,
+        #     stdev=0,
+        #     strike=0,
+        #     date_time=timestamp,
+        #     z_score=0,
+        # )          
     return strikess
 
 def generate_flow_combinations(current_datetime):
@@ -1072,12 +1073,11 @@ def generate_flow_combinations(current_datetime):
     pre_filtered_combinations = []
     
     for comb in [cmb for cmb in combs if not check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", valid_earnings_data)]:
-        
         strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
         if strikess and strike in strikess:
-            pass
-        else:
+            print('has strikes', 'in stirkes', strike, timestamp)
             
+        else:
             stock_1 = [stock for stock in stocks if stock['symbol'] == comb[0] ][0]
             stock_2 = [stock for stock in stocks if stock['symbol'] == comb[1] ][0]
             stock_3 = [stock for stock in stocks if stock['symbol'] == comb[2] ][0] 
