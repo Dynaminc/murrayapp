@@ -9,7 +9,7 @@ admin.site.register(Company)
 admin.site.register(Missing)
 admin.site.register(MiniCombination)
 admin.site.register(Nonday)
-# admin.site.register(Combination)
+admin.site.register(Earning)
 admin.site.register(Cronny)
 
 from .models import Combination

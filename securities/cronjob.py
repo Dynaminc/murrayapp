@@ -626,7 +626,7 @@ def generate_dji_combinations(current_datetime, tmp_distinct_timestamps):
     
 def check_strike_symbol(strike, earning_symbols):
     for item in earning_symbols:
-        if item in strike:
+        if item in strike.split('-'):
             return True
     return False
     
@@ -742,8 +742,9 @@ def mig_flow(initial_timestamp):
                 valid_earnings_data = []
                 for earnings in Earning.objects.all():
                     start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-                    end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     dt = earnings.date_time
+                    if dt.weekday() == 0:  # Monday
+                        start_date = datetime.combine((earnings.date_time.date() - timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())                    
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     if dt.weekday() == 4:  # Weekend
                         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())                    
@@ -868,6 +869,8 @@ def all_flow(initial_timestamp):
                 for earnings in Earning.objects.all():
                     start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     dt = earnings.date_time
+                    if dt.weekday() == 0:  # Monday
+                        start_date = datetime.combine((earnings.date_time.date() - timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
                     end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
                     if dt.weekday() == 4:  # Weekend
                         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
@@ -929,25 +932,36 @@ def all_flow(initial_timestamp):
                 prev_close[item.symbol] = item.close
                 
             count += 1
-            
+
 
 def resetEarnings(timestamp):    
-    symbols_reset = []     
-    yesterday = timestamp - timedelta(days=1)
-    # valid_earnings_data.append(earnings.symbol)    
+    pre_symbol_reset = []
+    symbols_reset = []   
+      
+    
+    # valid_earnings_data.append(earnings.symbol)   
+    yester_count, today_count =  0, 0 
     for earnings in Earning.objects.all():
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
-        dt = earnings.date_time
+        dt = earnings.date_time        
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
         for obj in Nonday.objects.all():
             if start_date <= obj.date_time <= end_date:
                 end_date += timedelta(days=1)  
-                                                        
+                
+        if dt.weekday() == 3:  
+            yesterday = timestamp - timedelta(days=3)
+        else:
+            yesterday = timestamp - timedelta(days=1)
         if start_date <= yesterday <= end_date:
+            yester_count += 1
+            pre_symbol_reset.append(earnings.symbol)
             if timestamp > end_date:
-                symbols_reset.append(earnings.symbol)    
+                today_count += 1
+                symbols_reset.append(earnings.symbol)  
+                
                 
     combs = combinations(Company.SYMBOLS, 3)
     for comb in [cmb for cmb in combs if check_strike_symbol(f"{cmb[0]}-{cmb[1]}-{cmb[2]}", symbols_reset)]:   
@@ -1026,6 +1040,8 @@ def generate_flow_combinations(current_datetime):
     for earnings in Earning.objects.all():
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         dt = earnings.date_time
+        if dt.weekday() == 0:  # Monday
+            start_date = datetime.combine((earnings.date_time.date() - timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())        
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
@@ -1361,6 +1377,8 @@ def generate_test_combinations(current_datetime):
     for earnings in Earning.objects.all():
         start_date = datetime.combine((earnings.date_time.date() - timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         dt = earnings.date_time
+        if dt.weekday() == 0:  # Monday
+            start_date = datetime.combine((earnings.date_time.date() - timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())        
         end_date = datetime.combine((earnings.date_time.date() + timedelta(days=1)), datetime.strptime("15:59", "%H:%M").time())
         if dt.weekday() == 4:  # Weekend
             end_date = datetime.combine((earnings.date_time.date() + timedelta(days=3)), datetime.strptime("15:59", "%H:%M").time())
