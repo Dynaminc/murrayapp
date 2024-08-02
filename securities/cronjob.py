@@ -723,6 +723,9 @@ def mig_flow(initial_timestamp):
             
         if proceed:        
             if timestamp.time() >= time(9, 30): 
+                strikess = False
+                if timestamp.time() == time(9, 30):
+                    strikess = resetEarnings(timestamp)
                 print(timestamp)
                 final_set = [item for item in stocks if item.date_time == distinct_timestamps[count]]
                 if count > 0:
@@ -762,32 +765,35 @@ def mig_flow(initial_timestamp):
                 print(len(prev_dict.keys()), len(specials))
                 for itm in specials:
                     comb = itm.split('-')
+                    strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
                     try:
-                        strike = f"{comb[0]}-{comb[1]}-{comb[2]}"
-                        
-                        
-                        stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
-                        stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
-                        stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
-                        
-                        
-                        # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
-                        current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
-                        # current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
-                        cummulative_percent  =  prev_dict[strike] + current_percent
-                        prev_dict[strike] = cummulative_percent 
-                        try:
-                            Combination.objects.create(
-                                    symbol=strike,
-                                    avg=cummulative_percent,
-                                    stdev=current_percent,
-                                    strike=(stock_1.close + stock_2.close + stock_3.close)/3,
-                                    date_time=timestamp,
-                                    z_score=0,
-                                ) 
-                        except Exception as E:
-                            print(E)
-                            pass
+                        if strikess and strike in strikess:
+                            print('has strikes', 'in stirkes', strike, timestamp)
+            
+                        else:
+                            
+                            stock_1 = [stock for stock in final_set if stock.symbol == comb[0] ][0]
+                            stock_2 = [stock for stock in final_set if stock.symbol == comb[1] ][0]
+                            stock_3 = [stock for stock in final_set if stock.symbol == comb[2] ][0] 
+                            
+                            
+                            # current_percent = ((stock_1.close + stock_2.close + stock_3.close) - (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) ) / (stock_1.previous_close + stock_2.previous_close + stock_3.previous_close) * 100
+                            current_percent = (((stock_1.close - prev_close[comb[0]] ) / prev_close[comb[0]]) + ((stock_2.close - prev_close[comb[1]] ) / prev_close[comb[1]]) + ((stock_3.close - prev_close[comb[2]] ) / prev_close[comb[2]])) * 100
+                            # current_percent = (((stock_1.close - stock_1.previous_close ) / stock_1.previous_close) + ((stock_2.close - stock_2.previous_close ) / stock_2.previous_close) + ((stock_3.close - stock_3.previous_close ) / stock_3.previous_close)) * 100
+                            cummulative_percent  =  prev_dict[strike] + current_percent
+                            prev_dict[strike] = cummulative_percent 
+                            try:
+                                Combination.objects.create(
+                                        symbol=strike,
+                                        avg=cummulative_percent,
+                                        stdev=current_percent,
+                                        strike=(stock_1.close + stock_2.close + stock_3.close)/3,
+                                        date_time=timestamp,
+                                        z_score=0,
+                                    ) 
+                            except Exception as E:
+                                print(E)
+                                pass
                     except:
                         pass
                 dji = [stock for stock in final_set if stock.symbol == "DJI" ][0]
