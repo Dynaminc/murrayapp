@@ -85,7 +85,7 @@ def get_chart(request):
                             Q(symbol='DJI') ).filter(date_time__gte=strike_instance.open_time).all()
         # .filter(date_time__gte=max(last_24_hours,strike_instance.open_time)).all()
                                     # last_24_hours, date_time__gte=strike_instance.open_time)
-        print('fetched all combs', len(all_combs))
+        ## print('fetched all combs', len(all_combs))
         shorts = [item for item in all_combs if item.symbol == short]
         
         data = [
@@ -102,11 +102,43 @@ def get_chart(request):
         return JsonResponse({ 'message':"Load Failed", "data":[], "dji_value": 0})
 
 
+def get_non_weekend_dates(start_date, end_date):
+    # Define the start and end dates
+
+    current_date = start_date
+    non_weekend_dates = []
+    
+    while current_date <= end_date:
+        # Check if the current date is a weekend
+        if current_date.weekday() < 5:  # 0 is Monday, 1 is Tuesday, ..., 4 is Friday
+            non_weekend_dates.append(str(current_date.date()))
+        current_date += timedelta(days=1)
+    return non_weekend_dates
+
+def get_unique_day():
+    year = datetime.now().year
+    start_date = datetime(year, 2, 1)
+    end_date = datetime.now()    
+    non_weekend_dates = get_non_weekend_dates(start_date, end_date)
+    return non_weekend_dates    
+
+    
 @api_view(['GET'])
 def load_unique_days(request):
-    unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
-    unique_days_list = [day['day'] for day in unique_days]
-    return JsonResponse({"data":unique_days_list})
+    year = datetime.now().year
+    start_date = datetime(year, 3, 1)
+    end_date = datetime.now()        
+    # Get non-weekend dates
+    non_weekend_dates = get_non_weekend_dates(start_date, end_date)
+    return JsonResponse({"data":non_weekend_dates})
+    # Print the non-weekend dates
+    # for date in non_weekend_dates:
+        ## print(date.strftime('%Y-%m-%d'))
+        
+    
+    # unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
+    # unique_days_list = [day['day'] for day in unique_days]
+    # return JsonResponse({"data":unique_days_list})
 
 @api_view(['GET'])
 def load_strikes(request):
@@ -148,7 +180,7 @@ def ManageNonday(request):
         info = serializer['info'] 
         datetimer = serializer['datetime']
         half_day = serializer['half_day']
-        print("creting nonday", half_day, serializer['half_day'], bool(half_day))
+        ## print("creting nonday", half_day, serializer['half_day'], bool(half_day))
         
         Nonday.objects.create(info=info, date_time=datetimer, half_day=bool(half_day))
             
@@ -235,7 +267,7 @@ def ManageEarning(request):
         valid_earnings_data = [item.symbol for item in earnings_data if start_date.date() <= item.date_time.date() <= end_date]
         
         if check_strike_symbol(symbol, valid_earnings_data):
-            print(start_date, end_date, current_date, datetimer, symbol)
+            ## print(start_date, end_date, current_date, datetimer, symbol)
             return JsonResponse({ "data":True})               
         else:
             return JsonResponse({ "data":False})               
@@ -787,13 +819,13 @@ def load_all_stats(request):
     
     final_data = []
     for profile_instance in Profile.objects.all(): 
-        print(profile_instance)
+        ## print(profile_instance)
         data = {}
         for key, value in ProfileSerializer(profile_instance).data.items():    
             data[key] = value
             
         final_data.append(calculate_stats(data, profile_instance))   
-        print(final_data)
+        ## print(final_data)
     
     return JsonResponse({'data':final_data , 'message':"Loaded Succesfully"})  
 
@@ -848,35 +880,35 @@ def clean_comb():
     count = 0 
     times = [datetime(2024, 4, 29, 11, 40)]
     for item in times:
-        print('Running clean module ')
+        ## print('Running clean module ')
         data = Combination.objects.filter(date_time__gte=item).all()
         data.delete()
-        print('cleaned combinations')
+        ## print('cleaned combinations')
         data = Stock.objects.filter(date_time__gte=item).all()
         data.delete()
-        print('cleaned stocks')
+        ## print('cleaned stocks')
         con.set("combinations_data", "[]")
         con.set("comb_time", "[]")
         con.set("stock_data", "[]")
-        print('cleaned redis')
+        ## print('cleaned redis')
 
 
 @api_view(['GET', 'POST'])
 def trigger_store(request):
-    print("initiated")    
+    ## print("initiated")    
     # data = clean_comb()
-    # print("Fetching")
+    # ## print("Fetching")
     # data = get_test_data()
-    print("Migrating")
+    ## print("Migrating")
     # json_migrator()
-    # print("Getting all strikes ")
+    # ## print("Getting all strikes ")
     # data = all_strikes()
-    # print("Completed strikes")
+    # ## print("Completed strikes")
     
     
     # data = new_calc()
     
-    print("Exporting")
+    ## print("Exporting")
     # data = export_file()
     # now to export the last minute ranking
     
@@ -884,7 +916,7 @@ def trigger_store(request):
     
     # data = top_flow()
     
-    print("Exported") 
+    ## print("Exported") 
     return JsonResponse({'message':"Loaded Succesfully",})  
 
             
@@ -901,19 +933,19 @@ def trigger_lens(request):
 @api_view(['GET', 'POST'])
 def clean_end(request):
     try:
-        print('cleaning')
+        ## print('cleaning')
         id = int(request.GET.get('id', 10))
         delete = request.GET.get('delete',False)
         d = tz.now() - timedelta(days=id)
-        print(d)
+        ## print(d)
         count = 0
         paginator = Paginator(Combination.objects.filter(date_time__lt=d), 1000) # chunks of 1000
-        print('paginated')
+        ## print('paginated')
         for page_idx in range(1, paginator.num_pages):
             for row in paginator.page(page_idx).object_list:
                 if delete:  
                     count += 1
-                    print('deleteded, ', count, row.date_time)
+                    ## print('deleteded, ', count, row.date_time)
                     row.delete()
         return JsonResponse({'message':f"Deleted Succesfully {count}"})    
     except Exception as E:
@@ -925,7 +957,7 @@ def clean_end(request):
 def check_market_hours(dat):
     eastern = pytz.timezone('US/Eastern')
     dt = eastern.localize(dat)
-    print(dt)
+    ## print(dt)
     current_date = datetime.now().date()
     queryset = Nonday.objects.filter(date_time__date=current_date)
     if len(queryset) > 0:
@@ -950,7 +982,7 @@ def check_market_hours(dat):
 def check_strike_symbol(strike, earning_symbols):
     for item in earning_symbols:
         if item in strike:
-            print(item)
+            ## print(item)
             return True
     return False
         
@@ -988,7 +1020,7 @@ def test_end(request):
         current_time = str(display_time).split('.')[0]
         
     latest_data = info['latest_time']
-    print(latest_data, 'latest')
+    ## print(latest_data, 'latest')
     if latest_data:
         latest_time = latest_data
         pre_filtered_combinations = MiniCombination.objects.all()
@@ -1007,7 +1039,7 @@ def test_end(request):
 #     combs = []
 #     market_state = "off"
 #     if 'loading.txt' not in os.listdir(os.getcwd()):
-#         print('File not found, creating')
+#         ## print('File not found, creating')
 #         f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
 #         f.write('first')
 #         f.close()
@@ -1019,7 +1051,7 @@ def test_end(request):
 #             info['loading'] = True
 #         else:
 #             info['loading'] = False
-#             print('initing loading')
+#             ## print('initing loading')
 #             f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
 #             f.write(f'{datetime.now().replace(second=0, microsecond=0)}-loading')
 #             f.close()  
@@ -1030,7 +1062,7 @@ def test_end(request):
 #     market_state = check_market_hours(datetime.now())
     
 #     if info['loading']:
-#         # print('loading combs')
+#         # ## print('loading combs')
 #         # combs =  info['combs']
         
 #         dji_here = 0
@@ -1040,14 +1072,14 @@ def test_end(request):
 #                 data = json.load(f)
 #                 combs = data['comb']
 #                 dji_here = data['dji']
-#         # print(combs, 'combs fetched')
+#         # ## print(combs, 'combs fetched')
 #         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":dji_here}, status=status.HTTP_200_OK)
 #     ad = Combination.objects.latest('date_time')
     
     
-#     # print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
+#     # ## print("Checking time: ",ad.date_time.replace(second=0, microsecond=0), ' - ', info['latest_time'], ' - ', len(info['combs']) )                    
 #     # if ad.date_time.replace(second=0, microsecond=0) == info['latest_time'] and len(info['combs']) > 0:
-#     #     print('fetching saved combs')
+#     #     ## print('fetching saved combs')
 #     #     combs =  info['combs']
 #     #     return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value":info['dji_value']}, status=status.HTTP_200_OK)
     
@@ -1066,7 +1098,7 @@ def test_end(request):
     
 #     end_time = datetime.now()
 #     time_difference = end_time - start_time
-#     print(f'fetched dji {initial_time} ', time_difference)
+#     ## print(f'fetched dji {initial_time} ', time_difference)
     
 #     display_time = datetime.now()
 #     current_time = str(display_time).split('.')[0]
@@ -1081,7 +1113,7 @@ def test_end(request):
     
     
 #     latest_data = info['latest_time']
-#     print(latest_data, 'latest')
+#     ## print(latest_data, 'latest')
 #     if latest_data:
 #         start_time = datetime.now()
         
@@ -1101,7 +1133,7 @@ def test_end(request):
         
 #         end_time = datetime.now()
 #         time_difference = end_time - start_time
-#         print(f'Fetched and processed combs {initial_time} ', time_difference) 
+#         ## print(f'Fetched and processed combs {initial_time} ', time_difference) 
         
         
 #         start_time = datetime.now()
@@ -1113,7 +1145,7 @@ def test_end(request):
 #         with open('jsn.json', 'w') as f:
 #             json.dump({'comb':cmb, 'dji':dji_val}, f)
 
-#         print('saved combs fr min', info['latest_time'])
+#         ## print('saved combs fr min', info['latest_time'])
 #         # info['loading'] = False
         
 #         f = open(os.path.join(os.getcwd(),'loading.txt'), 'w')
@@ -1122,12 +1154,12 @@ def test_end(request):
         
 #         end_time = datetime.now()
 #         time_difference = end_time - start_time
-#         print(f'final  sort {initial_time} ', time_difference) 
+#         ## print(f'final  sort {initial_time} ', time_difference) 
                 
                 
 #         end_time = datetime.now()
 #         time_difference = end_time - initial_time
-#         print(f'Total Time {initial_time} ', time_difference)        
+#         ## print(f'Total Time {initial_time} ', time_difference)        
 #         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state, "dji_value": dji_val }, status=status.HTTP_200_OK )
 #     else:
 #         return JsonResponse({"top_5": combs[:20], "low_5":combs[-20:], "market": market_state,"dji_value": dji_val}, status=status.HTTP_200_OK)
@@ -1149,9 +1181,9 @@ def test_end(request):
         # combs = [{'symbol':item.symbol,'stdev':item.stdev,'score':item.avg,'date':str(latest_time)} for item in filtered_combinations ]    
 def stocks(request):
     combo = Combination.objects.filter(symbol__icontains='CSCO')
-    print(len(combo))
+    ## print(len(combo))
     combinations = con.get("last_120").decode("utf-8")
-    pprint.pprint(combinations)
+    pprint.p## print(combinations)
     stocks_list = con.get("last_30").decode("utf-8")
 
     return JsonResponse({"stocks": stocks_list, "combinations": combinations})
@@ -1204,8 +1236,9 @@ def download_file(request):
         strikes = Strike.objects.filter(user=request.user)
     
     
-    unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
-    m = [day['day'] for day in unique_days]
+    # unique_days = Combination.objects.annotate(day=TruncDate('date_time')).values('day').distinct()
+    # m = [day['day'] for day in unique_days]
+    m = get_unique_day()
     
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="strikes.csv"'
@@ -1232,6 +1265,10 @@ def download_file(request):
     ])    
     
     for strike in strikes:
+        print('herere', len(m))
+        print('ffef', strike.open_time.date())
+        print('erte', len(m[m.index(str(strike.open_time.date())):]))
+        ## print('here', len(m[m.index(strike.open_time.date()):]) if not strike.closed else (len(m[m.index(strike.open_time.date()):]) - len(m[m.index(strike.close_time.date()):]))    )
         writer.writerow([
             strike.user.username if strike.user else '',
             strike.id,
@@ -1246,8 +1283,10 @@ def download_file(request):
             strike.target_profit,
             strike.open_time.date(),
             str(strike.close_time) if strike.closed else "N/A",
-            len(m[m.index(strike.open_time.date()):]) if not strike.closed else (len(m[m.index(strike.open_time.date()):]) - len(m[m.index(strike.close_time.date()):]))
-        ])    
+            len(m[m.index(str(strike.open_time.date())):]) if not strike.closed else (len(m[m.index(str(strike.open_time.date())):]) - len(m[m.index(str(strike.close_time.date())):]))    
+        ])  
+        
+        # 
     # file_content = "id,name\n1,John\n2,Jane"
 
     # Prepare HTTP response with the file content
